@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { canUserAccessPaidFeature, incrementDailyUsage } from '@/lib/subscription'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
@@ -37,6 +38,7 @@ export default function Home() {
   const [domainMastery, setDomainMastery] = useState<Record<string, { correct: number; total: number }>>({})
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
+  const [quotaError, setQuotaError] = useState<string | null>(null)
 
   useEffect(() => {
     // Check initial auth state
@@ -168,6 +170,15 @@ export default function Home() {
           percentage: Math.round((stats.correct / stats.total) * 100)
         })),
       })
+      
+      // Increment daily usage counter for free tier tracking
+      console.log("[v0] Incrementing daily usage for", quizResults.total, "questions");
+      try {
+        await incrementDailyUsage(user.id, 'questions_attempted')
+      } catch (err) {
+        console.error("[v0] Error incrementing daily usage:", err)
+      }
+      
       loadStats(user.id)
     } catch (error) {
       console.error('Error saving results:', error)
@@ -248,7 +259,18 @@ export default function Home() {
     }
   }
 
-  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string) => {
+  const startQuiz = async (quizMode: QuizMode, domains?: string[], diff?: string) => {
+    if (!user) return
+    
+    // Check free tier limit
+    const access = await canUserAccessPaidFeature(user.id, 'questions')
+    if (!access.allowed) {
+      console.log("[v0] Free tier limit reached:", access.reason)
+      setQuotaError(access.reason || '')
+      return
+    }
+    setQuotaError(null)
+    
     let questions = [...QUESTIONS]
 
     // Filter by domains
@@ -471,6 +493,16 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* Quota Error Alert */}
+          {quotaError && (
+            <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-sm text-red-700">
+                <strong>Daily Limit Reached</strong>
+                <p className="mt-1">{quotaError}</p>
+              </div>
+            </div>
+          )}
 
           {/* Resume Quiz Section */}
           {pausedSessions && pausedSessions.length > 0 && (

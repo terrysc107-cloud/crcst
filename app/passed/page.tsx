@@ -567,9 +567,21 @@ export default function PassedExamFlow() {
               borderRadius: "50%",
               animation: "pulse 2s ease-in-out infinite",
             }} />
+            {/* Shimmer ring */}
+            <div style={{
+              position: "absolute", inset: "-8px",
+              borderRadius: "50%",
+              border: `2px solid transparent`,
+              background: `linear-gradient(90deg, transparent, ${cfg.accent}60, transparent) border-box`,
+              WebkitMask: "linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+              animation: "shimmer 2s linear infinite",
+            }} />
             <style>{`
               @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
               @keyframes badgeDrop { from{opacity:0;transform:translateY(-30px) scale(0.85)} to{opacity:1;transform:translateY(0) scale(1)} }
+              @keyframes shimmer { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
             `}</style>
             <div style={{ animation: "badgeDrop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards" }}>
               <CertBadge cert={cert} name={name} date={passDate} />

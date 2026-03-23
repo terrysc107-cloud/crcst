@@ -20,7 +20,7 @@ export default function Header({ user, streak = 0 }: HeaderProps) {
           SPD Cert <em className="text-amber">Companion</em>
         </div>
         <div className="text-xs text-navy-3 tracking-widest">
-          CRCST - CER - CIS - CHL
+          CRCST - CHL - CER - SJT
         </div>
       </Link>
       <div className="flex items-center gap-3">

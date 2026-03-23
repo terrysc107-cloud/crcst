@@ -50,7 +50,7 @@ function Counter({ end, suffix = "", duration = 1800 }) {
 // ─── CERT CARD ────────────────────────────────────────────────────────────────
 const CERTS = [
   { code: "CRCST", name: "Central Service Technician", color: "#0D7377", accent: "#14BDAC", icon: "⚙️", questions: 400, desc: "The foundational certification. Master sterilization, decontamination, and instrument processing." },
-  { code: "CHL",   name: "Healthcare Leader",          color: "#1A4A8A", accent: "#4A90D9", icon: "🎖️", questions: 180, desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise." },
+  { code: "CHL",   name: "Healthcare Leader",          color: "#1A4A8A", accent: "#4A90D9", icon: "🎖️", questions: 240, desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise." },
   { code: "CER",   name: "Endoscope Reprocessor",      color: "#5B2D8E", accent: "#9B59D6", icon: "🔬", questions: 147, desc: "The specialist cert. Master flexible and rigid endoscope reprocessing protocols." },
 ];
 
@@ -123,8 +123,8 @@ const TESTIMONIALS = [
 
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
 const FAQS = [
-  { q: "Which certifications does this cover?", a: "Currently CRCST, CHL, CER, and CIS — the four HSPA (formerly IAHCSMM) certifications. All question banks are built from current HSPA content outlines." },
-  { q: "How many questions are in the question bank?", a: "Over 700 questions across all four certifications, categorized by domain, chapter, and difficulty. New questions are added regularly." },
+  { q: "Which certifications does this cover?", a: "Currently CRCST, CHL, and CER — the three core HSPA (formerly IAHCSMM) certifications — plus a Situational Judgment (SJT) module. All question banks are built from current HSPA content outlines." },
+  { q: "How many questions are in the question bank?", a: "787+ questions across CRCST (400), CHL (240), and CER (147), categorized by domain, chapter, and difficulty. New questions are added regularly." },
   { q: "Is the content aligned to the actual HSPA exam?", a: "Yes. All questions are mapped to the official HSPA content outlines for each certification. We include both multiple choice and true/false question types." },
   { q: "What is the AI Study Chat?", a: "A Claude-powered chatbot specialized in sterile processing, instrumentation, and certification content. Ask it to explain a concept, quiz you verbally, or clarify a confusing answer." },
   { q: "Can I use this on my phone?", a: "Yes. SPD Cert Prep is a web app that works on any device — phone, tablet, or computer. No download required." },
@@ -316,8 +316,8 @@ export default function LandingPage() {
                 color: "rgba(255,255,255,0.65)", fontSize: "0.9rem", fontWeight: 500,
                 textDecoration: "none", transition: "color 0.2s",
               }}
-              onMouseEnter={e => e.target.style.color = "#14BDAC"}
-              onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.65)"}
+              onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
+              onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.65)"}
               >{l}</a>
             ))}
           </div>
@@ -363,7 +363,7 @@ export default function LandingPage() {
             }}>
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#14BDAC", display: "inline-block", boxShadow: "0 0 8px #14BDAC" }} />
               <span style={{ color: "#14BDAC", fontSize: "0.78rem", fontWeight: 600, fontFamily: "'DM Mono', monospace", letterSpacing: "0.08em" }}>
-                NOW COVERING CRCST · CHL · CER · CIS
+                NOW COVERING CRCST · CHL · CER · SJT
               </span>
             </div>
 
@@ -581,7 +581,11 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                <a href="/dashboard" className={p.highlight ? "btn-primary" : "btn-ghost"} style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}>
+                <a
+                  href={p.name === "Free" ? "/dashboard" : `/pricing`}
+                  className={p.highlight ? "btn-primary" : "btn-ghost"}
+                  style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}
+                >
                   {p.cta}
                 </a>
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", textAlign: "center", marginTop: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
@@ -670,20 +674,31 @@ export default function LandingPage() {
             </div>
             <div>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>PRODUCT</p>
-              {["Features", "Pricing", "CRCST Prep", "CHL Prep", "CER Prep"].map(l => (
-                <div key={l}><a href="#" style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                  onMouseEnter={e => e.target.style.color = "#14BDAC"}
-                  onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.45)"}
-                >{l}</a></div>
+              {[
+                { label: "Features", href: "#features" },
+                { label: "Pricing", href: "/pricing" },
+                { label: "CRCST Prep", href: "/crcst" },
+                { label: "CHL Prep", href: "/chl" },
+                { label: "CER Prep", href: "/cer" },
+              ].map(l => (
+                <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
+                  onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
+                  onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
+                >{l.label}</a></div>
               ))}
             </div>
             <div>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>ACCOUNT</p>
-              {["Sign Up Free", "Sign In", "Claim Your Badge", "Upgrade to Pro"].map(l => (
-                <div key={l}><a href="#" style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                  onMouseEnter={e => e.target.style.color = "#14BDAC"}
-                  onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.45)"}
-                >{l}</a></div>
+              {[
+                { label: "Sign Up Free", href: "/dashboard" },
+                { label: "Sign In", href: "/dashboard" },
+                { label: "Claim Your Badge", href: "/passed" },
+                { label: "Upgrade to Pro", href: "/pricing" },
+              ].map(l => (
+                <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
+                  onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
+                  onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
+                >{l.label}</a></div>
               ))}
             </div>
             <div>
@@ -695,8 +710,8 @@ export default function LandingPage() {
                 { label: "Baltimore 2025", href: "#" },
               ].map(l => (
                 <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                  onMouseEnter={e => e.target.style.color = "#14BDAC"}
-                  onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.45)"}
+                  onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
+                  onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
                 >{l.label}</a></div>
               ))}
             </div>

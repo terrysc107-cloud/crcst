@@ -44,14 +44,14 @@ const certifications: Certification[] = [
     name: 'CER',
     fullName: 'Certified Endoscope Reprocessor',
     description: 'Master endoscope anatomy, reprocessing procedures, microbiology, and quality assurance',
-    questionCount: 360,
+    questionCount: 147,
     color: 'text-blue-500',
     bgGradient: 'from-blue-500 to-blue-600',
     href: '/cer',
   },
 ]
 
-const totalQuestions = 400 + 240 + 360
+const totalQuestions = 400 + 240 + 147
 
 export default function DashboardPage() {
   const router = useRouter()

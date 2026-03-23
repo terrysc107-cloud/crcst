@@ -226,6 +226,8 @@ export default function PassedExamFlow() {
   const [copied, setCopied] = useState(false);
   const confettiRef = useConfetti(step === "celebration");
   const cfg = CERT_CONFIG[cert];
+  
+  console.log("[v0] PassedExamFlow step:", step, "cert:", cert);
 
   function validate() {
     const e: Record<string, string> = {};
@@ -237,12 +239,19 @@ export default function PassedExamFlow() {
   }
 
   async function handleSubmit() {
+    console.log("[v0] handleSubmit called");
     const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
+    if (Object.keys(e).length) { 
+      console.log("[v0] Validation errors:", e);
+      setErrors(e); 
+      return; 
+    }
     setErrors({});
     setStep("verifying");
+    console.log("[v0] Step set to verifying");
 
     const { data: { user } } = await supabase.auth.getUser();
+    console.log("[v0] User:", user?.id || "not logged in");
     
     // User must be authenticated to claim badge
     if (!user) {
@@ -262,6 +271,7 @@ export default function PassedExamFlow() {
       });
 
     if (error) {
+      console.log("[v0] Insert error:", error.code, error.message);
       setStep("entry");
       if (error.code === "23505") {
         setErrors({ submit: "You have already claimed this certification badge." });
@@ -271,6 +281,7 @@ export default function PassedExamFlow() {
       return;
     }
 
+    console.log("[v0] Success! Setting step to celebration");
     setStep("celebration");
   }
 
@@ -476,6 +487,22 @@ export default function PassedExamFlow() {
             <p style={{ textAlign: "center", color: "#7B96A8", fontSize: "0.75rem", marginTop: "1rem", fontFamily: "Calibri, sans-serif" }}>
               Your badge is yours to download and share on LinkedIn
             </p>
+            
+            {/* Back to Home link */}
+            <Link
+              href="/"
+              style={{
+                display: "block",
+                textAlign: "center",
+                color: "#7B96A8",
+                fontSize: "0.85rem",
+                marginTop: "1.5rem",
+                fontFamily: "Calibri, sans-serif",
+                textDecoration: "none",
+              }}
+            >
+              ← Back to Home
+            </Link>
           </div>
         </div>
       </div>
@@ -567,9 +594,21 @@ export default function PassedExamFlow() {
               borderRadius: "50%",
               animation: "pulse 2s ease-in-out infinite",
             }} />
+            {/* Shimmer ring */}
+            <div style={{
+              position: "absolute", inset: "-8px",
+              borderRadius: "50%",
+              border: `2px solid transparent`,
+              background: `linear-gradient(90deg, transparent, ${cfg.accent}60, transparent) border-box`,
+              WebkitMask: "linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+              animation: "shimmer 2s linear infinite",
+            }} />
             <style>{`
               @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
               @keyframes badgeDrop { from{opacity:0;transform:translateY(-30px) scale(0.85)} to{opacity:1;transform:translateY(0) scale(1)} }
+              @keyframes shimmer { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
             `}</style>
             <div style={{ animation: "badgeDrop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards" }}>
               <CertBadge cert={cert} name={name} date={passDate} />
@@ -650,21 +689,24 @@ export default function PassedExamFlow() {
             )}
 
             {/* Return home */}
-            <button
-              onClick={() => window.location.href = "/"}
+            <Link
+              href="/"
               style={{
+                display: "block",
                 padding: "0.8rem",
                 borderRadius: "12px",
-                border: "none",
-                background: "transparent",
-                color: "#7B96A8",
+                border: "1px solid rgba(255,255,255,0.15)",
+                background: "rgba(255,255,255,0.05)",
+                color: "#FFFFFF",
                 fontSize: "0.9rem",
                 cursor: "pointer",
                 fontFamily: "Calibri, sans-serif",
+                textDecoration: "none",
+                textAlign: "center",
               }}
             >
-              ← Back to dashboard
-            </button>
+              ← Back to Home
+            </Link>
           </div>
 
           {/* Encouragement quote */}

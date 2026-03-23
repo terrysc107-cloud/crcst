@@ -71,6 +71,7 @@ const PLANS = [
     price: "$0",
     period: "",
     highlight: false,
+    comingSoon: false,
     features: [
       "20 practice questions/day",
       "5 AI chat questions/day",
@@ -86,6 +87,7 @@ const PLANS = [
     price: "$14.99",
     period: "/month",
     highlight: true,
+    comingSoon: true,
     features: [
       "Unlimited practice questions",
       "Unlimited AI Study Chat",
@@ -94,14 +96,15 @@ const PLANS = [
       "Pause & resume any session",
       "Priority badge processing",
     ],
-    cta: "Start Pro",
-    note: "Cancel anytime",
+    cta: "Coming Soon",
+    note: "Launching soon — start free today",
   },
   {
     name: "Lifetime",
     price: "$99",
     period: " one time",
     highlight: false,
+    comingSoon: true,
     features: [
       "Everything in Pro — forever",
       "All future certifications included",
@@ -109,8 +112,8 @@ const PLANS = [
       "Lifetime badge archive",
       "Best value for career-long use",
     ],
-    cta: "Get Lifetime Access",
-    note: "Pay once, own it forever",
+    cta: "Coming Soon",
+    note: "Launching soon",
   },
 ];
 
@@ -553,17 +556,23 @@ export default function LandingPage() {
 
           <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem", alignItems: "start" }}>
             {PLANS.map((p, i) => (
-              <div key={i} className={`pricing-card reveal ${pricingInView ? "visible" : ""} reveal-delay-${i + 1} ${p.highlight ? "highlight" : ""}`}>
-                {p.highlight && (
+              <div key={i} className={`pricing-card reveal ${pricingInView ? "visible" : ""} reveal-delay-${i + 1} ${p.highlight ? "highlight" : ""}`}
+                style={{ opacity: p.comingSoon ? 0.75 : 1 }}>
+                {p.highlight && !p.comingSoon && (
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #0D7377, #14BDAC)" }} />
                 )}
-                {p.highlight && (
-                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #0D7377, #14BDAC)", borderRadius: 100, padding: "0.25rem 1rem", fontSize: "0.72rem", fontFamily: "'DM Mono', monospace", fontWeight: 600, color: "#FFFFFF", whiteSpace: "nowrap" }}>
-                    MOST POPULAR
-                  </div>
-                )}
+                <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", borderRadius: 100, padding: "0.25rem 1rem", fontSize: "0.72rem", fontFamily: "'DM Mono', monospace", fontWeight: 600, whiteSpace: "nowrap",
+                  ...(p.comingSoon
+                    ? { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.15)" }
+                    : p.highlight
+                      ? { background: "linear-gradient(135deg, #0D7377, #14BDAC)", color: "#FFFFFF" }
+                      : { display: "none" }
+                  )
+                }}>
+                  {p.comingSoon ? "COMING SOON" : "MOST POPULAR"}
+                </div>
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <h3 style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", letterSpacing: "0.08em", color: p.highlight ? "#14BDAC" : "rgba(255,255,255,0.5)", marginBottom: "0.75rem" }}>
+                  <h3 style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", letterSpacing: "0.08em", color: p.highlight && !p.comingSoon ? "#14BDAC" : "rgba(255,255,255,0.5)", marginBottom: "0.75rem" }}>
                     {p.name.toUpperCase()}
                   </h3>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "0.2rem" }}>
@@ -575,19 +584,21 @@ export default function LandingPage() {
                 <div style={{ marginBottom: "1.75rem" }}>
                   {p.features.map((f, j) => (
                     <div key={j} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", padding: "0.45rem 0", borderBottom: j < p.features.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                      <span style={{ color: p.highlight ? "#14BDAC" : "rgba(255,255,255,0.4)", fontSize: "0.85rem", marginTop: 1 }}>✓</span>
+                      <span style={{ color: p.highlight && !p.comingSoon ? "#14BDAC" : "rgba(255,255,255,0.4)", fontSize: "0.85rem", marginTop: 1 }}>✓</span>
                       <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.88rem", fontWeight: 300 }}>{f}</span>
                     </div>
                   ))}
                 </div>
 
-                <a
-                  href={p.name === "Free" ? "/dashboard" : `/pricing`}
-                  className={p.highlight ? "btn-primary" : "btn-ghost"}
-                  style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}
-                >
-                  {p.cta}
-                </a>
+                {p.comingSoon ? (
+                  <div style={{ width: "100%", padding: "0.9rem", textAlign: "center", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.3)", fontSize: "0.88rem", fontFamily: "'DM Mono', monospace", letterSpacing: "0.06em" }}>
+                    COMING SOON
+                  </div>
+                ) : (
+                  <a href="/dashboard" className="btn-primary" style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}>
+                    {p.cta}
+                  </a>
+                )}
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", textAlign: "center", marginTop: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
                   {p.note}
                 </p>

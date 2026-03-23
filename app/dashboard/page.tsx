@@ -228,18 +228,20 @@ export default function DashboardPage() {
                 <span>AI Chat: <strong>{sub.usage?.aiChatsToday ?? 0} / {sub.usage?.aiChatsLimit ?? 5}</strong></span>
               </div>
             </div>
-            <Link href="/pricing" style={{
-              background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-              color: '#fff',
+            <span style={{
+              background: 'rgba(255,255,255,0.06)',
+              color: 'rgba(255,255,255,0.4)',
               padding: '0.5rem 1.1rem',
               borderRadius: 8,
-              textDecoration: 'none',
-              fontSize: '0.82rem',
+              border: '1px solid rgba(255,255,255,0.1)',
+              fontSize: '0.78rem',
               fontWeight: 600,
               whiteSpace: 'nowrap' as const,
+              fontFamily: 'monospace',
+              letterSpacing: '0.04em',
             }}>
-              Upgrade to Pro
-            </Link>
+              Pro — Coming Soon
+            </span>
           </div>
         )}
 

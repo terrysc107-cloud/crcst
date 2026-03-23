@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-type Cert = "CRCST" | "CHL" | "CER" | "CIS";
+type Cert = "CRCST" | "CHL" | "CER";
 type Step = "entry" | "verifying" | "celebration" | "next_cert";
 
 interface PassedData {
@@ -48,18 +48,9 @@ const CERT_CONFIG: Record<Cert, {
     color: "#5B2D8E",
     accent: "#9B59D6",
     icon: "🔬",
-    next: "CIS",
-    nextLabel: "Certified Instrument Specialist (CIS)",
-    nextDesc: "Surgical instruments are complex. CIS proves you understand them at the highest level.",
-  },
-  CIS: {
-    label: "Certified Instrument Specialist",
-    color: "#8B2500",
-    accent: "#E85D04",
-    icon: "⚕️",
     next: null,
     nextLabel: null,
-    nextDesc: "You've earned the full stack. Share your expertise — consider teaching or mentoring the next generation.",
+    nextDesc: "You've completed all three HSPA certifications available on this platform. You're at the top of your field — consider mentoring the next generation of SPD professionals.",
   },
 };
 
@@ -339,7 +330,7 @@ export default function PassedExamFlow() {
                 WHICH CERTIFICATION DID YOU PASS?
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {(["CRCST", "CHL", "CER", "CIS"] as Cert[]).map((c) => (
+                {(["CRCST", "CHL", "CER"] as Cert[]).map((c) => (
                   <button
                     key={c}
                     onClick={() => setCert(c)}
@@ -776,7 +767,7 @@ export default function PassedExamFlow() {
           {/* CTA */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: 380, margin: "0 auto" }}>
             <button
-              onClick={() => window.location.href = `/study/${cfg.next?.toLowerCase()}`}
+              onClick={() => window.location.href = `/${cfg.next?.toLowerCase()}`}
               style={{
                 padding: "1.1rem",
                 borderRadius: "12px",

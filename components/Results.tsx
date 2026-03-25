@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 interface ResultsProps {
   results: {
     correct: number
@@ -116,6 +118,130 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
           />
         </div>
       )}
+
+      {/* Missed Questions Review */}
+      {results.questions && results.answers && (
+        <MissedQuestionsReview
+          questions={results.questions}
+          answers={results.answers}
+        />
+      )}
+    </div>
+  )
+}
+
+function MissedQuestionsReview({
+  questions,
+  answers,
+}: {
+  questions: any[]
+  answers: (number | null)[]
+}) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const missed = questions
+    .map((q, i) => ({ q, i, selected: answers[i] }))
+    .filter(({ q, selected }) => selected !== q.correct_answer)
+
+  if (missed.length === 0) {
+    return (
+      <div className="mt-8 p-6 bg-correct-bg border border-correct rounded-xl text-center">
+        <div className="font-serif text-lg text-correct mb-1">Perfect Score!</div>
+        <div className="text-sm text-text-3">You answered every question correctly. Nothing to review.</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-serif text-lg text-navy">Review Missed Questions</h3>
+        <span className="text-xs font-mono bg-wrong-bg border border-wrong text-wrong px-3 py-1 rounded-full">
+          {missed.length} {missed.length === 1 ? 'question' : 'questions'} to review
+        </span>
+      </div>
+
+      <div className="space-y-3">
+        {missed.map(({ q, i, selected }, reviewIdx) => {
+          const isOpen = openIndex === reviewIdx
+          const selectedLabel =
+            selected !== null && selected >= 0
+              ? String.fromCharCode(65 + selected)
+              : null
+
+          return (
+            <div
+              key={i}
+              className="bg-white border-2 border-cream-2 rounded-xl overflow-hidden"
+            >
+              {/* Accordion Header */}
+              <button
+                onClick={() => setOpenIndex(isOpen ? null : reviewIdx)}
+                className="w-full text-left px-5 py-4 flex items-start gap-3 hover:bg-cream/40 transition"
+              >
+                <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-wrong-bg border border-wrong text-wrong text-xs flex items-center justify-center font-mono">
+                  ✗
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-teal tracking-widest mb-1">
+                    Q{i + 1} · {q.domain} · {q.difficulty}
+                  </div>
+                  <div className="font-serif text-sm text-navy leading-snug">
+                    {q.question}
+                  </div>
+                </div>
+                <span className="flex-shrink-0 text-text-3 text-sm ml-2 mt-1">
+                  {isOpen ? '▲' : '▼'}
+                </span>
+              </button>
+
+              {/* Accordion Body */}
+              {isOpen && (
+                <div className="border-t border-cream-2 px-5 py-4 space-y-3">
+                  {/* All answer options */}
+                  <div className="space-y-2">
+                    {q.options.map((opt: string, idx: number) => {
+                      const letter = String.fromCharCode(65 + idx)
+                      const isCorrect = idx === q.correct_answer
+                      const isSelected = idx === selected
+
+                      let cls = 'flex items-start gap-3 px-3 py-2.5 rounded-lg border text-sm'
+                      if (isCorrect) {
+                        cls += ' border-correct bg-correct-bg text-correct'
+                      } else if (isSelected) {
+                        cls += ' border-wrong bg-wrong-bg text-wrong'
+                      } else {
+                        cls += ' border-cream-2 text-text-3'
+                      }
+
+                      return (
+                        <div key={idx} className={cls}>
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/60 border border-current text-center text-xs leading-5 font-mono">
+                            {letter}
+                          </span>
+                          <span className="flex-1 leading-snug">{opt}</span>
+                          {isCorrect && (
+                            <span className="flex-shrink-0 text-xs font-mono font-bold">Correct</span>
+                          )}
+                          {isSelected && !isCorrect && (
+                            <span className="flex-shrink-0 text-xs font-mono font-bold">Your answer</span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Explanation */}
+                  <div className="bg-navy/5 border border-navy/10 rounded-lg px-4 py-3">
+                    <div className="text-xs font-mono text-teal tracking-widest mb-1">EXPLANATION</div>
+                    <div className="text-sm text-text leading-relaxed">{q.explanation}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

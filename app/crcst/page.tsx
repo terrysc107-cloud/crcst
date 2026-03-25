@@ -42,6 +42,11 @@ export default function Home() {
     // Check initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        const onboardingComplete = localStorage.getItem(`onboarding_complete_${session.user.id}`)
+        if (onboardingComplete !== 'true') {
+          window.location.href = '/onboarding'
+          return
+        }
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
@@ -51,6 +56,11 @@ export default function Home() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
+        const onboardingComplete = localStorage.getItem(`onboarding_complete_${session.user.id}`)
+        if (onboardingComplete !== 'true') {
+          window.location.href = '/onboarding'
+          return
+        }
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)

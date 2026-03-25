@@ -637,12 +637,12 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
             <div className="text-center mb-6">
-              <div className="text-4xl mb-3">🔒</div>
+              <div className="text-4xl mb-3">⏰</div>
               <h2 className="font-serif text-2xl text-navy mb-2">
-                Daily Limit Reached
+                Hourly Limit Reached
               </h2>
               <p className="text-sm text-text-3">
-                You&apos;ve used all {rateLimitInfo?.limit || 20} free questions for today. Upgrade to Pro for unlimited access!
+                You&apos;ve used all {rateLimitInfo?.limit || 20} free questions this hour. Upgrade to Pro for unlimited access!
               </p>
             </div>
 
@@ -651,19 +651,19 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <span className="text-correct">✓</span>
-                  Unlimited questions per day
+                  Unlimited practice questions
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-correct">✓</span>
-                  Unlimited AI chat assistance
+                  Unlimited flashcards
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-correct">✓</span>
-                  Access to all certifications
+                  Unlimited AI assistance
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-correct">✓</span>
-                  Priority support
+                  Full-length mock exams
                 </li>
               </ul>
             </div>
@@ -676,15 +676,15 @@ export default function Home() {
                 Maybe Later
               </button>
               <a
-                href="/account"
+                href="/pricing"
                 className="flex-1 px-4 py-3 bg-teal text-white rounded-lg font-mono text-sm text-center hover:bg-teal-2 transition"
               >
-                Upgrade Now
+                View Plans
               </a>
             </div>
 
             <p className="text-xs text-center text-text-3 mt-4">
-              Questions reset daily at midnight
+              Questions reset every hour
             </p>
           </div>
         </div>

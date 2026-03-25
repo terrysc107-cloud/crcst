@@ -568,10 +568,6 @@ function AuthScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [targetCert, setTargetCert] = useState('')
-  const [examTimeline, setExamTimeline] = useState('')
-  const [experience, setExperience] = useState('')
-  const [referralSource, setReferralSource] = useState('')
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -589,25 +585,24 @@ function AuthScreen() {
         if (error) throw error
         // If email confirmation is disabled, user is auto-confirmed and session is returned
         if (data.session && data.user) {
-          // Save profile data
-          await supabase.from('profiles').upsert({
-            id: data.user.id,
-            target_cert: targetCert || null,
-            exam_timeline: examTimeline || null,
-            years_experience: experience || null,
-            referral_source: referralSource || null,
-          })
-          // User is already logged in, no confirmation needed
-          setUser(data.user)
-          setScreen('home')
-          loadStats(data.user.id)
+          // Redirect new users to the onboarding flow
+          window.location.href = '/onboarding'
         } else {
           // Email confirmation is enabled, show message
           setMessage('Check your email to confirm your account!')
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+        // Check if user has completed onboarding
+        if (data.user) {
+          const onboardingComplete = localStorage.getItem(`onboarding_complete_${data.user.id}`)
+          if (onboardingComplete !== 'true') {
+            // First time sign in after email confirmation - go to onboarding
+            window.location.href = '/onboarding'
+          }
+          // Otherwise the auth state listener in useEffect will handle navigation
+        }
       }
     } catch (err: any) {
       const message = err.message || 'Authentication failed'
@@ -632,7 +627,7 @@ function AuthScreen() {
           SPD Cert <em className="text-amber">Companion</em>
         </h1>
         <p className="text-xs text-center text-text-3 tracking-widest mb-6">
-          Master CRCST Certification
+          Master HSPA Certification
         </p>
 
         {/* Tab Switcher */}
@@ -673,62 +668,8 @@ function AuthScreen() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleAuth()}
-          className="w-full px-4 py-3 border border-cream-2 rounded-lg mb-3 text-sm font-mono focus:outline-none focus:border-teal"
+          className="w-full px-4 py-3 border border-cream-2 rounded-lg mb-4 text-sm font-mono focus:outline-none focus:border-teal"
         />
-
-        {isSignUp && (
-          <>
-            <select
-              value={targetCert}
-              onChange={e => setTargetCert(e.target.value)}
-              className="w-full px-4 py-3 border border-cream-2 rounded-lg mb-3 text-sm font-mono focus:outline-none focus:border-teal bg-white"
-            >
-              <option value="">Which cert are you studying for?</option>
-              <option value="CRCST">CRCST — Central Service Technician</option>
-              <option value="CHL">CHL — Healthcare Leader</option>
-              <option value="CER">CER — Endoscope Reprocessor</option>
-              <option value="unsure">Not sure yet</option>
-            </select>
-
-            <select
-              value={examTimeline}
-              onChange={e => setExamTimeline(e.target.value)}
-              className="w-full px-4 py-3 border border-cream-2 rounded-lg mb-3 text-sm font-mono focus:outline-none focus:border-teal bg-white"
-            >
-              <option value="">When is your exam?</option>
-              <option value="30days">Within 30 days</option>
-              <option value="1to3months">1–3 months</option>
-              <option value="3to6months">3–6 months</option>
-              <option value="nodateyet">No date set yet</option>
-            </select>
-
-            <select
-              value={experience}
-              onChange={e => setExperience(e.target.value)}
-              className="w-full px-4 py-3 border border-cream-2 rounded-lg mb-3 text-sm font-mono focus:outline-none focus:border-teal bg-white"
-            >
-              <option value="">Years in sterile processing?</option>
-              <option value="entry">Less than 1 year</option>
-              <option value="early">1–3 years</option>
-              <option value="mid">3–5 years</option>
-              <option value="senior">5+ years</option>
-            </select>
-
-            <select
-              value={referralSource}
-              onChange={e => setReferralSource(e.target.value)}
-              className="w-full px-4 py-3 border border-cream-2 rounded-lg mb-4 text-sm font-mono focus:outline-none focus:border-teal bg-white"
-            >
-              <option value="">How did you hear about us?</option>
-              <option value="coworker">Coworker or colleague</option>
-              <option value="socialmedia">Social media</option>
-              <option value="google">Google search</option>
-              <option value="instructor">Instructor or educator</option>
-              <option value="conference">HSPA / Conference</option>
-              <option value="other">Other</option>
-            </select>
-          </>
-        )}
 
         <button
           onClick={handleAuth}

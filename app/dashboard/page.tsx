@@ -62,6 +62,14 @@ export default function DashboardPage() {
     async function loadCerts() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
+
+      // Redirect new users to onboarding if they haven't completed it
+      const onboardingDone = localStorage.getItem(`onboarding_complete_${user.id}`)
+      if (!onboardingDone) {
+        router.push('/onboarding')
+        return
+      }
+
       const { data } = await supabase
         .from("certified_users")
         .select("cert")
@@ -70,7 +78,7 @@ export default function DashboardPage() {
       if (data) setEarnedCerts(data)
     }
     loadCerts()
-  }, [])
+  }, [router])
 
   return (
     <div className="min-h-screen bg-cream">

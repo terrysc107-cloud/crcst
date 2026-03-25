@@ -84,22 +84,19 @@ export async function incrementDailyUsage(
   field: 'questions_attempted' | 'ai_chats_used'
 ): Promise<{ success: boolean; newCount: number }> {
   const supabase = getServiceSupabase()
-  const now = new Date().toISOString()
 
-  // Try RPC first
+  // Try RPC first (for atomic insertion)
   const { error: rpcError } = await supabase.rpc('increment_daily_usage', {
     p_user_id: userId,
     p_field: field,
   })
 
-  // If RPC fails (doesn't exist), use upsert fallback
   if (rpcError) {
-    console.log('[v0] RPC failed, using fallback insert:', rpcError.message)
+    console.log('[v0] RPC increment failed, using direct insert:', rpcError.message)
     
-    // Insert a new record for this usage event
+    // Fallback: insert directly if RPC doesn't exist
     const insertData: any = {
       user_id: userId,
-      created_at: now,
       questions_attempted: field === 'questions_attempted' ? 1 : 0,
       ai_chats_used: field === 'ai_chats_used' ? 1 : 0,
     }
@@ -114,7 +111,7 @@ export async function incrementDailyUsage(
     }
   }
 
-  // Get updated count
+  // Get updated hourly count
   const usage = await getHourlyUsage(userId)
   const newCount = field === 'questions_attempted' ? usage.questions_attempted : usage.ai_chats_used
   

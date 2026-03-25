@@ -26,27 +26,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid field' }, { status: 400 })
     }
 
-    // Check if user can still access the feature
+    // Check if user can still access the feature BEFORE incrementing
     const feature = field === 'questions_attempted' ? 'questions' : 'ai_chat'
-    const access = await canUserAccessPaidFeature(user.id, feature)
+    const accessBefore = await canUserAccessPaidFeature(user.id, feature)
 
-    if (!access.allowed) {
+    if (!accessBefore.allowed) {
       return NextResponse.json({
         error: 'limit_reached',
-        message: access.reason,
-        used: access.used,
-        limit: access.limit,
+        message: accessBefore.reason,
+        used: accessBefore.used,
+        limit: accessBefore.limit,
       }, { status: 429 })
     }
 
     // Increment usage
     const result = await incrementDailyUsage(user.id, field)
 
+    // Check limit again after incrementing
+    const accessAfter = await canUserAccessPaidFeature(user.id, feature)
+
     return NextResponse.json({
       success: result.success,
       used: result.newCount,
-      limit: access.limit,
-      remaining: access.limit ? Math.max(0, access.limit - result.newCount) : null,
+      limit: accessAfter.limit,
+      remaining: accessAfter.limit ? Math.max(0, accessAfter.limit - result.newCount) : null,
+      allowed: accessAfter.allowed,
     })
   } catch (error) {
     console.error('[usage/increment]', error)

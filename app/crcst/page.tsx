@@ -37,6 +37,8 @@ export default function Home() {
   const [domainMastery, setDomainMastery] = useState<Record<string, { correct: number; total: number }>>({})
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
+  const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   useEffect(() => {
     // Check initial auth state
@@ -50,6 +52,7 @@ export default function Home() {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        loadRateLimitInfo()
       }
     })
 
@@ -64,6 +67,7 @@ export default function Home() {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        loadRateLimitInfo()
       } else {
         setUser(null)
         setScreen('auth')
@@ -145,6 +149,30 @@ export default function Home() {
 
     } catch (error) {
       console.error('Error loading stats:', error)
+    }
+  }
+
+  const loadRateLimitInfo = async () => {
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) return
+
+      const res = await fetch('/api/usage/check?feature=questions', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setRateLimitInfo({
+          allowed: data.allowed,
+          used: data.used ?? 0,
+          limit: data.limit ?? 20,
+          remaining: data.remaining ?? 20,
+        })
+      }
+    } catch (error) {
+      console.error('Error loading rate limit info:', error)
     }
   }
 
@@ -259,6 +287,12 @@ export default function Home() {
   }
 
   const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string) => {
+    // Check rate limit for free users
+    if (rateLimitInfo && !rateLimitInfo.allowed) {
+      setShowUpgradeModal(true)
+      return
+    }
+
     let questions = [...QUESTIONS]
 
     // Filter by domains
@@ -295,6 +329,8 @@ export default function Home() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
+    // Refresh rate limit info after completing quiz
+    loadRateLimitInfo()
   }
 
   const getDomains = () => {
@@ -432,6 +468,37 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Daily Usage Indicator for Free Users */}
+        {rateLimitInfo && rateLimitInfo.limit && (
+          <div className="mx-6 mt-6 p-4 bg-white border border-cream-2 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-xs tracking-widest text-text-3">
+                DAILY QUESTIONS
+              </div>
+              <div className="text-xs text-text-3">
+                {rateLimitInfo.used}/{rateLimitInfo.limit} used today
+              </div>
+            </div>
+            <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  rateLimitInfo.remaining === 0 ? 'bg-wrong' : rateLimitInfo.remaining <= 5 ? 'bg-amber' : 'bg-teal'
+                }`}
+                style={{ width: `${(rateLimitInfo.used / rateLimitInfo.limit) * 100}%` }}
+              />
+            </div>
+            {rateLimitInfo.remaining === 0 ? (
+              <div className="mt-2 text-xs text-wrong">
+                Daily limit reached. <button onClick={() => setShowUpgradeModal(true)} className="text-teal underline">Upgrade to Pro</button> for unlimited questions.
+              </div>
+            ) : rateLimitInfo.remaining <= 5 ? (
+              <div className="mt-2 text-xs text-amber">
+                {rateLimitInfo.remaining} questions remaining today
+              </div>
+            ) : null}
+          </div>
+        )}
+
         {/* Study Modes */}
         <div className="px-6 py-8">
           <div className="text-xs tracking-widest text-text-3 mb-4">
@@ -566,6 +633,64 @@ export default function Home() {
         </div>
       </div>
       <ChatBot />
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-3">⏰</div>
+              <h2 className="font-serif text-2xl text-navy mb-2">
+                Hourly Limit Reached
+              </h2>
+              <p className="text-sm text-text-3">
+                You&apos;ve used all {rateLimitInfo?.limit || 20} free questions this hour. Upgrade to Pro for unlimited access!
+              </p>
+            </div>
+
+            <div className="bg-cream rounded-lg p-4 mb-6">
+              <div className="text-xs tracking-widest text-text-3 mb-3">PRO BENEFITS</div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <span className="text-correct">✓</span>
+                  Unlimited practice questions
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-correct">✓</span>
+                  Unlimited flashcards
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-correct">✓</span>
+                  Unlimited AI assistance
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-correct">✓</span>
+                  Full-length mock exams
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 px-4 py-3 bg-cream-2 text-text rounded-lg font-mono text-sm hover:bg-cream transition"
+              >
+                Maybe Later
+              </button>
+              <a
+                href="/pricing"
+                className="flex-1 px-4 py-3 bg-teal text-white rounded-lg font-mono text-sm text-center hover:bg-teal-2 transition"
+              >
+                View Plans
+              </a>
+            </div>
+
+            <p className="text-xs text-center text-text-3 mt-4">
+              Questions reset every hour
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

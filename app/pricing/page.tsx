@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { loadStripe } from '@stripe/js'
 
 const PLANS = [
   {
@@ -10,13 +11,12 @@ const PLANS = [
     name: 'Free',
     price: '$0',
     period: '',
-    comingSoon: false,
     features: [
-      '20 practice questions / day',
-      '5 AI chat messages / day',
+      '20 practice questions per hour',
+      '1 flashcard round per hour',
+      '5 AI chat messages per day',
       'Basic progress tracking',
       'Access to CRCST, CHL, CER, SJT',
-      'Exam readiness score',
       'Certification badge (after passing)',
     ],
     cta: 'Start Free',
@@ -27,11 +27,12 @@ const PLANS = [
   {
     id: 'pro',
     name: 'Pro',
-    price: '$14.99',
+    price: '$9.99',
     period: '/month',
-    comingSoon: true,
+    tier: 'PRO',
     features: [
       'Unlimited practice questions',
+      'Unlimited flashcards',
       'Unlimited AI Study Chat',
       'Full domain mastery tracking',
       'Custom quiz builder',
@@ -39,42 +40,125 @@ const PLANS = [
       'Priority badge processing',
       'All future updates included',
     ],
-    cta: 'Coming Soon',
-    note: 'Launching soon — start free today',
+    cta: 'Upgrade to Pro',
+    note: 'Cancel anytime',
     color: 'rgba(13,115,119,0.15)',
     border: 'rgba(20,189,172,0.4)',
-    badge: 'Coming Soon',
+    badge: 'Most Popular',
   },
   {
     id: 'lifetime',
     name: 'Lifetime',
-    price: '$99',
+    price: '$49.99',
     period: ' one time',
-    comingSoon: true,
+    tier: 'LIFETIME',
     features: [
       'Everything in Pro — forever',
       'All future certifications included',
       'Early access to new features',
       'Lifetime badge archive',
       'Best value for career-long prep',
+      'No subscription fees ever',
     ],
-    cta: 'Coming Soon',
-    note: 'Launching soon',
+    cta: 'Get Lifetime Access',
+    note: 'One-time purchase',
     color: 'rgba(255,255,255,0.04)',
     border: 'rgba(218,165,32,0.35)',
+    badge: 'Best Value',
   },
 ]
 
 export default function PricingPage() {
   const [currentPlan, setCurrentPlan] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     async function load() {
       const { data: { user: u } } = await supabase.auth.getUser()
-      setCurrentPlan(u ? 'free' : null)
+      if (u) {
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('tier, status')
+          .eq('id', u.id)
+          .single()
+        
+        if (subscription?.status === 'active') {
+          setCurrentPlan(subscription.tier.toLowerCase())
+        } else {
+          setCurrentPlan('free')
+        }
+      }
     }
     load()
   }, [])
+
+  const handleUpgrade = async (tier: 'PRO' | 'LIFETIME') => {
+    try {
+      setLoading(true)
+      setError('')
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        // Redirect to login if not authenticated
+        window.location.href = '/crcst'
+        return
+      }
+
+      // Get session for auth header
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+
+      if (!token) {
+        setError('Authentication failed. Please try again.')
+        return
+      }
+
+      // Determine price ID
+      const priceId = tier === 'PRO' 
+        ? process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID 
+        : process.env.NEXT_PUBLIC_STRIPE_LIFETIME_PRICE_ID
+
+      if (!priceId) {
+        setError('Pricing not configured. Please contact support.')
+        return
+      }
+
+      // Call checkout endpoint
+      const response = await fetch('/api/payment/stripe-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ tier, priceId }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
+
+      const { sessionId } = await response.json()
+
+      // Redirect to Stripe Checkout
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+      if (!stripe) {
+        throw new Error('Stripe failed to load. Please try again.')
+      }
+
+      const result = await stripe.redirectToCheckout({ sessionId })
+      if (result.error) {
+        throw new Error(result.error.message)
+      }
+    } catch (err: any) {
+      console.error('Upgrade error:', err)
+      setError(err.message || 'Failed to start checkout')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div style={{
@@ -97,9 +181,11 @@ export default function PricingPage() {
           </div>
           <span style={{ fontWeight: 600 }}>SPD Cert Companion</span>
         </Link>
-        <Link href="/dashboard" style={{ color: '#14BDAC', textDecoration: 'none', fontSize: '0.9rem' }}>
-          Go to Dashboard →
-        </Link>
+        {currentPlan && (
+          <Link href="/crcst" style={{ color: '#14BDAC', textDecoration: 'none', fontSize: '0.9rem' }}>
+            Back to Quiz →
+          </Link>
+        )}
       </nav>
 
       {/* Header */}
@@ -108,37 +194,32 @@ export default function PricingPage() {
           Simple Pricing
         </div>
         <h1 style={{ fontSize: '2.75rem', fontWeight: 700, marginBottom: '1rem', lineHeight: 1.2 }}>
-          Invest in your career.
+          Invest in your certification.
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.6)', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-          Start free today. Paid plans are coming soon — create your account now and upgrade when they launch.
+          Choose the plan that fits your study style. All plans include access to all certifications.
         </p>
       </div>
 
-      {/* Coming Soon Banner */}
-      <div style={{
-        maxWidth: 600,
-        margin: '0 auto 1.5rem',
-        padding: '0 2rem',
-      }}>
+      {/* Error Banner */}
+      {error && (
         <div style={{
-          background: 'rgba(20,189,172,0.08)',
-          border: '1px solid rgba(20,189,172,0.25)',
-          borderRadius: 12,
-          padding: '0.85rem 1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          fontSize: '0.88rem',
-          color: 'rgba(255,255,255,0.75)',
+          maxWidth: 600,
+          margin: '0 auto 1.5rem',
+          padding: '0 2rem',
         }}>
-          <span style={{ fontSize: '1.1rem' }}>🚀</span>
-          <span>
-            <strong style={{ color: '#14BDAC' }}>Pro & Lifetime plans launching soon.</strong>{' '}
-            Sign up free now — you&apos;ll be able to upgrade right from your dashboard.
-          </span>
+          <div style={{
+            background: 'rgba(220,50,50,0.1)',
+            border: '1px solid rgba(220,50,50,0.3)',
+            borderRadius: 12,
+            padding: '0.85rem 1.25rem',
+            fontSize: '0.88rem',
+            color: '#f87171',
+          }}>
+            {error}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Cards */}
       <div style={{
@@ -161,7 +242,6 @@ export default function PricingPage() {
                 borderRadius: 18,
                 padding: '2rem',
                 position: 'relative',
-                opacity: plan.comingSoon ? 0.75 : 1,
                 transition: 'transform 0.2s',
               }}
             >
@@ -172,15 +252,14 @@ export default function PricingPage() {
                   top: -14,
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  background: plan.comingSoon ? 'rgba(255,255,255,0.15)' : '#14BDAC',
-                  color: plan.comingSoon ? 'rgba(255,255,255,0.7)' : '#fff',
+                  background: plan.id === 'pro' ? '#14BDAC' : '#DAA520',
+                  color: '#fff',
                   padding: '0.3rem 1rem',
                   borderRadius: 100,
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
                   whiteSpace: 'nowrap' as const,
-                  border: plan.comingSoon ? '1px solid rgba(255,255,255,0.2)' : 'none',
                 }}>
                   {plan.badge}
                 </div>
@@ -206,20 +285,7 @@ export default function PricingPage() {
               </ul>
 
               {/* CTA */}
-              {plan.comingSoon ? (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '0.85rem',
-                  borderRadius: 10,
-                  border: '1.5px solid rgba(255,255,255,0.1)',
-                  color: 'rgba(255,255,255,0.35)',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.05em',
-                }}>
-                  Coming Soon
-                </div>
-              ) : isCurrentPlan ? (
+              {isCurrentPlan ? (
                 <div style={{
                   textAlign: 'center',
                   padding: '0.85rem',
@@ -230,13 +296,32 @@ export default function PricingPage() {
                 }}>
                   Current Plan
                 </div>
+              ) : plan.tier ? (
+                <button
+                  onClick={() => handleUpgrade(plan.tier as 'PRO' | 'LIFETIME')}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem',
+                    borderRadius: 10,
+                    background: plan.id === 'pro' ? 'linear-gradient(135deg, #0D7377, #14BDAC)' : '#DAA520',
+                    color: '#fff',
+                    border: 'none',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.7 : 1,
+                    transition: 'opacity 0.2s',
+                  }}>
+                  {loading ? 'Loading...' : plan.cta}
+                </button>
               ) : (
-                <Link href="/dashboard" style={{
+                <Link href="/crcst" style={{
                   display: 'block',
                   textAlign: 'center',
                   padding: '0.85rem',
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
+                  background: 'rgba(255,255,255,0.1)',
                   color: '#fff',
                   textDecoration: 'none',
                   fontSize: '0.95rem',
@@ -258,6 +343,34 @@ export default function PricingPage() {
           )
         })}
       </div>
+
+      {/* FAQ */}
+      <div style={{ maxWidth: 600, margin: '0 auto 4rem', padding: '0 2rem' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.75rem' }}>Questions?</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <details style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '1rem', cursor: 'pointer' }}>
+            <summary style={{ fontWeight: 600, color: '#14BDAC' }}>Can I change plans?</summary>
+            <p style={{ marginTop: '0.75rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+              Yes, you can upgrade from Free to Pro anytime. Your Pro subscription renews monthly.
+            </p>
+          </details>
+
+          <details style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '1rem', cursor: 'pointer' }}>
+            <summary style={{ fontWeight: 600, color: '#14BDAC' }}>Can I cancel anytime?</summary>
+            <p style={{ marginTop: '0.75rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+              Yes, Pro subscriptions can be cancelled anytime from your account settings. You keep access until your billing period ends.
+            </p>
+          </details>
+
+          <details style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '1rem', cursor: 'pointer' }}>
+            <summary style={{ fontWeight: 600, color: '#14BDAC' }}>What payment methods do you accept?</summary>
+            <p style={{ marginTop: '0.75rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+              We accept all major credit cards and digital payment methods through Stripe.
+            </p>
+          </details>
+        </div>
+      </div>
     </div>
   )
 }
+

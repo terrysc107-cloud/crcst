@@ -224,7 +224,8 @@ export default function OnboardingPage() {
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/')
+        // Redirect to auth page if not logged in
+        router.push('/crcst')
         return
       }
       setUserEmail(user.email ?? '')

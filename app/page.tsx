@@ -126,12 +126,12 @@ const TESTIMONIALS = [
 
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
 const FAQS = [
-  { q: "Which certifications does this cover?", a: "Currently CRCST, CHL, and CER — the three core HSPA (formerly IAHCSMM) certifications — plus a Situational Judgment (SJT) module. All question banks are built from current HSPA content outlines." },
+  { q: "Which certifications does this cover?", a: "Currently CRCST, CHL, and CER certifications — plus a Situational Judgment (SJT) module. All question banks are built from current industry content outlines." },
   { q: "How many questions are in the question bank?", a: "787+ questions across CRCST (400), CHL (240), and CER (147), categorized by domain, chapter, and difficulty. New questions are added regularly." },
-  { q: "Is the content aligned to the actual HSPA exam?", a: "Yes. All questions are mapped to the official HSPA content outlines for each certification. We include both multiple choice and true/false question types." },
+  { q: "Is the content aligned to the actual exam?", a: "Yes. All questions are mapped to the official content outlines for each certification. We include both multiple choice and true/false question types." },
   { q: "What is the AI Study Chat?", a: "A Claude-powered chatbot specialized in sterile processing, instrumentation, and certification content. Ask it to explain a concept, quiz you verbally, or clarify a confusing answer." },
   { q: "Can I use this on my phone?", a: "Yes. SPD Cert Prep is a web app that works on any device — phone, tablet, or computer. No download required." },
-  { q: "What happens after I pass?", a: "You can claim a digital certification badge by entering your name and HSPA member number. Your badge is yours to download and share on LinkedIn. You'll also get guided toward your next certification." },
+  { q: "What happens after I pass?", a: "You can claim a digital certification badge by entering your name and certification details. Your badge is yours to download and share on LinkedIn. You'll also get guided toward your next certification." },
 ];
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
@@ -378,7 +378,7 @@ export default function LandingPage() {
               animation: heroInView ? "fadeUp 0.7s ease 0.1s both" : "none",
             }}>
               Pass Your{" "}
-              <span className="shimmer-text">HSPA Certification</span>
+              <span className="shimmer-text">CRCST / CBSPD Certification</span>
               <br />The First Time.
             </h1>
 
@@ -455,7 +455,7 @@ export default function LandingPage() {
             <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
               <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>EXAM COVERAGE</p>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900 }}>
-                All Four HSPA Certifications
+                All Certifications Covered
               </h2>
               <p style={{ color: "rgba(255,255,255,0.5)", marginTop: "0.75rem", fontSize: "1rem", fontWeight: 300 }}>
                 One platform. Every certification you'll ever need in sterile processing.
@@ -495,7 +495,7 @@ export default function LandingPage() {
               { step: "01", title: "Create your account", desc: "Free sign up. Tell us which cert you're targeting and your exam date." },
               { step: "02", title: "Practice by domain", desc: "Work through each chapter. Weak spots are flagged so you know where to focus." },
               { step: "03", title: "Ask the AI anything", desc: "Stuck on a concept? The AI Study Chat explains it in plain language, instantly." },
-              { step: "04", title: "Pass and claim your badge", desc: "Enter your HSPA number, download your badge, and start the next cert." },
+              { step: "04", title: "Pass and claim your badge", desc: "Download your digital badge and start the next cert." },
             ].map((s, i) => (
               <div key={i} style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
                 <div style={{
@@ -733,7 +733,7 @@ export default function LandingPage() {
               © 2025 Scott Advisory Group · Aseptic Technical Solutions
             </p>
             <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
-              Not affiliated with HSPA · All trademarks belong to their respective owners
+              All trademarks and certifications belong to their respective owners
             </p>
           </div>
         </footer>

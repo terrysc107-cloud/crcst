@@ -116,8 +116,10 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     })
   }
 
-  const selectAnswer = (idx: number) => {
+  const selectAnswer = async (idx: number) => {
     if (mode === 'mock' && hasAnswered) return // No changing answers in mock mode
+    if (hasAnswered) return // Don't count the same question twice
+    
     const newAnswers = [...answers]
     newAnswers[current] = idx
     setAnswers(newAnswers)
@@ -130,6 +132,20 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       was_correct: idx === q.correct_answer,
       selected_answer: String.fromCharCode(65 + idx).toLowerCase(),
     }).then(() => {})
+
+    // Increment daily usage count for rate limiting
+    if (user?.id) {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      fetch('/api/usage/increment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ field: 'questions_attempted' }),
+      }).catch(() => {}) // Silent fail - don't block the quiz
+    }
 
     if (mode === 'practice') {
       setShowExplanation(true)

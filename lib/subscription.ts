@@ -56,32 +56,69 @@ export async function getHourlyUsage(userId: string): Promise<DailyUsage> {
   const supabase = getServiceSupabase()
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
 
-  const { data } = await supabase
+  // Sum all questions attempted within the last hour
+  const { data, error } = await supabase
     .from('daily_usage')
-    .select('*')
+    .select('questions_attempted, ai_chats_used')
     .eq('user_id', userId)
     .gte('created_at', oneHourAgo)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
 
-  if (!data) {
+  if (error || !data || data.length === 0) {
     return { user_id: userId, created_at: new Date().toISOString(), questions_attempted: 0, ai_chats_used: 0 }
   }
-  return data as DailyUsage
+
+  // Sum up all usage records from the past hour
+  const totalQuestions = data.reduce((sum, record) => sum + (record.questions_attempted || 0), 0)
+  const totalChats = data.reduce((sum, record) => sum + (record.ai_chats_used || 0), 0)
+
+  return { 
+    user_id: userId, 
+    created_at: new Date().toISOString(), 
+    questions_attempted: totalQuestions, 
+    ai_chats_used: totalChats 
+  }
 }
 
 export async function incrementDailyUsage(
   userId: string,
   field: 'questions_attempted' | 'ai_chats_used'
-): Promise<void> {
+): Promise<{ success: boolean; newCount: number }> {
   const supabase = getServiceSupabase()
+  const now = new Date().toISOString()
 
-  // Use RPC to atomically increment
-  await supabase.rpc('increment_daily_usage', {
+  // Try RPC first
+  const { error: rpcError } = await supabase.rpc('increment_daily_usage', {
     p_user_id: userId,
     p_field: field,
   })
+
+  // If RPC fails (doesn't exist), use upsert fallback
+  if (rpcError) {
+    console.log('[v0] RPC failed, using fallback insert:', rpcError.message)
+    
+    // Insert a new record for this usage event
+    const insertData: any = {
+      user_id: userId,
+      created_at: now,
+      questions_attempted: field === 'questions_attempted' ? 1 : 0,
+      ai_chats_used: field === 'ai_chats_used' ? 1 : 0,
+    }
+
+    const { error: insertError } = await supabase
+      .from('daily_usage')
+      .insert(insertData)
+
+    if (insertError) {
+      console.error('[v0] Insert failed:', insertError.message)
+      return { success: false, newCount: 0 }
+    }
+  }
+
+  // Get updated count
+  const usage = await getHourlyUsage(userId)
+  const newCount = field === 'questions_attempted' ? usage.questions_attempted : usage.ai_chats_used
+  
+  return { success: true, newCount }
 }
 
 export async function canUserAccessPaidFeature(

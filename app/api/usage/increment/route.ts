@@ -40,12 +40,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Increment usage
-    await incrementDailyUsage(user.id, field)
+    const result = await incrementDailyUsage(user.id, field)
 
     return NextResponse.json({
-      success: true,
-      used: (access.used ?? 0) + 1,
+      success: result.success,
+      used: result.newCount,
       limit: access.limit,
+      remaining: access.limit ? Math.max(0, access.limit - result.newCount) : null,
     })
   } catch (error) {
     console.error('[usage/increment]', error)

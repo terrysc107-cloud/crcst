@@ -28,6 +28,8 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [timeLeft, setTimeLeft] = useState(mode === 'mock' ? 50 * 60 : 0) // 50 minutes for mock
   const [isPausing, setIsPausing] = useState(false)
   const [pauseSaved, setPauseSaved] = useState(false)
+  const [rateLimitReached, setRateLimitReached] = useState(false)
+  const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null)
 
   const q = quizData.questions[current]
   const progress = ((current + 1) / quizData.questions.length) * 100
@@ -119,6 +121,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const selectAnswer = async (idx: number) => {
     if (mode === 'mock' && hasAnswered) return // No changing answers in mock mode
     if (hasAnswered) return // Don't count the same question twice
+    if (rateLimitReached) return // Don't allow more answers if limit reached
     
     const newAnswers = [...answers]
     newAnswers[current] = idx
@@ -135,21 +138,89 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
 
     // Increment daily usage count for rate limiting
     if (user?.id) {
-      const session = await supabase.auth.getSession()
-      const token = session.data.session?.access_token
-      fetch('/api/usage/increment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ field: 'questions_attempted' }),
-      }).catch(() => {}) // Silent fail - don't block the quiz
+      try {
+        const session = await supabase.auth.getSession()
+        const token = session.data.session?.access_token
+        const res = await fetch('/api/usage/increment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ field: 'questions_attempted' }),
+        })
+        
+        const data = await res.json()
+        console.log('[v0] Usage increment response:', data)
+        
+        if (res.status === 429 || data.error === 'limit_reached') {
+          // Rate limit reached - block further questions
+          setRateLimitReached(true)
+          setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+        } else if (data.used !== undefined) {
+          // Update usage info
+          setUsageInfo({ 
+            used: data.used, 
+            limit: data.limit || 20, 
+            remaining: data.remaining || 0 
+          })
+          
+          // Check if we just hit the limit
+          if (data.remaining !== null && data.remaining <= 0) {
+            setRateLimitReached(true)
+          }
+        }
+      } catch (err) {
+        console.error('[v0] Failed to increment usage:', err)
+      }
     }
 
     if (mode === 'practice') {
       setShowExplanation(true)
     }
+  }
+
+  // Rate limit reached screen
+  if (rateLimitReached) {
+    return (
+      <div className="max-w-md mx-auto text-center py-12 px-6">
+        <div className="text-6xl mb-6">&#9203;</div>
+        <h2 className="font-serif text-2xl text-navy mb-4">
+          Hourly Limit Reached
+        </h2>
+        <p className="text-text-3 mb-6">
+          You&apos;ve used all {usageInfo?.limit || 20} free questions this hour. 
+          Your limit will reset in about an hour, or upgrade to Pro for unlimited access.
+        </p>
+        
+        {usageInfo && (
+          <div className="bg-cream rounded-lg p-4 mb-6">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-text-3">Questions used</span>
+              <span className="text-navy font-mono">{usageInfo.used}/{usageInfo.limit}</span>
+            </div>
+            <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
+              <div className="h-full bg-wrong" style={{ width: '100%' }} />
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={onExit}
+            className="flex-1 px-4 py-3 bg-cream-2 text-text rounded-lg font-mono text-sm hover:bg-cream transition"
+          >
+            Back to Home
+          </button>
+          <a
+            href="/pricing"
+            className="flex-1 px-4 py-3 bg-teal text-white rounded-lg font-mono text-sm text-center hover:bg-teal-2 transition"
+          >
+            Upgrade to Pro
+          </a>
+        </div>
+      </div>
+    )
   }
 
   // Flashcard mode

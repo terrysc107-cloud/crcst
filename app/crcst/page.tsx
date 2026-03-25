@@ -329,6 +329,8 @@ export default function Home() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
+    // Refresh rate limit info after completing quiz
+    loadRateLimitInfo()
   }
 
   const getDomains = () => {

@@ -326,8 +326,8 @@ export default function LandingPage() {
           </div>
 
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <Link href="/dashboard" className="btn-ghost" style={{ padding: "0.55rem 1.2rem", fontSize: "0.88rem" }}>Sign In</Link>
-            <Link href="/dashboard" className="btn-primary" style={{ padding: "0.55rem 1.2rem", fontSize: "0.88rem" }}>Start Free</Link>
+            <Link href="/crcst" className="btn-ghost" style={{ padding: "0.55rem 1.2rem", fontSize: "0.88rem" }}>Sign In</Link>
+            <Link href="/crcst" className="btn-primary" style={{ padding: "0.55rem 1.2rem", fontSize: "0.88rem" }}>Start Free</Link>
           </div>
         </nav>
 
@@ -395,7 +395,7 @@ export default function LandingPage() {
               display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap",
               animation: heroInView ? "fadeUp 0.7s ease 0.4s both" : "none",
             }}>
-              <Link href="/dashboard" className="btn-primary" style={{ fontSize: "1.05rem", padding: "1rem 2.2rem" }}>
+              <Link href="/crcst" className="btn-primary" style={{ fontSize: "1.05rem", padding: "1rem 2.2rem" }}>
                 Start Studying Free
               </Link>
               <a href="#features" className="btn-ghost" style={{ fontSize: "1.05rem", padding: "1rem 2rem" }}>
@@ -428,7 +428,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── FEATURES ─────────────────────────────────────────────────────── */}
+        {/* ── FEATURES ─────────────────────────────���───────────────────────── */}
         <section id="features" ref={featRef} style={{ padding: "6rem 1.5rem", maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
             <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>WHAT YOU GET</p>
@@ -595,9 +595,9 @@ export default function LandingPage() {
                     COMING SOON
                   </div>
                 ) : (
-                  <a href="/dashboard" className="btn-primary" style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}>
-                    {p.cta}
-                  </a>
+<a href="/crcst" className="btn-primary" style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}>
+  {p.cta}
+  </a>
                 )}
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", textAlign: "center", marginTop: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
                   {p.note}
@@ -663,9 +663,9 @@ export default function LandingPage() {
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.05rem", lineHeight: 1.7, marginBottom: "2.5rem", fontWeight: 300 }}>
               Start free today. 20 questions a day, no credit card required. Upgrade when your exam date gets close and you need full access.
             </p>
-            <a href="/dashboard" className="btn-primary" style={{ fontSize: "1.1rem", padding: "1.1rem 2.6rem", textDecoration: "none" }}>
-              Create Your Free Account →
-            </a>
+<a href="/crcst" className="btn-primary" style={{ fontSize: "1.1rem", padding: "1.1rem 2.6rem", textDecoration: "none" }}>
+  Create Your Free Account →
+  </a>
             <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.78rem", marginTop: "1rem", fontFamily: "'DM Mono', monospace" }}>
               Free · No credit card · Start in 60 seconds
             </p>

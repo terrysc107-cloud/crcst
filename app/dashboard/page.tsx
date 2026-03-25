@@ -249,54 +249,128 @@ export default function DashboardPage() {
           SELECT YOUR CERTIFICATION
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-6">
-          {certifications.map((cert) => (
-            <Link
-              key={cert.id}
-              href={cert.href}
-              className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-teal hover:shadow-xl transition-all duration-300"
+          {certifications.map((cert) => {
+            const isPremium = cert.id !== 'crcst'
+            const isLocked = isPremium && !sub.isPaid
+
+            if (isLocked) {
+              return (
+                <div
+                  key={cert.id}
+                  onClick={() => router.push('/pricing')}
+                  className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
+                >
+                  {/* Lock Badge */}
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-navy text-white text-xs font-mono px-2 py-1 rounded-full">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                    Premium
+                  </div>
+                  {/* Card Header */}
+                  <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white grayscale`}>
+                    <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
+                    <div className="text-sm opacity-90">{cert.fullName}</div>
+                  </div>
+                  {/* Card Body */}
+                  <div className="p-6">
+                    <p className="text-sm text-text-3 mb-4 leading-relaxed">
+                      {cert.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono text-navy/50">Upgrade to unlock</span>
+                      <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-text-3" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+
+            return (
+              <Link
+                key={cert.id}
+                href={cert.href}
+                className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-teal hover:shadow-xl transition-all duration-300"
+              >
+                {/* Card Header */}
+                <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white`}>
+                  <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
+                  <div className="text-sm opacity-90">{cert.fullName}</div>
+                </div>
+                {/* Card Body */}
+                <div className="p-6">
+                  <p className="text-sm text-text-3 mb-4 leading-relaxed">
+                    {cert.description}
+                  </p>
+                  <div className="flex items-center justify-end">
+                    <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-teal group-hover:text-white transition-colors">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+          {/* Situational Judgment Card */}
+          {sub.isPaid ? (
+            <div
+              onClick={() => router.push("/quiz/scenarios")}
+              className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-amber hover:shadow-xl transition-all duration-300 cursor-pointer"
             >
-              {/* Card Header */}
-              <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white`}>
-                <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
-                <div className="text-sm opacity-90">{cert.fullName}</div>
+              <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white">
+                <div className="font-serif text-3xl font-bold mb-1">SJT</div>
+                <div className="text-sm opacity-90">Situational Judgment</div>
               </div>
-              {/* Card Body */}
               <div className="p-6">
                 <p className="text-sm text-text-3 mb-4 leading-relaxed">
-                  {cert.description}
+                  Real-world scenarios. Build decision-making skills beyond the exam.
                 </p>
                 <div className="flex items-center justify-end">
-                  <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-teal group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-amber group-hover:text-white transition-colors">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
-          {/* Situational Judgment Card — inline with cert cards */}
-          <div
-            onClick={() => router.push("/quiz/scenarios")}
-            className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-amber hover:shadow-xl transition-all duration-300 cursor-pointer"
-          >
-            <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white">
-              <div className="font-serif text-3xl font-bold mb-1">SJT</div>
-              <div className="text-sm opacity-90">Situational Judgment</div>
             </div>
-            <div className="p-6">
-              <p className="text-sm text-text-3 mb-4 leading-relaxed">
-                Real-world scenarios. Build decision-making skills beyond the exam.
-              </p>
-              <div className="flex items-center justify-end">
-                <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-amber group-hover:text-white transition-colors">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+          ) : (
+            <div
+              onClick={() => router.push('/pricing')}
+              className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
+            >
+              {/* Lock Badge */}
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-navy text-white text-xs font-mono px-2 py-1 rounded-full">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                Premium
+              </div>
+              <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white grayscale">
+                <div className="font-serif text-3xl font-bold mb-1">SJT</div>
+                <div className="text-sm opacity-90">Situational Judgment</div>
+              </div>
+              <div className="p-6">
+                <p className="text-sm text-text-3 mb-4 leading-relaxed">
+                  Real-world scenarios. Build decision-making skills beyond the exam.
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-navy/50">Upgrade to unlock</span>
+                  <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-text-3" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 

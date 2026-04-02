@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export type Plan = 'free' | 'pro' | 'lifetime'
+export type Plan = 'free' | 'pro' | 'triple_crown'
 
 interface SubscriptionState {
   plan: Plan
   status: string
-  currentPeriodEnd: string | null
+  tierExpiresAt: string | null
   usage: {
-    questionsToday: number
+    questionsThisHour: number
     aiChatsToday: number
     questionsLimit: number | null
     aiChatsLimit: number | null
@@ -18,6 +18,8 @@ interface SubscriptionState {
   loading: boolean
   isPaid: boolean
   canAccessUnlimited: boolean
+  canAccessCHL: boolean
+  canAccessCER: boolean
   questionsRemaining: number | null
   aiChatsRemaining: number | null
 }
@@ -25,11 +27,13 @@ interface SubscriptionState {
 const DEFAULT_STATE: SubscriptionState = {
   plan: 'free',
   status: 'none',
-  currentPeriodEnd: null,
+  tierExpiresAt: null,
   usage: null,
   loading: true,
   isPaid: false,
   canAccessUnlimited: false,
+  canAccessCHL: false,
+  canAccessCER: false,
   questionsRemaining: 20,
   aiChatsRemaining: 5,
 }
@@ -37,7 +41,7 @@ const DEFAULT_STATE: SubscriptionState = {
 export function useSubscription(): SubscriptionState & { refresh: () => void } {
   const [state, setState] = useState<SubscriptionState>(DEFAULT_STATE)
 
-  const fetch = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
@@ -53,20 +57,23 @@ export function useSubscription(): SubscriptionState & { refresh: () => void } {
 
       const data = await res.json()
       const plan: Plan = data.plan || 'free'
-      const isPaid = plan === 'pro' || plan === 'lifetime'
+      const isPaid = plan === 'pro' || plan === 'triple_crown'
+      const isTripleCrown = plan === 'triple_crown'
       const usage = data.usage
 
       setState({
         plan,
         status: data.status || 'none',
-        currentPeriodEnd: data.currentPeriodEnd,
+        tierExpiresAt: data.currentPeriodEnd,
         usage,
         loading: false,
         isPaid,
         canAccessUnlimited: isPaid,
+        canAccessCHL: isTripleCrown,
+        canAccessCER: isTripleCrown,
         questionsRemaining: isPaid
           ? null
-          : Math.max(0, (usage?.questionsLimit ?? 20) - (usage?.questionsToday ?? 0)),
+          : Math.max(0, (usage?.questionsLimit ?? 20) - (usage?.questionsThisHour ?? 0)),
         aiChatsRemaining: isPaid
           ? null
           : Math.max(0, (usage?.aiChatsLimit ?? 5) - (usage?.aiChatsToday ?? 0)),
@@ -76,7 +83,7 @@ export function useSubscription(): SubscriptionState & { refresh: () => void } {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { fetchData() }, [fetchData])
 
-  return { ...state, refresh: fetch }
+  return { ...state, refresh: fetchData }
 }

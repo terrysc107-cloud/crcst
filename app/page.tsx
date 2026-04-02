@@ -15,22 +15,25 @@ const FontLoader = () => {
 };
 
 // ─── INTERSECTION OBSERVER HOOK ───────────────────────────────────────────────
-function useInView(threshold = 0.15) {
-  const ref = useRef(null);
+function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
+  const ref = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
+    const currentRef = ref.current;
+    if (!currentRef) return;
+    
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setInView(true); },
       { threshold }
     );
-    if (ref.current) obs.observe(ref.current);
+    obs.observe(currentRef);
     return () => obs.disconnect();
-  }, []);
+  }, [threshold]);
   return [ref, inView];
 }
 
 // ─── ANIMATED COUNTER ─────────────────────────────────────────────────────────
-function Counter({ end, suffix = "", duration = 1800 }) {
+function Counter({ end, suffix = "", duration = 1800 }: { end: number; suffix?: string; duration?: number }) {
   const [count, setCount] = useState(0);
   const [ref, inView] = useInView(0.5);
   useEffect(() => {
@@ -44,7 +47,7 @@ function Counter({ end, suffix = "", duration = 1800 }) {
     }, 16);
     return () => clearInterval(timer);
   }, [inView, end, duration]);
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+  return <span ref={ref as React.RefObject<HTMLSpanElement>}>{count.toLocaleString()}{suffix}</span>;
 }
 
 // ─── CERT CARD ────────────────────────────────────────────────────────────────
@@ -69,51 +72,51 @@ const PLANS = [
   {
     name: "Free",
     price: "$0",
-    period: "",
+    period: "forever",
     highlight: false,
-    comingSoon: false,
     features: [
-      "20 practice questions/day",
+      "20 practice questions/hour",
       "5 AI chat questions/day",
       "Basic progress tracking",
-      "Access to all cert domains",
+      "CRCST certification only",
       "Exam readiness score",
     ],
     cta: "Start Free",
     note: "No credit card required",
+    href: "/crcst",
   },
   {
     name: "Pro",
-    price: "$14.99",
-    period: "/month",
+    price: "$19",
+    period: "90 days",
     highlight: true,
-    comingSoon: true,
+    tier: "pro",
     features: [
       "Unlimited practice questions",
       "Unlimited AI Study Chat",
       "Full domain mastery tracking",
       "Custom quiz builder",
-      "Pause & resume any session",
-      "Priority badge processing",
+      "CRCST certification",
     ],
-    cta: "Coming Soon",
-    note: "Launching soon — start free today",
+    cta: "Get Pro Access",
+    note: "One-time payment",
   },
   {
-    name: "Lifetime",
-    price: "$99",
-    period: " one time",
+    name: "Triple Crown",
+    price: "$39",
+    period: "90 days",
     highlight: false,
-    comingSoon: true,
+    tier: "triple_crown",
+    badge: "All 3 Certs",
     features: [
-      "Everything in Pro — forever",
-      "All future certifications included",
-      "Early access to new features",
-      "Lifetime badge archive",
-      "Best value for career-long use",
+      "Everything in Pro",
+      "CRCST certification",
+      "CHL certification",
+      "CER certification",
+      "Best value for career growth",
     ],
-    cta: "Coming Soon",
-    note: "Launching soon",
+    cta: "Get Triple Crown",
+    note: "One-time payment",
   },
 ];
 
@@ -556,49 +559,51 @@ export default function LandingPage() {
 
           <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem", alignItems: "start" }}>
             {PLANS.map((p, i) => (
-              <div key={i} className={`pricing-card reveal ${pricingInView ? "visible" : ""} reveal-delay-${i + 1} ${p.highlight ? "highlight" : ""}`}
-                style={{ opacity: p.comingSoon ? 0.75 : 1 }}>
-                {p.highlight && !p.comingSoon && (
+              <div key={i} className={`pricing-card reveal ${pricingInView ? "visible" : ""} reveal-delay-${i + 1} ${p.highlight ? "highlight" : ""}`}>
+                {p.highlight && (
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #0D7377, #14BDAC)" }} />
                 )}
-                <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", borderRadius: 100, padding: "0.25rem 1rem", fontSize: "0.72rem", fontFamily: "'DM Mono', monospace", fontWeight: 600, whiteSpace: "nowrap",
-                  ...(p.comingSoon
-                    ? { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.15)" }
-                    : p.highlight
-                      ? { background: "linear-gradient(135deg, #0D7377, #14BDAC)", color: "#FFFFFF" }
-                      : { display: "none" }
-                  )
-                }}>
-                  {p.comingSoon ? "COMING SOON" : "MOST POPULAR"}
-                </div>
+                {(p.highlight || p.badge) && (
+                  <div style={{ 
+                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", 
+                    borderRadius: 100, padding: "0.25rem 1rem", fontSize: "0.72rem", 
+                    fontFamily: "'DM Mono', monospace", fontWeight: 600, whiteSpace: "nowrap",
+                    background: p.highlight ? "linear-gradient(135deg, #0D7377, #14BDAC)" : "linear-gradient(135deg, #DAA520, #E8A020)",
+                    color: "#FFFFFF"
+                  }}>
+                    {p.badge || "MOST POPULAR"}
+                  </div>
+                )}
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <h3 style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", letterSpacing: "0.08em", color: p.highlight && !p.comingSoon ? "#14BDAC" : "rgba(255,255,255,0.5)", marginBottom: "0.75rem" }}>
+                  <h3 style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", letterSpacing: "0.08em", color: p.highlight ? "#14BDAC" : "rgba(255,255,255,0.5)", marginBottom: "0.75rem" }}>
                     {p.name.toUpperCase()}
                   </h3>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "0.2rem" }}>
                     <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.8rem", fontWeight: 900, color: "#FFFFFF" }}>{p.price}</span>
-                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}>{p.period}</span>
+                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}>/ {p.period}</span>
                   </div>
                 </div>
 
                 <div style={{ marginBottom: "1.75rem" }}>
                   {p.features.map((f, j) => (
                     <div key={j} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", padding: "0.45rem 0", borderBottom: j < p.features.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                      <span style={{ color: p.highlight && !p.comingSoon ? "#14BDAC" : "rgba(255,255,255,0.4)", fontSize: "0.85rem", marginTop: 1 }}>✓</span>
+                      <span style={{ color: p.highlight ? "#14BDAC" : p.badge ? "#DAA520" : "rgba(255,255,255,0.4)", fontSize: "0.85rem", marginTop: 1 }}>✓</span>
                       <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.88rem", fontWeight: 300 }}>{f}</span>
                     </div>
                   ))}
                 </div>
 
-                {p.comingSoon ? (
-                  <div style={{ width: "100%", padding: "0.9rem", textAlign: "center", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, color: "rgba(255,255,255,0.3)", fontSize: "0.88rem", fontFamily: "'DM Mono', monospace", letterSpacing: "0.06em" }}>
-                    COMING SOON
-                  </div>
-                ) : (
-<a href="/crcst" className="btn-primary" style={{ width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block" }}>
-  {p.cta}
-  </a>
-                )}
+                <Link 
+                  href={p.href || "/pricing"} 
+                  className="btn-primary" 
+                  style={{ 
+                    width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block",
+                    background: p.badge ? "linear-gradient(135deg, #DAA520, #E8A020)" : undefined,
+                    boxShadow: p.badge ? "0 4px 20px rgba(218,165,32,0.35)" : undefined,
+                  }}
+                >
+                  {p.cta}
+                </Link>
                 <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", textAlign: "center", marginTop: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
                   {p.note}
                 </p>

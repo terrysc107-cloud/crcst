@@ -1,17 +1,12 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-export type Plan = 'free' | 'pro' | 'lifetime'
+export type Plan = 'free' | 'pro' | 'triple_crown'
 
-export interface Subscription {
+export interface UserTier {
   id: string
   tier: Plan
+  tier_expires_at: string | null
   stripe_customer_id: string | null
-  stripe_subscription_id: string | null
-  status: 'active' | 'cancelled' | 'past_due'
-  current_period_start: string | null
-  current_period_end: string | null
-  created_at: string
-  updated_at: string
 }
 
 export interface DailyUsage {
@@ -27,6 +22,13 @@ export const FREE_LIMITS = {
   aiChatsPerDay: 5,
 }
 
+// Available certifications by tier
+export const TIER_CERTS: Record<Plan, string[]> = {
+  free: ['crcst'],
+  pro: ['crcst'],
+  triple_crown: ['crcst', 'chl', 'cer'],
+}
+
 export function getServiceSupabase(): SupabaseClient {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,22 +36,54 @@ export function getServiceSupabase(): SupabaseClient {
   )
 }
 
-export async function getUserSubscription(userId: string): Promise<Subscription | null> {
+// Check if tier is expired
+export function isTierExpired(expiresAt: string | null): boolean {
+  if (!expiresAt) return false
+  return new Date(expiresAt) < new Date()
+}
+
+// Get effective tier (returns 'free' if expired)
+export function getEffectiveTier(tier: Plan, expiresAt: string | null): Plan {
+  if (tier === 'free') return 'free'
+  if (isTierExpired(expiresAt)) return 'free'
+  return tier
+}
+
+export async function getUserTier(userId: string): Promise<UserTier | null> {
   const supabase = getServiceSupabase()
   const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*')
+    .from('profiles')
+    .select('id, tier, tier_expires_at, stripe_customer_id')
     .eq('id', userId)
     .single()
 
   if (error || !data) return null
-  return data as Subscription
+  return data as UserTier
+}
+
+// Legacy function for backward compatibility
+export async function getUserSubscription(userId: string): Promise<{ tier: Plan; status: string; current_period_end: string | null } | null> {
+  const userTier = await getUserTier(userId)
+  if (!userTier) return null
+  
+  const effectiveTier = getEffectiveTier(userTier.tier as Plan, userTier.tier_expires_at)
+  return {
+    tier: effectiveTier,
+    status: effectiveTier !== 'free' ? 'active' : 'none',
+    current_period_end: userTier.tier_expires_at,
+  }
 }
 
 export async function getPlan(userId: string): Promise<Plan> {
-  const sub = await getUserSubscription(userId)
-  if (!sub || sub.status !== 'active') return 'free'
-  return sub.tier
+  const userTier = await getUserTier(userId)
+  if (!userTier) return 'free'
+  return getEffectiveTier(userTier.tier as Plan, userTier.tier_expires_at)
+}
+
+// Check if user can access a specific cert
+export async function canAccessCert(userId: string, cert: 'crcst' | 'chl' | 'cer'): Promise<boolean> {
+  const plan = await getPlan(userId)
+  return TIER_CERTS[plan].includes(cert)
 }
 
 export async function getHourlyUsage(userId: string): Promise<DailyUsage> {
@@ -124,8 +158,8 @@ export async function canUserAccessPaidFeature(
 ): Promise<{ allowed: boolean; reason?: string; used?: number; limit?: number }> {
   const plan = await getPlan(userId)
 
-  // Pro and lifetime users have unlimited access
-  if (plan === 'pro' || plan === 'lifetime') {
+  // Pro and Triple Crown users have unlimited access
+  if (plan === 'pro' || plan === 'triple_crown') {
     return { allowed: true, used: 0, limit: -1 }
   }
 

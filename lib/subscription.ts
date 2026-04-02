@@ -17,8 +17,7 @@ export interface DailyUsage {
 }
 
 export const FREE_LIMITS = {
-  questionsPerHour: 20,
-  flashcardsPerHour: 1,
+  questionsPerHour: 20, // Includes both quiz questions and flashcards
   aiChatsPerDay: 5,
 }
 

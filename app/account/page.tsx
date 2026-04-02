@@ -6,11 +6,11 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 interface StatusData {
-  plan: 'free' | 'pro' | 'lifetime'
+  plan: 'free' | 'pro' | 'triple_crown'
   status: string
   currentPeriodEnd: string | null
   usage: {
-    questionsToday: number
+    questionsThisHour: number
     aiChatsToday: number
     questionsLimit: number | null
     aiChatsLimit: number | null
@@ -203,16 +203,16 @@ export default function AccountPage() {
         {/* Usage card (free tier) */}
         {statusData.plan === 'free' && (
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '1.75rem', marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>Today's Usage</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>Current Usage</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
-                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.3rem' }}>Practice Questions</div>
+                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.3rem' }}>Questions (per hour)</div>
                 <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>
-                  {statusData.usage.questionsToday} <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>/ {statusData.usage.questionsLimit}</span>
+                  {statusData.usage.questionsThisHour} <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>/ {statusData.usage.questionsLimit}</span>
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.3rem' }}>AI Chat Messages</div>
+                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.3rem' }}>AI Chat (per day)</div>
                 <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>
                   {statusData.usage.aiChatsToday} <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>/ {statusData.usage.aiChatsLimit}</span>
                 </div>

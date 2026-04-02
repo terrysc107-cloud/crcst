@@ -407,7 +407,7 @@ export default function LandingPage() {
             </div>
 
             <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.8rem", marginTop: "1.25rem", fontFamily: "'DM Mono', monospace" }}>
-              Free tier includes 20 questions/day · No credit card required
+              Free tier includes 20 questions/hour · No credit card required
             </p>
           </div>
         </section>
@@ -666,7 +666,7 @@ export default function LandingPage() {
               <span style={{ color: "#14BDAC" }}>closer than you think.</span>
             </h2>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.05rem", lineHeight: 1.7, marginBottom: "2.5rem", fontWeight: 300 }}>
-              Start free today. 20 questions a day, no credit card required. Upgrade when your exam date gets close and you need full access.
+              Start free today. 20 questions per hour, no credit card required. Upgrade when your exam date gets close and you need full access.
             </p>
 <a href="/crcst" className="btn-primary" style={{ fontSize: "1.1rem", padding: "1.1rem 2.6rem", textDecoration: "none" }}>
   Create Your Free Account →

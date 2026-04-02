@@ -286,11 +286,31 @@ export default function Home() {
     }
   }
 
-  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string) => {
-    // Check rate limit for free users
-    if (rateLimitInfo && !rateLimitInfo.allowed) {
-      setShowUpgradeModal(true)
-      return
+  const startQuiz = async (quizMode: QuizMode, domains?: string[], diff?: string) => {
+    // Always check rate limit fresh before starting quiz
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (token) {
+        const res = await fetch('/api/usage/check?feature=questions', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (!data.allowed) {
+            setRateLimitInfo({
+              allowed: false,
+              used: data.used ?? 0,
+              limit: data.limit ?? 20,
+              remaining: 0,
+            })
+            setShowUpgradeModal(true)
+            return
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking rate limit:', error)
     }
 
     let questions = [...QUESTIONS]
@@ -333,6 +353,11 @@ export default function Home() {
     loadRateLimitInfo()
   }
 
+  const handleReturnHome = () => {
+    setScreen('home')
+    loadRateLimitInfo() // Refresh rate limit when returning home
+  }
+
   const getDomains = () => {
     return Array.from(new Set(QUESTIONS.map((q) => q.domain)))
   }
@@ -357,7 +382,7 @@ export default function Home() {
           quizData={quizData}
           mode={mode}
           onComplete={handleQuizComplete}
-          onExit={() => setScreen('home')}
+          onExit={handleReturnHome}
           onPause={savePausedSession}
           user={user}
         />
@@ -374,7 +399,7 @@ export default function Home() {
         <Results
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
-          onHome={() => setScreen('home')}
+          onHome={handleReturnHome}
         />
         <ChatBot />
       </div>
@@ -395,7 +420,7 @@ export default function Home() {
           questionCount={customQuestionCount}
           setQuestionCount={setCustomQuestionCount}
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
-          onBack={() => setScreen('home')}
+          onBack={handleReturnHome}
         />
         <ChatBot />
       </div>

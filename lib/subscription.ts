@@ -113,6 +113,24 @@ export async function getHourlyUsage(userId: string): Promise<DailyUsage> {
   }
 }
 
+export async function getDailyAiChatUsage(userId: string): Promise<number> {
+  const supabase = getServiceSupabase()
+  const today = new Date().toISOString().split('T')[0]
+
+  // Sum all AI chats used today
+  const { data, error } = await supabase
+    .from('daily_usage')
+    .select('ai_chats_used')
+    .eq('user_id', userId)
+    .gte('created_at', `${today}T00:00:00`)
+
+  if (error || !data || data.length === 0) {
+    return 0
+  }
+
+  return data.reduce((sum, record) => sum + (record.ai_chats_used || 0), 0)
+}
+
 export async function incrementDailyUsage(
   userId: string,
   field: 'questions_attempted' | 'ai_chats_used'
@@ -183,16 +201,14 @@ export async function canUserAccessPaidFeature(
     const today = new Date().toISOString().split('T')[0]
     const supabase = getServiceSupabase()
     
+    // Sum all AI chats used today (each row has ai_chats_used = 1)
     const { data } = await supabase
       .from('daily_usage')
       .select('ai_chats_used')
       .eq('user_id', userId)
       .gte('created_at', `${today}T00:00:00`)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
 
-    const used = data?.ai_chats_used ?? 0
+    const used = data?.reduce((sum, record) => sum + (record.ai_chats_used || 0), 0) ?? 0
     const limit = FREE_LIMITS.aiChatsPerDay
     if (used >= limit) {
       return {

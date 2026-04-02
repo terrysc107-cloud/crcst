@@ -6,7 +6,7 @@ export function getStripe(): Stripe {
   if (!_stripe) {
     const key = process.env.STRIPE_SECRET_KEY
     if (!key) throw new Error("STRIPE_SECRET_KEY environment variable is not set")
-    _stripe = new Stripe(key, { apiVersion: "2024-04-10" })
+    _stripe = new Stripe(key, { apiVersion: "2025-02-24.acacia" })
   }
   return _stripe
 }
@@ -16,8 +16,6 @@ export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
     return (getStripe() as any)[prop]
   },
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-02-24.acacia",
 })
 
 export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""

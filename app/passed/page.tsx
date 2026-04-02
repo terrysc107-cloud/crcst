@@ -226,8 +226,6 @@ export default function PassedExamFlow() {
   const [copied, setCopied] = useState(false);
   const confettiRef = useConfetti(step === "celebration");
   const cfg = CERT_CONFIG[cert];
-  
-  console.log("[v0] PassedExamFlow step:", step, "cert:", cert);
 
   function validate() {
     const e: Record<string, string> = {};
@@ -239,19 +237,15 @@ export default function PassedExamFlow() {
   }
 
   async function handleSubmit() {
-    console.log("[v0] handleSubmit called");
     const e = validate();
     if (Object.keys(e).length) { 
-      console.log("[v0] Validation errors:", e);
       setErrors(e); 
       return; 
     }
     setErrors({});
     setStep("verifying");
-    console.log("[v0] Step set to verifying");
 
     const { data: { user } } = await supabase.auth.getUser();
-    console.log("[v0] User:", user?.id || "not logged in");
     
     // User must be authenticated to claim badge
     if (!user) {
@@ -271,7 +265,6 @@ export default function PassedExamFlow() {
       });
 
     if (error) {
-      console.log("[v0] Insert error:", error.code, error.message);
       setStep("entry");
       if (error.code === "23505") {
         setErrors({ submit: "You have already claimed this certification badge." });
@@ -281,7 +274,6 @@ export default function PassedExamFlow() {
       return;
     }
 
-    console.log("[v0] Success! Setting step to celebration");
     setStep("celebration");
   }
 

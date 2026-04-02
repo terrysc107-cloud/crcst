@@ -105,14 +105,14 @@ export default function DashboardPage() {
                 fontSize: '0.75rem',
                 padding: '0.25rem 0.7rem',
                 borderRadius: '100px',
-                background: sub.plan === 'lifetime' ? 'rgba(218,165,32,0.2)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.2)' : 'rgba(255,255,255,0.08)',
-                color: sub.plan === 'lifetime' ? '#DAA520' : sub.plan === 'pro' ? '#14BDAC' : 'rgba(255,255,255,0.5)',
-                border: `1px solid ${sub.plan === 'lifetime' ? 'rgba(218,165,32,0.4)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                background: sub.plan === 'triple_crown' ? 'rgba(218,165,32,0.2)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.2)' : 'rgba(255,255,255,0.08)',
+                color: sub.plan === 'triple_crown' ? '#DAA520' : sub.plan === 'pro' ? '#14BDAC' : 'rgba(255,255,255,0.5)',
+                border: `1px solid ${sub.plan === 'triple_crown' ? 'rgba(218,165,32,0.4)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.4)' : 'rgba(255,255,255,0.15)'}`,
                 fontWeight: 600,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase' as const,
               }}>
-                {sub.plan === 'lifetime' ? 'Lifetime' : sub.plan === 'pro' ? 'Pro' : 'Free'}
+                {sub.plan === 'triple_crown' ? 'Triple Crown' : sub.plan === 'pro' ? 'Pro' : 'Free'}
               </span>
             )}
             <Link href="/account" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>
@@ -234,27 +234,30 @@ export default function DashboardPage() {
           }}>
             <div>
               <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
-                FREE TIER — TODAY&apos;S USAGE
+                FREE TIER — HOURLY USAGE
               </div>
               <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-                <span>Questions: <strong>{sub.usage?.questionsToday ?? 0} / {sub.usage?.questionsLimit ?? 20}</strong></span>
+                <span>Questions: <strong>{sub.usage?.questionsThisHour ?? 0} / {sub.usage?.questionsLimit ?? 20}</strong></span>
                 <span>AI Chat: <strong>{sub.usage?.aiChatsToday ?? 0} / {sub.usage?.aiChatsLimit ?? 5}</strong></span>
               </div>
             </div>
-            <span style={{
-              background: 'rgba(255,255,255,0.06)',
-              color: 'rgba(255,255,255,0.4)',
-              padding: '0.5rem 1.1rem',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              whiteSpace: 'nowrap' as const,
-              fontFamily: 'monospace',
-              letterSpacing: '0.04em',
-            }}>
-              Pro — Coming Soon
-            </span>
+            <Link 
+              href="/pricing"
+              style={{
+                background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
+                color: '#fff',
+                padding: '0.5rem 1.1rem',
+                borderRadius: 8,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                whiteSpace: 'nowrap' as const,
+                fontFamily: 'monospace',
+                letterSpacing: '0.04em',
+                textDecoration: 'none',
+              }}
+            >
+              Upgrade to Pro — $19
+            </Link>
           </div>
         )}
 
@@ -263,8 +266,9 @@ export default function DashboardPage() {
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-6">
           {certifications.map((cert) => {
-            const isPremium = cert.id !== 'crcst'
-            const isLocked = isPremium && !sub.isPaid
+            // CHL and CER require Triple Crown access
+            const requiresTripleCrown = cert.id === 'chl' || cert.id === 'cer'
+            const isLocked = requiresTripleCrown && !sub.canAccessCHL
 
             if (isLocked) {
               return (
@@ -274,11 +278,11 @@ export default function DashboardPage() {
                   className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
                 >
                   {/* Lock Badge */}
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-navy text-white text-xs font-mono px-2 py-1 rounded-full">
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-amber-600 text-white text-xs font-mono px-2 py-1 rounded-full">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 11h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V12z"/>
                     </svg>
-                    Premium
+                    Triple Crown
                   </div>
                   {/* Card Header */}
                   <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white grayscale`}>
@@ -291,7 +295,7 @@ export default function DashboardPage() {
                       {cert.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-navy/50">Upgrade to unlock</span>
+                      <span className="text-xs font-mono text-navy/50">Triple Crown only</span>
                       <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
                         <svg className="w-5 h-5 text-text-3" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>

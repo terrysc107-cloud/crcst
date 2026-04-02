@@ -7,8 +7,10 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
+import { useSubscription } from '@/hooks/useSubscription'
+import { UpsellGateModal } from '@/components/UpsellGateModal'
 
-type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
+type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
 
 interface QuizData {
@@ -37,6 +39,9 @@ export default function CHLPage() {
   const [domainMastery, setDomainMastery] = useState<Record<string, { correct: number; total: number }>>({})
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
+  const [showUpsellModal, setShowUpsellModal] = useState(false)
+  
+  const sub = useSubscription()
 
   useEffect(() => {
     // Check initial auth state
@@ -291,6 +296,39 @@ export default function CHLPage() {
   // Auth Screen
   if (screen === 'auth') {
     return <AuthScreen />
+  }
+
+  // Check Triple Crown access
+  if (!sub.loading && !sub.canAccessCHL) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <Header user={user} streak={streak} />
+        <div className="max-w-2xl mx-auto px-6 py-16 text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <svg className="w-10 h-10 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 11h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V12z"/>
+            </svg>
+          </div>
+          <h1 className="font-serif text-3xl text-navy font-bold mb-4">
+            CHL is Triple Crown only
+          </h1>
+          <p className="text-text-3 mb-8 max-w-md mx-auto">
+            Unlock CHL certification prep along with CRCST and CER for just $39. Get full access for 90 days.
+          </p>
+          <button
+            onClick={() => setShowUpsellModal(true)}
+            className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+          >
+            Upgrade to Triple Crown - $39
+          </button>
+        </div>
+        <UpsellGateModal 
+          isOpen={showUpsellModal} 
+          onClose={() => setShowUpsellModal(false)}
+          certName="CHL"
+        />
+      </div>
+    )
   }
 
   // Quiz Screen

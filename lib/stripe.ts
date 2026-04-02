@@ -1,7 +1,21 @@
 import Stripe from "stripe"
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-04-10",
+let _stripe: Stripe | null = null
+
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error("STRIPE_SECRET_KEY environment variable is not set")
+    _stripe = new Stripe(key, { apiVersion: "2024-04-10" })
+  }
+  return _stripe
+}
+
+// Keep named export for backwards compatibility — lazily resolved at call time
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return (getStripe() as any)[prop]
+  },
 })
 
 export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""

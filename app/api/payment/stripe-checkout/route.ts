@@ -1,16 +1,28 @@
 import { createClient } from "@supabase/supabase-js"
-import { stripe, STRIPE_PRICE_ID } from "@/lib/stripe"
+import { stripe, STRIPE_PRO_PRICE_ID, STRIPE_TRIPLE_CROWN_PRICE_ID } from "@/lib/stripe"
 import { NextRequest, NextResponse } from "next/server"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 export async function POST(request: NextRequest) {
   try {
-    const { priceId, tier } = await request.json()
-    
+    const { tier } = await request.json()
+
+    if (!tier || !["pro", "triple_crown"].includes(tier)) {
+      return NextResponse.json(
+        { error: "Invalid tier" },
+        { status: 400 }
+      )
+    }
+
     // Get authenticated user
     const authHeader = request.headers.get("authorization")
     if (!authHeader) {
@@ -32,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Get or create Stripe customer
     let customerId: string
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("stripe_customer_id")
       .eq("id", user.id)
@@ -47,24 +59,27 @@ export async function POST(request: NextRequest) {
       })
       customerId = customer.id
 
-      await supabase
+      await supabaseAdmin
         .from("profiles")
         .update({ stripe_customer_id: customerId })
         .eq("id", user.id)
     }
 
-    // Create checkout session
+    // Select price ID based on tier
+    const priceId = tier === "pro" ? STRIPE_PRO_PRICE_ID : STRIPE_TRIPLE_CROWN_PRICE_ID
+
+    // Create checkout session for one-time payment
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: priceId || STRIPE_PRICE_ID,
+          price: priceId,
           quantity: 1,
         },
       ],
-      mode: "subscription",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/account?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/account`,
+      mode: "payment",
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment_success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       metadata: {
         supabase_uid: user.id,
         tier,

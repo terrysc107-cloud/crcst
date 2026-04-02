@@ -5,7 +5,7 @@ import Stripe from "stripe"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -32,20 +32,20 @@ export async function POST(request: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
         const supabaseUid = session.metadata?.supabase_uid
-        const tier = session.metadata?.tier || "PRO"
+        const tier = session.metadata?.tier || "pro"
 
-        if (supabaseUid) {
-          // Update user subscription in database
+        if (supabaseUid && ["pro", "triple_crown"].includes(tier)) {
+          // Calculate 90-day expiry
+          const now = new Date()
+          const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000)
+
+          // Update user's tier and expiry in profiles table
           await supabase
-            .from("subscriptions")
-            .upsert({
-              id: supabaseUid,
+            .from("profiles")
+            .update({
               tier,
+              tier_expires_at: expiresAt.toISOString(),
               stripe_customer_id: session.customer as string,
-              stripe_subscription_id: session.subscription as string,
-              status: "active",
-              current_period_start: new Date().toISOString(),
-              current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             })
             .eq("id", supabaseUid)
         }
@@ -53,33 +53,12 @@ export async function POST(request: NextRequest) {
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription
-        const supabaseUid = subscription.metadata?.supabase_uid
-
-        if (supabaseUid) {
-          const status = subscription.status === "active" ? "active" : "canceled"
-          await supabase
-            .from("subscriptions")
-            .update({
-              status,
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-            })
-            .eq("id", supabaseUid)
-        }
+        // Not used for one-time payments, but kept for reference
         break
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription
-        const supabaseUid = subscription.metadata?.supabase_uid
-
-        if (supabaseUid) {
-          await supabase
-            .from("subscriptions")
-            .update({ status: "canceled" })
-            .eq("id", supabaseUid)
-        }
+        // Not used for one-time payments, but kept for reference
         break
       }
 

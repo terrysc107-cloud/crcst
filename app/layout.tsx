@@ -18,7 +18,7 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   title: 'SPD Cert Companion',
-  description: 'Pass your HSPA certification — 787+ verified questions covering CRCST, CHL, and CER with AI study chat.',
+  description: 'Pass your HSPA certification — 790+ verified questions covering CRCST, CHL, and CER with AI study chat.',
   generator: 'v0.app',
   icons: {
     icon: [

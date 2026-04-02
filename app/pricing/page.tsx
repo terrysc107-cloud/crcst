@@ -345,7 +345,7 @@ export default function PricingPage() {
               <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
             </summary>
             <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-              Yes, we offer a 7-day money-back guarantee if you&apos;re not satisfied with your purchase. Contact support to request a refund.
+              All purchases are final. We do not offer refunds under any circumstances.
             </p>
           </details>
         </div>

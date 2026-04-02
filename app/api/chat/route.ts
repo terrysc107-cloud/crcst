@@ -1,4 +1,5 @@
 import { generateText } from 'ai'
+import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const maxDuration = 30
@@ -10,10 +11,10 @@ export async function POST(request: NextRequest) {
     const { message } = await request.json()
 
     const result = await generateText({
-      model: 'anthropic/claude-sonnet-4-5',
+      model: anthropic('claude-sonnet-4-20250514'),
       system: SYSTEM_PROMPT,
       prompt: message,
-      maxOutputTokens: 500,
+      maxTokens: 500,
     })
 
     return NextResponse.json({ response: result.text })

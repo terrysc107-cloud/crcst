@@ -288,6 +288,7 @@ export default function LandingPage() {
       .hero-title { font-size: 2.4rem !important; }
       .hide-mobile { display: none !important; }
       .pricing-grid { grid-template-columns: 1fr !important; }
+      .resume-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
     }
   `;
 
@@ -543,6 +544,56 @@ export default function LandingPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── RESUME SERVICE ───────────────────────────────────────────────── */}
+        <section style={{ background: "#021B3A", padding: "5rem 1.5rem" }}>
+          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }} className="resume-grid">
+              <div>
+                <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.72rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>CAREER SERVICES</p>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", fontWeight: 900, lineHeight: 1.2, marginBottom: "1.25rem" }}>
+                  Your certification opens doors.<br />
+                  <span style={{ color: "#14BDAC" }}>A qualified resume gets you through them.</span>
+                </h2>
+                <p style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7, marginBottom: "2rem", fontSize: "0.95rem" }}>
+                  Certification is just the beginning. Stand out to hiring managers and pass ATS filters with a professionally written resume tailored for healthcare and SPD roles.
+                </p>
+                <a
+                  href="https://www.myqualifiedresume.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.85rem 2rem", borderRadius: 10,
+                    background: "linear-gradient(135deg, #0D7377, #14BDAC)",
+                    color: "#fff", fontWeight: 700, textDecoration: "none", fontSize: "0.95rem",
+                  }}
+                >
+                  Explore Resume Services →
+                </a>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {[
+                  { stat: "87%", label: "Interview Rate", desc: "Clients who land interviews after using our service" },
+                  { stat: "48h", label: "Delivery Time", desc: "Expert-written and human-reviewed, fast" },
+                  { stat: "$29", label: "Starting Price", desc: "Affordable packages from Starter to Premium" },
+                ].map(({ stat, label, desc }) => (
+                  <div key={label} style={{
+                    display: "flex", alignItems: "flex-start", gap: "1.25rem",
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(20,189,172,0.2)",
+                    borderRadius: 14, padding: "1.25rem 1.5rem",
+                  }}>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "2rem", fontWeight: 900, color: "#14BDAC", lineHeight: 1, flexShrink: 0 }}>{stat}</div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "0.9rem", marginBottom: "0.2rem" }}>{label}</div>
+                      <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

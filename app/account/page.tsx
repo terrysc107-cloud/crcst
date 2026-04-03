@@ -283,6 +283,51 @@ export default function AccountPage() {
           )}
         </div>
 
+        {/* Resume Service — shown only to badge holders */}
+        {earnedBadges.length > 0 && (
+          <div style={{
+            background: 'rgba(20,189,172,0.05)',
+            border: '1px solid rgba(20,189,172,0.2)',
+            borderRadius: 16,
+            padding: '1.5rem 1.75rem',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            gap: '1.25rem',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{
+              width: 40, height: 40,
+              background: 'rgba(20,189,172,0.1)',
+              border: '1px solid rgba(20,189,172,0.25)',
+              borderRadius: 10,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '1.1rem', flexShrink: 0,
+            }}>
+              📄
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: '0.7rem', color: '#14BDAC', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+                Career Next Step
+              </div>
+              <div style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '0.92rem', marginBottom: '0.4rem', lineHeight: 1.3 }}>
+                Your certification is on the record. Is your resume?
+              </div>
+              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.55, margin: '0 0 0.75rem' }}>
+                myqualifiedresume.com writes resumes for healthcare professionals in sterile processing — they know how to present SPD credentials to hiring managers.
+              </p>
+              <a
+                href="https://www.myqualifiedresume.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#14BDAC', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Visit myqualifiedresume.com →
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Quiz Score History Section */}
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '1.75rem', marginBottom: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>

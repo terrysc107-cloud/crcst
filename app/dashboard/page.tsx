@@ -418,6 +418,28 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Resume Service Card */}
+      <div className="px-6 py-6 border-t border-cream-2">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4" style={{ borderLeftColor: '#14BDAC' }}>
+            <div className="text-2xl flex-shrink-0">📄</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-serif font-bold text-navy text-sm mb-0.5">Turn your certification into your next opportunity</div>
+              <div className="text-xs text-text-3">Expert-written, ATS-optimized resumes for healthcare professionals · 87% interview rate · Starting at $29</div>
+            </div>
+            <a
+              href="https://www.myqualifiedresume.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 text-xs font-mono tracking-widest px-4 py-2.5 rounded-lg text-white transition hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg, #0D7377, #14BDAC)' }}
+            >
+              GET YOUR RESUME →
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="bg-navy text-white px-6 py-8">
         <div className="max-w-4xl mx-auto text-center">

@@ -3,10 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { loadStripe } from '@stripe/stripe-js'
 import { Crown, X, Check } from 'lucide-react'
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
 
 interface UpsellGateModalProps {
   isOpen: boolean
@@ -39,9 +36,8 @@ export function UpsellGateModal({ isOpen, onClose, certName = 'CHL and CER' }: U
       })
 
       const data = await res.json()
-      if (data.sessionId) {
-        const stripe = await stripePromise
-        await stripe?.redirectToCheckout({ sessionId: data.sessionId })
+      if (data.url) {
+        window.location.href = data.url
       }
     } catch (error) {
       console.error('Checkout error:', error)

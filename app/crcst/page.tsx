@@ -41,11 +41,32 @@ export default function Home() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   useEffect(() => {
+    // Check if onboarding is complete (localStorage or database)
+    const checkOnboarding = async (userId: string): Promise<boolean> => {
+      // Fast path: check localStorage first
+      if (localStorage.getItem(`onboarding_complete_${userId}`) === 'true') {
+        return true
+      }
+      // Slow path: check database for returning users on new devices
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('target_cert')
+        .eq('id', userId)
+        .single()
+      
+      if (profile?.target_cert) {
+        // Sync localStorage for future checks
+        localStorage.setItem(`onboarding_complete_${userId}`, 'true')
+        return true
+      }
+      return false
+    }
+
     // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        const onboardingComplete = localStorage.getItem(`onboarding_complete_${session.user.id}`)
-        if (onboardingComplete !== 'true') {
+        const isComplete = await checkOnboarding(session.user.id)
+        if (!isComplete) {
           window.location.href = '/onboarding'
           return
         }
@@ -57,10 +78,10 @@ export default function Home() {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        const onboardingComplete = localStorage.getItem(`onboarding_complete_${session.user.id}`)
-        if (onboardingComplete !== 'true') {
+        const isComplete = await checkOnboarding(session.user.id)
+        if (!isComplete) {
           window.location.href = '/onboarding'
           return
         }

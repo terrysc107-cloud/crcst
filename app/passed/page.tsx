@@ -801,8 +801,9 @@ export default function PassedExamFlow() {
 
           {/* CTA */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: 380, margin: "0 auto" }}>
+            {cfg.next && (
             <button
-              onClick={() => window.location.href = `/${cfg.next?.toLowerCase()}`}
+              onClick={() => window.location.href = `/${cfg.next!.toLowerCase()}`}
               style={{
                 padding: "1.1rem",
                 borderRadius: "12px",
@@ -818,6 +819,7 @@ export default function PassedExamFlow() {
             >
               Start {cfg.next} Prep Now →
             </button>
+            )}
 
             <button
               onClick={() => setStep("celebration")}

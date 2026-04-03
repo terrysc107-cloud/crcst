@@ -22,7 +22,7 @@ export function UpsellGateModal({ isOpen, onClose, certName = 'CHL and CER' }: U
       const token = session.data.session?.access_token
 
       if (!token) {
-        router.push('/login?redirect=/pricing')
+        router.push('/crcst')
         return
       }
 

@@ -17,8 +17,10 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request: NextRequest) {
+  console.log("[v0] Stripe checkout API called")
   try {
     const { tier } = await request.json()
+    console.log("[v0] Tier requested:", tier)
 
     if (!tier || !["pro", "triple_crown"].includes(tier)) {
       return NextResponse.json(
@@ -81,6 +83,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log("[v0] Creating checkout session with priceId:", priceId)
     // Create checkout session for one-time payment
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -99,9 +102,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log("[v0] Checkout session created successfully, URL:", session.url)
     return NextResponse.json({ url: session.url })
   } catch (error: any) {
-    console.error("Checkout error:", error)
+    console.error("[v0] Checkout error:", error.message, error)
     return NextResponse.json(
       { error: error.message || "Checkout failed" },
       { status: 500 }

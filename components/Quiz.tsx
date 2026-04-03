@@ -332,22 +332,92 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           {isFlipped && answers[current] === null && (
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => {
+                onClick={async () => {
+                  if (rateLimitReached) return
                   const newAnswers = [...answers]
                   newAnswers[current] = -1 // Mark as "didn't know"
                   setAnswers(newAnswers)
+                  
+                  // Increment usage count for flashcard (counts toward hourly limit)
+                  if (user?.id) {
+                    try {
+                      const session = await supabase.auth.getSession()
+                      const token = session.data.session?.access_token
+                      const res = await fetch('/api/usage/increment', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify({ field: 'questions_attempted' }),
+                      })
+                      
+                      const data = await res.json()
+                      if (res.status === 429 || data.error === 'limit_reached') {
+                        setRateLimitReached(true)
+                        setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+                      } else if (data.used !== undefined) {
+                        setUsageInfo({ 
+                          used: data.used, 
+                          limit: data.limit || 20, 
+                          remaining: data.remaining || 0 
+                        })
+                        if (data.remaining !== null && data.remaining <= 0) {
+                          setRateLimitReached(true)
+                        }
+                      }
+                    } catch (err) {
+                      console.error('[v0] Failed to increment flashcard usage:', err)
+                    }
+                  }
                 }}
-                className="flex-1 px-4 py-3 bg-wrong-bg border-2 border-wrong text-wrong rounded-lg font-mono text-sm hover:bg-wrong/20 transition"
+                disabled={rateLimitReached}
+                className="flex-1 px-4 py-3 bg-wrong-bg border-2 border-wrong text-wrong rounded-lg font-mono text-sm hover:bg-wrong/20 transition disabled:opacity-50"
               >
                 ✗ Didn't Know
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
+                  if (rateLimitReached) return
                   const newAnswers = [...answers]
                   newAnswers[current] = q.correct_answer // Mark as "knew it"
                   setAnswers(newAnswers)
+                  
+                  // Increment usage count for flashcard (counts toward hourly limit)
+                  if (user?.id) {
+                    try {
+                      const session = await supabase.auth.getSession()
+                      const token = session.data.session?.access_token
+                      const res = await fetch('/api/usage/increment', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify({ field: 'questions_attempted' }),
+                      })
+                      
+                      const data = await res.json()
+                      if (res.status === 429 || data.error === 'limit_reached') {
+                        setRateLimitReached(true)
+                        setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+                      } else if (data.used !== undefined) {
+                        setUsageInfo({ 
+                          used: data.used, 
+                          limit: data.limit || 20, 
+                          remaining: data.remaining || 0 
+                        })
+                        if (data.remaining !== null && data.remaining <= 0) {
+                          setRateLimitReached(true)
+                        }
+                      }
+                    } catch (err) {
+                      console.error('[v0] Failed to increment flashcard usage:', err)
+                    }
+                  }
                 }}
-                className="flex-1 px-4 py-3 bg-correct-bg border-2 border-correct text-correct rounded-lg font-mono text-sm hover:bg-correct/20 transition"
+                disabled={rateLimitReached}
+                className="flex-1 px-4 py-3 bg-correct-bg border-2 border-correct text-correct rounded-lg font-mono text-sm hover:bg-correct/20 transition disabled:opacity-50"
               >
                 ✓ Knew It
               </button>

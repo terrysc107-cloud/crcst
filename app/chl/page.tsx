@@ -50,6 +50,9 @@ export default function CHLPage() {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+      } else {
+        // Redirect unauthenticated users to sign up first
+        window.location.href = '/crcst'
       }
     })
 
@@ -60,8 +63,8 @@ export default function CHLPage() {
         setScreen('home')
         loadStats(session.user.id)
       } else {
-        setUser(null)
-        setScreen('auth')
+        // Redirect to sign up
+        window.location.href = '/crcst'
       }
     })
 

@@ -3,10 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { loadStripe } from '@stripe/stripe-js'
 import { Check, Crown, Sparkles, Clock } from 'lucide-react'
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '')
 
 const PLANS = [
   {
@@ -127,17 +124,9 @@ export default function PricingPage() {
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
-      const { sessionId } = await response.json()
-      const stripe = await stripePromise
-
-      if (!stripe) {
-        throw new Error('Stripe failed to load')
-      }
-
-      const result = await stripe.redirectToCheckout({ sessionId })
-      if (result.error) {
-        throw new Error(result.error.message)
-      }
+      const { url } = await response.json()
+      if (!url) throw new Error('No checkout URL returned')
+      window.location.href = url
     } catch (err: any) {
       console.error('Upgrade error:', err)
       setError(err.message || 'Failed to start checkout')

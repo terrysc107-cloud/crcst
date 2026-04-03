@@ -1,6 +1,8 @@
 import { generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { canUserAccessPaidFeature, incrementDailyUsage } from '@/lib/subscription'
 
 export const maxDuration = 30
 
@@ -8,6 +10,32 @@ const SYSTEM_PROMPT = `You are a CRCST certification exam coach inside SPD Cert 
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check rate limit before calling AI
+    const access = await canUserAccessPaidFeature(user.id, 'ai_chat')
+    if (!access.allowed) {
+      return NextResponse.json(
+        { error: access.reason, used: access.used, limit: access.limit },
+        { status: 429 }
+      )
+    }
+
     const { message } = await request.json()
 
     const result = await generateText({
@@ -16,6 +44,9 @@ export async function POST(request: NextRequest) {
       prompt: message,
       maxTokens: 500,
     })
+
+    // Increment usage after successful response
+    await incrementDailyUsage(user.id, 'ai_chats_used')
 
     return NextResponse.json({ response: result.text })
   } catch (error) {

@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment_success=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?plan=${tier}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       metadata: {
         supabase_uid: user.id,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json({ sessionId: session.id })
+    return NextResponse.json({ url: session.url })
   } catch (error: any) {
     console.error("Checkout error:", error)
     return NextResponse.json(

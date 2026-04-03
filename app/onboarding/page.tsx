@@ -231,10 +231,25 @@ export default function OnboardingPage() {
       setUserEmail(user.email ?? '')
       setUserId(user.id)
 
-      // If onboarding already completed, skip to dashboard
-      const completed = localStorage.getItem(`onboarding_complete_${user.id}`)
-      if (completed === 'true') {
+      // Check localStorage first (fast path)
+      const localCompleted = localStorage.getItem(`onboarding_complete_${user.id}`)
+      if (localCompleted === 'true') {
         router.push('/dashboard')
+        return
+      }
+
+      // Check database for existing onboarding data (for returning users on new devices)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('target_cert')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.target_cert) {
+        // User already completed onboarding - sync localStorage and redirect
+        localStorage.setItem(`onboarding_complete_${user.id}`, 'true')
+        router.push('/dashboard')
+        return
       }
     }
     checkAuth()

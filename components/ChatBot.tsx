@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface Message {
   role: 'user' | 'ai'
@@ -8,6 +9,7 @@ interface Message {
 }
 
 export default function ChatBot() {
+  const supabase = createClient()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -31,23 +33,37 @@ export default function ChatBot() {
     setLoading(true)
 
     try {
+      // Get auth token for API call
+      const { data: { session } } = await supabase.auth.getSession()
+      
       const res = await fetch('/api/chat', {
         method: 'POST',
         body: JSON.stringify({ message: userMessage }),
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
+        },
       })
 
-      if (!res.ok) throw new Error('Failed to get response')
-
       const data = await res.json()
+      
+      if (!res.ok) {
+        // Handle rate limit or other errors
+        if (res.status === 401) {
+          throw new Error('Please sign in to use the AI chat.')
+        } else if (res.status === 429) {
+          throw new Error(data.error || 'You have reached your daily chat limit.')
+        }
+        throw new Error(data.error || 'Failed to get response')
+      }
+      
       setMessages((prev) => [...prev, { role: 'ai', content: data.response }])
-    } catch (e) {
+    } catch (e: any) {
       setMessages((prev) => [
         ...prev,
         {
           role: 'ai',
-          content:
-            'Sorry, I encountered an error. Please try again or check that the API is configured correctly.',
+          content: e.message || 'Sorry, I encountered an error. Please try again.',
         },
       ])
     } finally {

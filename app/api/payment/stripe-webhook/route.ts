@@ -39,15 +39,22 @@ export async function POST(request: NextRequest) {
           const now = new Date()
           const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000)
 
-          // Update user's tier and expiry in profiles table
-          await supabase
+          // Upsert user's tier and expiry in profiles table (insert if not exists, update if exists)
+          const { error: upsertError } = await supabase
             .from("profiles")
-            .update({
+            .upsert({
+              id: supabaseUid,
               tier,
               tier_expires_at: expiresAt.toISOString(),
               stripe_customer_id: session.customer as string,
-            })
-            .eq("id", supabaseUid)
+              created_at: new Date().toISOString(),
+            }, { onConflict: 'id' })
+
+          if (upsertError) {
+            console.error("Failed to upsert profile:", upsertError)
+          } else {
+            console.log(`Successfully upgraded user ${supabaseUid} to ${tier}`)
+          }
         }
         break
       }

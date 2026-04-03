@@ -29,12 +29,20 @@ export default function Header({ user, streak = 0 }: HeaderProps) {
           <span>{streak}</span>
         </div>
         {user && (
-          <button
-            onClick={handleSignOut}
-            className="text-xs border border-navy-3 text-text-3 px-3 py-1 rounded hover:text-teal-3 hover:border-teal-3 transition"
-          >
-            Sign Out
-          </button>
+          <>
+            <Link
+              href="/dashboard"
+              className="text-xs border border-teal-3 text-teal-3 px-3 py-1 rounded hover:bg-teal-3 hover:text-navy transition"
+            >
+              Account
+            </Link>
+            <button
+              onClick={handleSignOut}
+              className="text-xs border border-navy-3 text-text-3 px-3 py-1 rounded hover:text-teal-3 hover:border-teal-3 transition"
+            >
+              Sign Out
+            </button>
+          </>
         )}
       </div>
     </header>

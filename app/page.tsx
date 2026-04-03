@@ -72,7 +72,7 @@ const PLANS = [
   {
     name: "Free",
     price: "$0",
-    period: "forever",
+    period: "",
     highlight: false,
     features: [
       "20 practice questions/hour",
@@ -631,7 +631,7 @@ export default function LandingPage() {
                   </h3>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "0.2rem" }}>
                     <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.8rem", fontWeight: 900, color: "#FFFFFF" }}>{p.price}</span>
-                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}>/ {p.period}</span>
+                    {p.period && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}>/ {p.period}</span>}
                   </div>
                 </div>
 

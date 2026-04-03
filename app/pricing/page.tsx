@@ -10,7 +10,7 @@ const PLANS = [
     id: 'free',
     name: 'Free',
     price: '$0',
-    period: 'forever',
+    period: '',
     description: 'Get started with CRCST prep',
     features: [
       { text: '20 practice questions per hour', included: true },
@@ -226,7 +226,7 @@ export default function PricingPage() {
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm">/ {plan.period}</span>
+                  {plan.period && <span className="text-muted-foreground text-sm">/ {plan.period}</span>}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
               </div>

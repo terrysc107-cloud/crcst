@@ -96,15 +96,55 @@ export default function PaymentSuccessPage() {
       minHeight: '100vh',
       background: '#021B3A',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: "'DM Sans', sans-serif",
       color: '#fff',
       padding: '2rem',
+      gap: '1.5rem',
     }}>
       <Suspense fallback={<div style={{ color: '#fff' }}>Loading...</div>}>
         <PaymentSuccessContent />
       </Suspense>
+
+      {/* Resume Service Cross-sell */}
+      <div style={{
+        maxWidth: 480,
+        width: '100%',
+        background: 'rgba(20,189,172,0.06)',
+        border: '1px solid rgba(20,189,172,0.25)',
+        borderRadius: 16,
+        padding: '1.5rem',
+        textAlign: 'center',
+      }}>
+        <p style={{ fontSize: '0.75rem', letterSpacing: '0.1em', color: '#14BDAC', fontFamily: "'DM Mono', monospace", marginBottom: '0.5rem' }}>
+          WHILE YOU STUDY
+        </p>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+          We'll perfect your resume.
+        </h3>
+        <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '1rem' }}>
+          Expert-written, ATS-optimized resumes for healthcare professionals. Delivered in 48 hours.
+        </p>
+        <a
+          href="https://www.myqualifiedresume.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-block',
+            padding: '0.6rem 1.5rem',
+            borderRadius: 8,
+            border: '1px solid rgba(20,189,172,0.5)',
+            color: '#14BDAC',
+            fontSize: '0.88rem',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          Explore Resume Services →
+        </a>
+      </div>
     </div>
   )
 }

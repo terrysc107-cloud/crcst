@@ -847,6 +847,59 @@ export default function PassedExamFlow() {
             offers on-site certification prep and compliance training for SPD departments.
           </p>
 
+          {/* Resume Service Upsell */}
+          <div style={{
+            marginTop: "2rem",
+            padding: "1.5rem",
+            borderRadius: "16px",
+            background: "rgba(232,160,32,0.07)",
+            border: "1px solid rgba(232,160,32,0.35)",
+            textAlign: "left",
+          }}>
+            <div style={{
+              fontSize: "0.7rem", letterSpacing: "0.12em", color: "#E8A020",
+              fontFamily: "'DM Mono', monospace", marginBottom: "0.6rem",
+            }}>
+              CAREER NEXT STEP
+            </div>
+            <h3 style={{
+              fontSize: "1.15rem", fontWeight: "800", color: "#FFFFFF",
+              fontFamily: "Georgia, serif", marginBottom: "0.75rem", lineHeight: 1.3,
+            }}>
+              You passed. Now land the job.
+            </h3>
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {[
+                `Highlight your new ${cert} certification`,
+                "ATS-optimized for healthcare & SPD roles",
+                "87% of clients land interviews",
+              ].map((item, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "#C8D8E0", fontSize: "0.88rem", fontFamily: "Calibri, sans-serif" }}>
+                  <span style={{ color: "#E8A020", flexShrink: 0 }}>✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <a
+              href="https://www.myqualifiedresume.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-block",
+                padding: "0.7rem 1.4rem",
+                borderRadius: "10px",
+                background: "linear-gradient(135deg, #E8A020, #DAA520)",
+                color: "#021B3A",
+                fontWeight: "700",
+                fontSize: "0.88rem",
+                textDecoration: "none",
+                fontFamily: "Calibri, sans-serif",
+              }}
+            >
+              Get My Resume – Starting at $29 →
+            </a>
+          </div>
+
         </div>
       </div>
     );

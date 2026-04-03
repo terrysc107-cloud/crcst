@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js"
-import { stripe, STRIPE_PRO_PRICE_ID, STRIPE_TRIPLE_CROWN_PRICE_ID } from "@/lib/stripe"
+import { stripe } from "@/lib/stripe"
 import { NextRequest, NextResponse } from "next/server"
+
+// Read price IDs at runtime from server environment
+const STRIPE_PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || ""
+const STRIPE_TRIPLE_CROWN_PRICE_ID = process.env.STRIPE_TRIPLE_CROWN_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_TRIPLE_CROWN_PRICE_ID || ""
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -67,6 +71,15 @@ export async function POST(request: NextRequest) {
 
     // Select price ID based on tier
     const priceId = tier === "pro" ? STRIPE_PRO_PRICE_ID : STRIPE_TRIPLE_CROWN_PRICE_ID
+
+    // Validate price ID is set
+    if (!priceId) {
+      console.error(`Missing Stripe price ID for tier: ${tier}. PRO=${STRIPE_PRO_PRICE_ID}, TRIPLE_CROWN=${STRIPE_TRIPLE_CROWN_PRICE_ID}`)
+      return NextResponse.json(
+        { error: `Stripe price ID not configured for ${tier} plan. Please contact support.` },
+        { status: 500 }
+      )
+    }
 
     // Create checkout session for one-time payment
     const session = await stripe.checkout.sessions.create({

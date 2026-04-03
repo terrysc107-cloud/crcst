@@ -92,13 +92,11 @@ export default function PricingPage() {
   }, [])
 
   const handleUpgrade = async (tier: 'pro' | 'triple_crown') => {
-    console.log('[v0] handleUpgrade called with tier:', tier)
     try {
       setLoading(tier)
       setError('')
 
       const { data: { user } } = await supabase.auth.getUser()
-      console.log('[v0] User:', user?.id)
       if (!user) {
         window.location.href = '/login?redirect=/pricing'
         return
@@ -112,7 +110,6 @@ export default function PricingPage() {
         return
       }
 
-      console.log('[v0] Calling stripe-checkout API with tier:', tier)
       const response = await fetch('/api/payment/stripe-checkout', {
         method: 'POST',
         headers: {
@@ -121,17 +118,13 @@ export default function PricingPage() {
         },
         body: JSON.stringify({ tier }),
       })
-
-      console.log('[v0] Response status:', response.status)
       
       if (!response.ok) {
         const data = await response.json()
-        console.log('[v0] Error response:', data)
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
       const data = await response.json()
-      console.log('[v0] Success response:', data)
       const { url } = data
       if (!url) throw new Error('No checkout URL returned')
       window.location.href = url
@@ -292,10 +285,7 @@ export default function PricingPage() {
             Level up your career with CHL and CER certifications. Get all three with Triple Crown access.
           </p>
           <button
-            onClick={() => {
-              console.log('[v0] Triple Crown button clicked, currentPlan:', currentPlan, 'loading:', loading)
-              handleUpgrade('triple_crown')
-            }}
+            onClick={() => handleUpgrade('triple_crown')}
             disabled={loading !== null || currentPlan === 'triple_crown'}
             className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >

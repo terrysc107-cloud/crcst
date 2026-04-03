@@ -154,18 +154,20 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         console.log('[v0] Usage increment response:', data)
         
         if (res.status === 429 || data.error === 'limit_reached') {
-          // Rate limit reached - block further questions
-          setRateLimitReached(true)
-          setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
-        } else if (data.used !== undefined) {
-          // Update usage info
+          // Rate limit reached - block further questions (only for free users)
+          if (!data.unlimited) {
+            setRateLimitReached(true)
+            setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+          }
+        } else if (data.used !== undefined && !data.unlimited) {
+          // Update usage info (only for free users with limits)
           setUsageInfo({ 
             used: data.used, 
             limit: data.limit || 20, 
             remaining: data.remaining || 0 
           })
           
-          // Check if we just hit the limit
+          // Check if we just hit the limit (free users only)
           if (data.remaining !== null && data.remaining <= 0) {
             setRateLimitReached(true)
           }

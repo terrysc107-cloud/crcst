@@ -44,13 +44,17 @@ export async function POST(request: NextRequest) {
 
     // Check limit again after incrementing
     const accessAfter = await canUserAccessPaidFeature(user.id, feature)
+    
+    // For Pro/Triple Crown users, limit is -1 (unlimited) - return null instead
+    const isUnlimited = accessAfter.limit === -1
 
     return NextResponse.json({
       success: result.success,
       used: result.newCount,
-      limit: accessAfter.limit,
-      remaining: accessAfter.limit ? Math.max(0, accessAfter.limit - result.newCount) : null,
+      limit: isUnlimited ? null : accessAfter.limit,
+      remaining: isUnlimited ? null : (accessAfter.limit ? Math.max(0, accessAfter.limit - result.newCount) : null),
       allowed: accessAfter.allowed,
+      unlimited: isUnlimited,
     })
   } catch (error) {
     console.error('[usage/increment]', error)

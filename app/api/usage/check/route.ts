@@ -28,12 +28,16 @@ export async function GET(request: NextRequest) {
 
     const access = await canUserAccessPaidFeature(user.id, feature)
 
+    // For Pro/Triple Crown users, limit is -1 (unlimited) - return null instead
+    const isUnlimited = access.limit === -1
+    
     return NextResponse.json({
       allowed: access.allowed,
       reason: access.reason,
       used: access.used,
-      limit: access.limit,
-      remaining: access.limit ? access.limit - (access.used ?? 0) : null,
+      limit: isUnlimited ? null : access.limit,
+      remaining: isUnlimited ? null : (access.limit ? access.limit - (access.used ?? 0) : null),
+      unlimited: isUnlimited,
     })
   } catch (error) {
     console.error('[usage/check]', error)

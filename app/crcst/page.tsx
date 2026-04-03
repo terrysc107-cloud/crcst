@@ -493,8 +493,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hourly Usage Indicator for Free Users */}
-        {rateLimitInfo && rateLimitInfo.limit && (
+        {/* Hourly Usage Indicator for Free Users Only */}
+        {rateLimitInfo && rateLimitInfo.limit && rateLimitInfo.limit > 0 && (
           <div className="mx-6 mt-6 p-4 bg-white border border-cream-2 rounded-lg">
             <div className="flex justify-between items-center mb-2">
               <div className="text-xs tracking-widest text-text-3">

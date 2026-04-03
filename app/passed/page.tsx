@@ -259,9 +259,10 @@ export default function PassedExamFlow() {
       .insert({
         user_id: user.id,
         full_name: name,
-        hspa_member: hspaMember,
+        hspa_member: hspaMember ? true : false,
+        hspa_member_number: hspaMember || null,
         cert,
-        pass_date: new Date().toISOString().split("T")[0],
+        pass_date: passDate || new Date().toISOString().split("T")[0],
       });
 
     if (error) {

@@ -128,7 +128,7 @@ const FAQS = [
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const [openFaq, setOpenFaq] = useState(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [navScrolled, setNavScrolled] = useState(false);
   const [heroRef, heroInView] = useInView(0.1);
   const [statsRef, statsInView] = useInView(0.2);

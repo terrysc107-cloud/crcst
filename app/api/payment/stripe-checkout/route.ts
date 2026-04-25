@@ -6,18 +6,17 @@ import { NextRequest, NextResponse } from "next/server"
 const STRIPE_PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || ""
 const STRIPE_TRIPLE_CROWN_PRICE_ID = process.env.STRIPE_TRIPLE_CROWN_PRICE_ID || process.env.NEXT_PUBLIC_STRIPE_TRIPLE_CROWN_PRICE_ID || ""
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     const { tier } = await request.json()
 
     if (!tier || !["pro", "triple_crown"].includes(tier)) {

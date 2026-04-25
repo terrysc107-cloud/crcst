@@ -3,12 +3,11 @@ import { stripe } from "@/lib/stripe"
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function POST(request: NextRequest) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
   // Fix 5: Explicit webhook secret guard — fail fast if not configured
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
   if (!webhookSecret) {

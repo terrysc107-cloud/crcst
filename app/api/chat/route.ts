@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       model: anthropic('claude-sonnet-4-20250514'),
       system: SYSTEM_PROMPT,
       prompt: message,
-      maxTokens: 500,
+      maxOutputTokens: 500,
     })
 
     // Increment usage after successful response

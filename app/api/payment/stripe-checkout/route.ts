@@ -27,6 +27,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fix 3: Validate priceId BEFORE creating a Stripe customer to avoid orphaned customer records
+    const priceId = tier === "pro" ? STRIPE_PRO_PRICE_ID : STRIPE_TRIPLE_CROWN_PRICE_ID
+    if (!priceId) {
+      console.error(`Missing Stripe price ID for tier: ${tier}. PRO=${STRIPE_PRO_PRICE_ID}, TRIPLE_CROWN=${STRIPE_TRIPLE_CROWN_PRICE_ID}`)
+      return NextResponse.json(
+        { error: `Stripe price ID not configured for ${tier} plan. Please contact support.` },
+        { status: 500 }
+      )
+    }
+
     // Get authenticated user
     const authHeader = request.headers.get("authorization")
     if (!authHeader) {
@@ -69,17 +79,8 @@ export async function POST(request: NextRequest) {
         .eq("id", user.id)
     }
 
-    // Select price ID based on tier
-    const priceId = tier === "pro" ? STRIPE_PRO_PRICE_ID : STRIPE_TRIPLE_CROWN_PRICE_ID
-
-    // Validate price ID is set
-    if (!priceId) {
-      console.error(`Missing Stripe price ID for tier: ${tier}. PRO=${STRIPE_PRO_PRICE_ID}, TRIPLE_CROWN=${STRIPE_TRIPLE_CROWN_PRICE_ID}`)
-      return NextResponse.json(
-        { error: `Stripe price ID not configured for ${tier} plan. Please contact support.` },
-        { status: 500 }
-      )
-    }
+    // Fix 4: Use appUrl with fallback so success/cancel URLs always resolve
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get('origin') || 'https://spdcertprep.com'
 
     // Create checkout session for one-time payment
     const session = await stripe.checkout.sessions.create({
@@ -91,8 +92,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?plan=${tier}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+      success_url: `${appUrl}/payment/success?plan=${tier}`,
+      cancel_url: `${appUrl}/pricing`,
       metadata: {
         supabase_uid: user.id,
         tier,

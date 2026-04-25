@@ -145,9 +145,9 @@ export default function AccountPage() {
     )
   }
 
-  const planLabel = { free: 'Free', pro: 'Pro', lifetime: 'Lifetime' }[statusData.plan]
-  const planColor = { free: 'rgba(255,255,255,0.4)', pro: '#14BDAC', lifetime: '#DAA520' }[statusData.plan]
-  const isPaid = statusData.plan === 'pro' || statusData.plan === 'lifetime'
+  const planLabel = { free: 'Free', pro: 'Pro', triple_crown: 'Triple Crown' }[statusData.plan]
+  const planColor = { free: 'rgba(255,255,255,0.4)', pro: '#14BDAC', triple_crown: '#DAA520' }[statusData.plan]
+  const isPaid = statusData.plan === 'pro' || statusData.plan === 'triple_crown'
 
   return (
     <div style={{ minHeight: '100vh', background: '#021B3A', color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
@@ -195,7 +195,7 @@ export default function AccountPage() {
             </div>
           )}
 
-          {statusData.plan === 'lifetime' && (
+          {statusData.plan === 'triple_crown' && (
             <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>Permanent access — no renewal needed.</div>
           )}
         </div>

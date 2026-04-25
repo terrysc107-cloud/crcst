@@ -283,6 +283,15 @@ export default function OnboardingPage() {
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
+
+      // Also upsert into profiles so the app can detect onboarding completion
+      // on new devices (app reads target_cert from profiles table)
+      const primaryCert = data.certGoals[0] ?? null
+      await supabase.from('profiles').upsert({
+        id: userId,
+        target_cert: primaryCert,
+        onboarding_completed: true,
+      })
     } catch {
       // Silently ignore if table doesn't exist yet
     }

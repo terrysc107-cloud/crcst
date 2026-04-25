@@ -8,12 +8,21 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
 export async function POST(request: NextRequest) {
+  // Fix 5: Explicit webhook secret guard — fail fast if not configured
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
+  }
+
   try {
     const body = await request.text()
-    const signature = request.headers.get("stripe-signature")!
+    const signature = request.headers.get("stripe-signature")
+
+    // Fix 5: Explicit signature header guard
+    if (!signature) {
+      return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 })
+    }
 
     // Verify webhook signature
     let event: Stripe.Event
@@ -54,6 +63,40 @@ export async function POST(request: NextRequest) {
             console.error("Failed to upsert profile:", upsertError)
           } else {
             console.log(`Successfully upgraded user ${supabaseUid} to ${tier}`)
+          }
+        }
+        break
+      }
+
+      case "charge.refunded": {
+        // Fix 2: Handle refunds — revoke access immediately when a charge is refunded
+        const charge = event.data.object as Stripe.Charge
+        const stripeCustomerId = charge.customer as string
+
+        if (stripeCustomerId) {
+          // Look up user by Stripe customer ID
+          const { data: profile, error: lookupError } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("stripe_customer_id", stripeCustomerId)
+            .single()
+
+          if (lookupError || !profile) {
+            console.error("Failed to find profile for customer:", stripeCustomerId, lookupError)
+          } else {
+            const { error: updateError } = await supabase
+              .from("profiles")
+              .update({
+                tier: "free",
+                tier_expires_at: null,
+              })
+              .eq("id", profile.id)
+
+            if (updateError) {
+              console.error("Failed to revoke access after refund:", updateError)
+            } else {
+              console.log(`Revoked access for user ${profile.id} after refund`)
+            }
           }
         }
         break

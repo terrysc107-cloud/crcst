@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams()
-  const plan = searchParams.get('plan') as 'pro' | 'lifetime' | null
+  const plan = searchParams.get('plan') as 'pro' | 'triple_crown' | null
   const [seconds, setSeconds] = useState(5)
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function PaymentSuccessContent() {
     return () => clearTimeout(t)
   }, [seconds])
 
-  const planLabel = plan === 'lifetime' ? 'Lifetime Access' : 'Pro'
+  const planLabel = plan === 'triple_crown' ? 'Triple Crown' : 'Pro'
 
   return (
     <div style={{
@@ -61,7 +61,7 @@ function PaymentSuccessContent() {
         </p>
       )}
 
-      {plan === 'lifetime' && (
+      {plan === 'triple_crown' && (
         <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1.5rem' }}>
           You have permanent access — including all future certifications added to the platform.
         </p>

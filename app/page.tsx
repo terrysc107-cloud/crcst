@@ -3,17 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
-// ─── GOOGLE FONTS INJECTOR ────────────────────────────────────────────────────
-const FontLoader = () => {
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-  }, []);
-  return null;
-};
-
 // ─── INTERSECTION OBSERVER HOOK ───────────────────────────────────────────────
 function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -294,7 +283,6 @@ export default function LandingPage() {
 
   return (
     <>
-      <FontLoader />
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <div style={{ background: "#021B3A", color: "#FFFFFF", fontFamily: "'DM Sans', sans-serif", overflowX: "hidden" }}>
@@ -757,8 +745,8 @@ export default function LandingPage() {
             <div>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>ACCOUNT</p>
               {[
-                { label: "Sign Up Free", href: "/dashboard" },
-                { label: "Sign In", href: "/dashboard" },
+                { label: "Sign Up Free", href: "/crcst" },
+                { label: "Sign In", href: "/crcst" },
                 { label: "Claim Your Badge", href: "/passed" },
                 { label: "Upgrade to Pro", href: "/pricing" },
               ].map(l => (
@@ -772,15 +760,18 @@ export default function LandingPage() {
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>COMPANY</p>
               {[
                 { label: "Aseptic Technical Solutions", href: "https://aseptictechnicalsolutions.com" },
-                { label: "Scott Advisory Group", href: "#" },
-                { label: "Contact Us", href: "#" },
-                { label: "Baltimore 2025", href: "#" },
               ].map(l => (
                 <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
                   onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
                   onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
                 >{l.label}</a></div>
               ))}
+              <div><span style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", display: "block", marginBottom: "0.4rem" }}>Scott Advisory Group</span></div>
+              <div><a href="mailto:support@spdcertprep.com" style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
+                onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
+                onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
+              >Contact Us</a></div>
+              <div><span style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", display: "block", marginBottom: "0.4rem" }}>Baltimore 2025</span></div>
             </div>
           </div>
 

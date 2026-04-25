@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
 
 export default function ScenariosQuizPage() {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
@@ -21,11 +23,39 @@ export default function ScenariosQuizPage() {
   const isCorrect = hasAnswered && answers[current] === q.correct;
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    async function checkAuthAndSubscription() {
+      // Auth check
+      const { data: { user: u } } = await supabase.auth.getUser();
+      if (!u) {
+        router.push("/crcst");
+        return;
+      }
+      setUser(u);
+
+      // Paywall check — same pattern as the rest of the app
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const res = await fetch("/api/payment/status", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const plan: string = data.plan || "free";
+        const isPaid = plan === "pro" || plan === "triple_crown";
+        if (!isPaid) {
+          router.push("/pricing");
+          return;
+        }
+      } else {
+        // If status check fails, gate conservatively
+        router.push("/pricing");
+        return;
+      }
+
       setLoading(false);
-    });
-  }, []);
+    }
+    checkAuthAndSubscription();
+  }, [router]);
 
   const selectAnswer = (letter: "a" | "b" | "c" | "d") => {
     if (hasAnswered) return;

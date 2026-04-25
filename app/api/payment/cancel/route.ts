@@ -24,13 +24,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No active subscription found' }, { status: 400 })
     }
 
-    // Expire the tier immediately by setting tier_expires_at to now
+    // Mark the subscription as cancelled without revoking access immediately.
+    // The user retains paid access until tier_expires_at is reached naturally —
+    // we do NOT set tier: 'free' or update tier_expires_at here.
+    // Access will be downgraded automatically once tier_expires_at passes.
     const serviceSupabase = getServiceSupabase()
     const { error: updateError } = await serviceSupabase
       .from('profiles')
       .update({
-        tier: 'free',
-        tier_expires_at: new Date().toISOString(),
+        cancelled: true,
       })
       .eq('id', user.id)
 
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 })
     }
 
-    return NextResponse.json({ ok: true, message: 'Subscription cancelled. Your access has been downgraded to Free.' })
+    return NextResponse.json({ ok: true, message: 'Subscription cancelled. Your access will remain active until the end of your billing period.' })
   } catch (error) {
     console.error('[payment/cancel]', error)
     return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 })

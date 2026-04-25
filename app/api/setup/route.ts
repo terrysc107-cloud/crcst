@@ -2,6 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
+  const setupSecret = process.env.SETUP_SECRET
+  const providedSecret = request.headers.get('x-setup-secret')
+  if (!setupSecret || providedSecret !== setupSecret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

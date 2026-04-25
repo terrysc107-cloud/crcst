@@ -151,8 +151,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         })
         
         const data = await res.json()
-        console.log('[v0] Usage increment response:', data)
-        
+
         if (res.status === 429 || data.error === 'limit_reached') {
           // Rate limit reached - block further questions (only for free users)
           if (!data.unlimited) {

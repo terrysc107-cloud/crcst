@@ -777,11 +777,15 @@ export default function LandingPage() {
 
           <div style={{ maxWidth: 1100, margin: "2rem auto 0", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
             <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.78rem", fontFamily: "'DM Mono', monospace" }}>
-              © 2025 Scott Advisory Group · Aseptic Technical Solutions
+              © 2026 Scott Advisory Group · Aseptic Technical Solutions
             </p>
-            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
-              All trademarks and certifications belong to their respective owners
-            </p>
+            <div style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
+              <a href="/terms" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace", textDecoration: "none" }}>Terms of Service</a>
+              <a href="/privacy" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace", textDecoration: "none" }}>Privacy Policy</a>
+              <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace", margin: 0 }}>
+                All trademarks and certifications belong to their respective owners
+              </p>
+            </div>
           </div>
         </footer>
 

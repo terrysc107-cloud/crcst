@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 interface ResultsProps {
   results: {
@@ -39,7 +42,7 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
       </div>
 
       {/* Score Card */}
-      <div className="bg-white border-2 border-cream-2 rounded-xl p-8 mb-8 text-center shadow-lg">
+      <Card className="bg-white border-2 border-cream-2 rounded-xl p-8 mb-8 text-center shadow-lg gap-0">
         <div
           className={`font-serif text-6xl mb-2 ${
             passed ? 'text-correct' : 'text-wrong'
@@ -70,7 +73,7 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Pass/Fail Banner */}
       <div
@@ -110,18 +113,19 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
 
       {/* Action Buttons */}
       <div className="flex gap-4">
-        <button
+        <Button
           onClick={onRetry}
-          className="flex-1 bg-teal text-white py-4 rounded-lg font-mono text-sm tracking-widest hover:bg-teal-2 transition"
+          className="flex-1 bg-teal text-white py-4 h-auto rounded-lg font-mono text-sm tracking-widest hover:bg-teal-2"
         >
           RETAKE QUIZ
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onHome}
-          className="flex-1 bg-cream-2 text-text py-4 rounded-lg font-mono text-sm tracking-widest hover:bg-cream transition"
+          variant="secondary"
+          className="flex-1 bg-cream-2 text-text py-4 h-auto rounded-lg font-mono text-sm tracking-widest hover:bg-cream"
         >
           BACK HOME
-        </button>
+        </Button>
       </div>
 
       {/* Domain Breakdown (if available) */}
@@ -299,14 +303,16 @@ function DomainBreakdown({
                 {scores.correct}/{scores.total} ({pct}%)
               </div>
             </div>
-            <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  pct >= 70 ? 'bg-correct' : pct >= 50 ? 'bg-amber' : 'bg-wrong'
-                }`}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
+            <Progress
+              value={pct}
+              className={`h-2 bg-cream-2 [&_[data-slot=progress-indicator]]:transition-all [&_[data-slot=progress-indicator]]:duration-500 ${
+                pct >= 70
+                  ? '[&_[data-slot=progress-indicator]]:bg-correct'
+                  : pct >= 50
+                  ? '[&_[data-slot=progress-indicator]]:bg-amber'
+                  : '[&_[data-slot=progress-indicator]]:bg-wrong'
+              }`}
+            />
           </div>
         )
       })}

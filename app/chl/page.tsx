@@ -8,6 +8,7 @@ import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Progress } from '@/components/ui/progress'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
@@ -506,12 +507,10 @@ export default function CHLPage() {
                         <div className="text-xs text-text-3 mb-2">
                           {session.current_question_index + 1} / {session.question_ids.length} questions
                         </div>
-                        <div className="w-24 h-1 bg-cream-2 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-amber transition-all duration-500"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
+                        <Progress
+                          value={progress}
+                          className="w-24 h-1 bg-cream-2 [&_[data-slot=progress-indicator]]:bg-amber [&_[data-slot=progress-indicator]]:transition-all [&_[data-slot=progress-indicator]]:duration-500"
+                        />
                       </div>
                       <div className="flex gap-2 ml-4">
                         <button
@@ -550,14 +549,16 @@ export default function CHLPage() {
                   <div className="font-serif text-sm text-navy font-bold mb-2 truncate">
                     {domain}
                   </div>
-                  <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        pct >= 70 ? 'bg-correct' : pct >= 40 ? 'bg-amber' : 'bg-teal'
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <Progress
+                    value={pct}
+                    className={`h-1.5 bg-cream-2 [&_[data-slot=progress-indicator]]:transition-all [&_[data-slot=progress-indicator]]:duration-500 ${
+                      pct >= 70
+                        ? '[&_[data-slot=progress-indicator]]:bg-correct'
+                        : pct >= 40
+                        ? '[&_[data-slot=progress-indicator]]:bg-amber'
+                        : '[&_[data-slot=progress-indicator]]:bg-teal'
+                    }`}
+                  />
                   <div className="text-xs text-text-3 mt-1">
                     {pct}% ({mastery?.total || 0} questions)
                   </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Check, Crown, Sparkles, Clock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const PLANS = [
   {
@@ -252,17 +253,17 @@ export default function PricingPage() {
                   Current Plan
                 </div>
               ) : plan.tier ? (
-                <button
+                <Button
                   onClick={() => handleUpgrade(plan.tier as 'pro' | 'triple_crown')}
                   disabled={loading !== null}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`w-full py-3 h-auto rounded-xl font-semibold ${
                     plan.highlight
                       ? 'bg-primary text-primary-foreground hover:opacity-90'
                       : 'bg-amber-500 text-white hover:bg-amber-600'
                   }`}
                 >
                   {loading === plan.tier ? 'Processing...' : plan.cta}
-                </button>
+                </Button>
               ) : (
                 <Link
                   href={plan.href || '/crcst'}
@@ -284,14 +285,14 @@ export default function PricingPage() {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Level up your career with CHL and CER certifications. Get all three with Triple Crown access.
           </p>
-          <button
+          <Button
             onClick={() => handleUpgrade('triple_crown')}
             disabled={loading !== null || currentPlan === 'triple_crown'}
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-8 py-3 h-auto rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold hover:from-amber-600 hover:to-amber-700"
           >
             <Sparkles className="w-5 h-5" />
             {currentPlan === 'triple_crown' ? 'You have Triple Crown' : 'Upgrade to Triple Crown - $39'}
-          </button>
+          </Button>
         </div>
       </div>
 

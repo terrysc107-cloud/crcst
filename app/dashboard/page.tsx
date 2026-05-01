@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 interface Certification {
   id: string
@@ -101,7 +103,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             {!sub.loading && (
-              <span className={`text-xs px-3 py-1 rounded-full font-semibold tracking-[0.06em] uppercase border ${
+              <Badge className={`rounded-full font-mono font-semibold tracking-[0.06em] uppercase ${
                 sub.plan === 'triple_crown'
                   ? 'bg-amber/20 text-amber border-amber/40'
                   : sub.plan === 'pro'
@@ -109,7 +111,7 @@ export default function DashboardPage() {
                   : 'bg-white/[0.08] text-white/50 border-white/15'
               }`}>
                 {sub.plan === 'triple_crown' ? 'Triple Crown' : sub.plan === 'pro' ? 'Pro' : 'Free'}
-              </span>
+              </Badge>
             )}
             <Link href="/account" className="text-[0.8rem] text-white/50 no-underline">
               Account
@@ -171,11 +173,15 @@ export default function DashboardPage() {
         )}
 
         {/* I Passed Button */}
-        <Link href="/passed" className="block mb-6">
-          <button className="flex items-center gap-[0.6rem] px-[1.4rem] py-[0.85rem] rounded-xl border-2 border-amber bg-amber/[0.08] text-amber text-[0.95rem] font-bold cursor-pointer font-mono tracking-[0.02em] w-full justify-center">
+        <Button
+          asChild
+          variant="outline"
+          className="w-full mb-6 rounded-xl border-2 border-amber bg-amber/[0.08] text-amber hover:bg-amber/[0.14] hover:text-amber font-mono font-bold tracking-[0.02em] h-auto py-[0.85rem]"
+        >
+          <Link href="/passed">
             I Passed My Exam - Claim Your Badge
-          </button>
-        </Link>
+          </Link>
+        </Button>
 
         {/* Free tier usage + upgrade prompt */}
         {!sub.loading && sub.plan === 'free' && (

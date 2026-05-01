@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 export default function ScenariosQuizPage() {
   const router = useRouter();
@@ -173,12 +175,10 @@ export default function ScenariosQuizPage() {
       {/* Progress bar */}
       <div className="bg-navy-2 px-6 py-2">
         <div className="max-w-2xl mx-auto">
-          <div className="w-full h-1 bg-navy-3 rounded overflow-hidden">
-            <div
-              className="h-full bg-amber transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <Progress
+            value={progress}
+            className="h-1 bg-navy-3 rounded-full [&_[data-slot=progress-indicator]]:bg-amber"
+          />
         </div>
       </div>
 
@@ -186,15 +186,15 @@ export default function ScenariosQuizPage() {
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Domain & Type badges */}
         <div className="flex gap-2 mb-4 flex-wrap">
-          <span className="px-3 py-1 bg-teal/20 text-teal rounded-full text-xs font-mono">
+          <Badge className="bg-teal/20 text-teal border-transparent rounded-full font-mono">
             {q.domain}
-          </span>
-          <span className="px-3 py-1 bg-amber/20 text-amber rounded-full text-xs font-mono uppercase">
+          </Badge>
+          <Badge className="bg-amber/20 text-amber border-transparent rounded-full font-mono uppercase">
             {q.type}
-          </span>
-          <span className="px-3 py-1 bg-white/10 text-white/60 rounded-full text-xs font-mono">
+          </Badge>
+          <Badge className="bg-white/10 text-white/60 border-transparent rounded-full font-mono">
             {q.difficulty}
-          </span>
+          </Badge>
         </div>
 
         {/* Context block (if exists) */}

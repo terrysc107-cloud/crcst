@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 export default function ScenariosQuizPage() {
   const router = useRouter();
@@ -173,12 +175,10 @@ export default function ScenariosQuizPage() {
       {/* Progress bar */}
       <div className="bg-navy-2 px-6 py-2">
         <div className="max-w-2xl mx-auto">
-          <div className="w-full h-1 bg-navy-3 rounded overflow-hidden">
-            <div
-              className="h-full bg-amber transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <Progress
+            value={progress}
+            className="h-1 bg-navy-3 rounded-full [&_[data-slot=progress-indicator]]:bg-amber"
+          />
         </div>
       </div>
 
@@ -186,31 +186,21 @@ export default function ScenariosQuizPage() {
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Domain & Type badges */}
         <div className="flex gap-2 mb-4 flex-wrap">
-          <span className="px-3 py-1 bg-teal/20 text-teal rounded-full text-xs font-mono">
+          <Badge className="bg-teal/20 text-teal border-transparent rounded-full font-mono">
             {q.domain}
-          </span>
-          <span className="px-3 py-1 bg-amber/20 text-amber rounded-full text-xs font-mono uppercase">
+          </Badge>
+          <Badge className="bg-amber/20 text-amber border-transparent rounded-full font-mono uppercase">
             {q.type}
-          </span>
-          <span className="px-3 py-1 bg-white/10 text-white/60 rounded-full text-xs font-mono">
+          </Badge>
+          <Badge className="bg-white/10 text-white/60 border-transparent rounded-full font-mono">
             {q.difficulty}
-          </span>
+          </Badge>
         </div>
 
         {/* Context block (if exists) */}
         {q.context && (
-          <div style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "10px",
-            padding: "1rem 1.25rem",
-            marginBottom: "1.25rem",
-            color: "rgba(255,255,255,0.72)",
-            fontSize: "0.9rem",
-            lineHeight: 1.7,
-            fontStyle: "italic",
-          }}>
-            <span style={{ display: "block", color: "#E8A020", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.5rem", fontStyle: "normal" }}>
+          <div className="bg-white/[0.04] border border-white/[0.08] rounded-[10px] px-5 py-4 mb-5 text-white/72 text-[0.9rem] leading-[1.7] italic">
+            <span className="block text-[#E8A020] text-[0.68rem] font-mono tracking-[0.08em] mb-2 not-italic">
               SCENARIO
             </span>
             {q.context}
@@ -275,17 +265,11 @@ export default function ScenariosQuizPage() {
 
             {/* Real World Note */}
             {q.realWorldNote && (
-              <div style={{
-                marginTop: "1rem",
-                background: "rgba(232,160,32,0.06)",
-                border: "1px solid rgba(232,160,32,0.2)",
-                borderRadius: "10px",
-                padding: "1rem 1.25rem",
-              }}>
-                <p style={{ color: "#E8A020", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>
+              <div className="mt-4 bg-[#E8A020]/[0.06] border border-[#E8A020]/20 rounded-[10px] px-5 py-4">
+                <p className="text-[#E8A020] text-[0.68rem] font-mono tracking-[0.08em] mb-1">
                   IN PRACTICE
                 </p>
-                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.85rem", lineHeight: 1.65, fontStyle: "italic" }}>
+                <p className="text-white/60 text-[0.85rem] leading-[1.65] italic">
                   {q.realWorldNote}
                 </p>
               </div>

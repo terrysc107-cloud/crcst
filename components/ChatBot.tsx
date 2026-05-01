@@ -200,14 +200,8 @@ export default function ChatBot() {
                 <div className="bg-white text-text border border-cream-2 px-4 py-2 rounded-2xl rounded-bl-sm">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-teal rounded-full animate-bounce" />
-                    <span
-                      className="w-2 h-2 bg-teal rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    />
-                    <span
-                      className="w-2 h-2 bg-teal rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    />
+                    <span className="w-2 h-2 bg-teal rounded-full animate-bounce [animation-delay:0.1s]" />
+                    <span className="w-2 h-2 bg-teal rounded-full animate-bounce [animation-delay:0.2s]" />
                   </div>
                 </div>
               </div>

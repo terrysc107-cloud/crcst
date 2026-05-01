@@ -7,6 +7,7 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { Progress } from '@/components/ui/progress'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -525,14 +526,16 @@ export default function Home() {
                 {rateLimitInfo.used}/{rateLimitInfo.limit} used this hour
               </div>
             </div>
-            <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-300 ${
-                  rateLimitInfo.remaining === 0 ? 'bg-wrong' : rateLimitInfo.remaining <= 5 ? 'bg-amber' : 'bg-teal'
-                }`}
-                style={{ width: `${(rateLimitInfo.used / rateLimitInfo.limit) * 100}%` }}
-              />
-            </div>
+            <Progress
+              value={(rateLimitInfo.used / rateLimitInfo.limit) * 100}
+              className={`h-2 bg-cream-2 ${
+                rateLimitInfo.remaining === 0
+                  ? '[&_[data-slot=progress-indicator]]:bg-wrong'
+                  : rateLimitInfo.remaining <= 5
+                  ? '[&_[data-slot=progress-indicator]]:bg-amber'
+                  : '[&_[data-slot=progress-indicator]]:bg-teal'
+              }`}
+            />
             {rateLimitInfo.remaining === 0 ? (
               <div className="mt-2 text-xs text-wrong">
                 Hourly limit reached. <button onClick={() => setShowUpgradeModal(true)} className="text-teal underline">Upgrade to Pro</button> for unlimited questions.
@@ -617,12 +620,10 @@ export default function Home() {
                         <div className="text-xs text-text-3 mb-2">
                           {session.current_question_index + 1} / {session.question_ids.length} questions
                         </div>
-                        <div className="w-24 h-1 bg-cream-2 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-amber transition-all duration-500"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
+                        <Progress
+                          value={progress}
+                          className="w-24 h-1 bg-cream-2 [&_[data-slot=progress-indicator]]:bg-amber [&_[data-slot=progress-indicator]]:transition-all [&_[data-slot=progress-indicator]]:duration-500"
+                        />
                       </div>
                       <div className="flex gap-2 ml-4">
                         <button
@@ -661,14 +662,16 @@ export default function Home() {
                   <div className="font-serif text-sm text-navy font-bold mb-2 truncate">
                     {domain}
                   </div>
-                  <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        pct >= 70 ? 'bg-correct' : pct >= 40 ? 'bg-amber' : 'bg-teal'
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <Progress
+                    value={pct}
+                    className={`h-1.5 bg-cream-2 [&_[data-slot=progress-indicator]]:transition-all [&_[data-slot=progress-indicator]]:duration-500 ${
+                      pct >= 70
+                        ? '[&_[data-slot=progress-indicator]]:bg-correct'
+                        : pct >= 40
+                        ? '[&_[data-slot=progress-indicator]]:bg-amber'
+                        : '[&_[data-slot=progress-indicator]]:bg-teal'
+                    }`}
+                  />
                   <div className="text-xs text-text-3 mt-1">
                     {pct}% ({mastery?.total || 0} questions)
                   </div>

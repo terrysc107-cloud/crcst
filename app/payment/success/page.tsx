@@ -21,69 +21,41 @@ function PaymentSuccessContent() {
   const planLabel = plan === 'triple_crown' ? 'Triple Crown' : 'Pro'
 
   return (
-    <div style={{
-      maxWidth: 480,
-      width: '100%',
-      textAlign: 'center',
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(20,189,172,0.3)',
-      borderRadius: 20,
-      padding: '3rem 2rem',
-    }}>
+    <div className="w-full max-w-[480px] text-center bg-white/[0.04] border border-teal/30 rounded-[20px] px-8 py-12">
       {/* Checkmark */}
-      <div style={{
-        width: 72,
-        height: 72,
-        background: 'rgba(20,189,172,0.15)',
-        border: '2px solid #14BDAC',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0 auto 1.5rem',
-        fontSize: '2rem',
-      }}>
+      <div className="w-[72px] h-[72px] bg-teal/15 border-2 border-teal rounded-full flex items-center justify-center mx-auto mb-6 text-[2rem]">
         ✓
       </div>
 
-      <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '0.75rem', color: '#14BDAC' }}>
+      <h1 className="text-[1.8rem] font-bold mb-3 text-teal">
         Payment Successful!
       </h1>
 
-      <p style={{ color: 'rgba(255,255,255,0.75)', marginBottom: '0.5rem', lineHeight: 1.6 }}>
-        Welcome to <strong style={{ color: '#fff' }}>SPD Cert Companion {planLabel}</strong>.
+      <p className="text-white/75 mb-2 leading-relaxed">
+        Welcome to <strong className="text-white">SPD Cert Companion {planLabel}</strong>.
         Your account has been upgraded and all features are now unlocked.
       </p>
 
       {plan === 'pro' && (
-        <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1.5rem' }}>
+        <p className="text-sm text-white/50 mb-6">
           You can cancel anytime from your Account settings.
         </p>
       )}
 
       {plan === 'triple_crown' && (
-        <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1.5rem' }}>
+        <p className="text-sm text-white/50 mb-6">
           You have permanent access — including all future certifications added to the platform.
         </p>
       )}
 
-      <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+      <div className="text-white/40 text-sm mb-6">
         Redirecting to dashboard in {seconds}s…
       </div>
 
-      <Link href="/dashboard" style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem',
-        padding: '0.85rem 2.5rem',
-        borderRadius: 10,
-        background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-        color: '#fff',
-        fontWeight: 600,
-        textDecoration: 'none',
-        fontSize: '1rem',
-      }}>
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center justify-center gap-2 px-10 py-[0.85rem] rounded-[10px] bg-gradient-to-br from-teal-dark to-teal text-white font-semibold no-underline text-base"
+      >
         Go to Dashboard
       </Link>
     </div>
@@ -92,55 +64,23 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#021B3A',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: "'DM Sans', sans-serif",
-      color: '#fff',
-      padding: '2rem',
-      gap: '1.5rem',
-    }}>
-      <Suspense fallback={<div style={{ color: '#fff' }}>Loading...</div>}>
+    <div className="min-h-screen bg-navy flex flex-col items-center justify-center font-sans text-white p-8 gap-6">
+      <Suspense fallback={<div className="text-white">Loading...</div>}>
         <PaymentSuccessContent />
       </Suspense>
 
       {/* Resume Service Cross-sell */}
-      <div style={{
-        maxWidth: 480,
-        width: '100%',
-        background: 'rgba(20,189,172,0.06)',
-        border: '1px solid rgba(20,189,172,0.25)',
-        borderRadius: 16,
-        padding: '1.5rem',
-        textAlign: 'center',
-      }}>
-        <p style={{ fontSize: '0.75rem', letterSpacing: '0.1em', color: '#14BDAC', fontFamily: "'DM Mono', monospace", marginBottom: '0.5rem' }}>
-          WHILE YOU STUDY
-        </p>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          We'll perfect your resume.
-        </h3>
-        <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '1rem' }}>
+      <div className="w-full max-w-[480px] bg-teal/[0.06] border border-teal/25 rounded-2xl p-6 text-center">
+        <p className="text-xs tracking-[0.1em] text-teal font-mono mb-2">WHILE YOU STUDY</p>
+        <h3 className="text-[1.1rem] font-bold mb-2">We&apos;ll perfect your resume.</h3>
+        <p className="text-sm text-white/55 leading-relaxed mb-4">
           Expert-written, ATS-optimized resumes for healthcare professionals. Delivered in 48 hours.
         </p>
         <a
           href="https://www.myqualifiedresume.com/"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            display: 'inline-block',
-            padding: '0.6rem 1.5rem',
-            borderRadius: 8,
-            border: '1px solid rgba(20,189,172,0.5)',
-            color: '#14BDAC',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
+          className="inline-block px-6 py-[0.6rem] rounded-lg border border-teal/50 text-teal text-sm font-semibold no-underline"
         >
           Explore Resume Services →
         </a>

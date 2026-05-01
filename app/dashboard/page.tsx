@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 interface Certification {
   id: string
@@ -101,21 +103,17 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             {!sub.loading && (
-              <span style={{
-                fontSize: '0.75rem',
-                padding: '0.25rem 0.7rem',
-                borderRadius: '100px',
-                background: sub.plan === 'triple_crown' ? 'rgba(218,165,32,0.2)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.2)' : 'rgba(255,255,255,0.08)',
-                color: sub.plan === 'triple_crown' ? '#DAA520' : sub.plan === 'pro' ? '#14BDAC' : 'rgba(255,255,255,0.5)',
-                border: `1px solid ${sub.plan === 'triple_crown' ? 'rgba(218,165,32,0.4)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.4)' : 'rgba(255,255,255,0.15)'}`,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase' as const,
-              }}>
+              <Badge className={`rounded-full font-mono font-semibold tracking-[0.06em] uppercase ${
+                sub.plan === 'triple_crown'
+                  ? 'bg-amber/20 text-amber border-amber/40'
+                  : sub.plan === 'pro'
+                  ? 'bg-teal/20 text-teal border-teal/40'
+                  : 'bg-white/[0.08] text-white/50 border-white/15'
+              }`}>
                 {sub.plan === 'triple_crown' ? 'Triple Crown' : sub.plan === 'pro' ? 'Pro' : 'Free'}
-              </span>
+              </Badge>
             )}
-            <Link href="/account" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>
+            <Link href="/account" className="text-[0.8rem] text-white/50 no-underline">
               Account
             </Link>
           </div>
@@ -157,34 +155,16 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Earned Certifications */}
         {earnedCerts.length > 0 && (
-          <div style={{
-            background: "rgba(20,189,172,0.06)",
-            border: "1px solid rgba(20,189,172,0.2)",
-            borderRadius: "12px",
-            padding: "1rem 1.25rem",
-            marginBottom: "1rem",
-          }}>
-            <p style={{
-              color: "#14BDAC",
-              fontSize: "0.68rem",
-              letterSpacing: "0.1em",
-              fontFamily: "monospace",
-              marginBottom: "0.6rem",
-            }}>
+          <div className="bg-teal/[0.06] border border-teal/20 rounded-xl px-5 py-4 mb-4">
+            <p className="text-[0.68rem] text-teal tracking-[0.1em] font-mono mb-[0.6rem]">
               YOUR CERTIFICATIONS
             </p>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div className="flex gap-2 flex-wrap">
               {earnedCerts.map((c, i) => (
-                <span key={i} style={{
-                  background: "rgba(20,189,172,0.12)",
-                  border: "1px solid #14BDAC",
-                  borderRadius: "100px",
-                  padding: "0.25rem 0.75rem",
-                  color: "#14BDAC",
-                  fontSize: "0.82rem",
-                  fontWeight: "700",
-                  fontFamily: "monospace",
-                }}>
+                <span
+                  key={i}
+                  className="bg-teal/12 border border-teal rounded-full px-3 py-1 text-teal text-[0.82rem] font-bold font-mono"
+                >
                   {c.cert} ✓
                 </span>
               ))}
@@ -193,68 +173,31 @@ export default function DashboardPage() {
         )}
 
         {/* I Passed Button */}
-        <Link href="/passed">
-          <button
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.6rem",
-              padding: "0.85rem 1.4rem",
-              borderRadius: "12px",
-              border: "2px solid #DAA520",
-              background: "rgba(218,165,32,0.08)",
-              color: "#DAA520",
-              fontSize: "0.95rem",
-              fontWeight: "700",
-              cursor: "pointer",
-              fontFamily: "monospace",
-              letterSpacing: "0.02em",
-              width: "100%",
-              marginBottom: "1.5rem",
-              justifyContent: "center",
-            }}
-          >
+        <Button
+          asChild
+          variant="outline"
+          className="w-full mb-6 rounded-xl border-2 border-amber bg-amber/[0.08] text-amber hover:bg-amber/[0.14] hover:text-amber font-mono font-bold tracking-[0.02em] h-auto py-[0.85rem]"
+        >
+          <Link href="/passed">
             I Passed My Exam - Claim Your Badge
-          </button>
-        </Link>
+          </Link>
+        </Button>
 
         {/* Free tier usage + upgrade prompt */}
         {!sub.loading && sub.plan === 'free' && (
-          <div style={{
-            background: 'rgba(20,189,172,0.04)',
-            border: '1px solid rgba(20,189,172,0.2)',
-            borderRadius: 12,
-            padding: '1rem 1.25rem',
-            marginBottom: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-          }}>
+          <div className="bg-teal/[0.04] border border-teal/20 rounded-xl px-5 py-4 mb-5 flex items-center justify-between flex-wrap gap-3">
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
+              <div className="text-[0.72rem] text-teal tracking-[0.1em] mb-1 font-mono">
                 FREE TIER — HOURLY USAGE
               </div>
-              <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <div className="text-sm text-black/65 flex gap-5 flex-wrap">
                 <span>Questions: <strong>{sub.usage?.questionsThisHour ?? 0} / {sub.usage?.questionsLimit ?? 20}</strong></span>
                 <span>AI Chat: <strong>{sub.usage?.aiChatsToday ?? 0} / {sub.usage?.aiChatsLimit ?? 5}</strong></span>
               </div>
             </div>
-            <Link 
+            <Link
               href="/pricing"
-              style={{
-                background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-                color: '#fff',
-                padding: '0.5rem 1.1rem',
-                borderRadius: 8,
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                whiteSpace: 'nowrap' as const,
-                fontFamily: 'monospace',
-                letterSpacing: '0.04em',
-                textDecoration: 'none',
-              }}
+              className="bg-gradient-to-br from-teal-dark to-teal text-white px-[1.1rem] py-2 rounded-lg text-[0.78rem] font-semibold whitespace-nowrap font-mono tracking-[0.04em] no-underline"
             >
               Upgrade to Pro — $19
             </Link>
@@ -421,7 +364,7 @@ export default function DashboardPage() {
       {/* Resume Service Card */}
       <div className="px-6 py-6 border-t border-cream-2">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4" style={{ borderLeftColor: '#14BDAC' }}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4 border-l-teal">
             <div className="text-2xl flex-shrink-0">📄</div>
             <div className="flex-1 min-w-0">
               <div className="font-serif font-bold text-navy text-sm mb-0.5">Turn your certification into your next opportunity</div>
@@ -431,8 +374,7 @@ export default function DashboardPage() {
               href="https://www.myqualifiedresume.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 text-xs font-mono tracking-widest px-4 py-2.5 rounded-lg text-white transition hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #0D7377, #14BDAC)' }}
+              className="flex-shrink-0 text-xs font-mono tracking-widest px-4 py-2.5 rounded-lg text-white transition hover:opacity-90 bg-gradient-to-br from-teal-dark to-teal"
             >
               GET YOUR RESUME →
             </a>

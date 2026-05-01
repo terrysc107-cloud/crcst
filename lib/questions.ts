@@ -1,3 +1,5 @@
+export type VariantType = 'direct' | 'inverse' | 'application' | 'scenario' | 'distractor_swap'
+
 export interface Question {
   id: string
   question: string
@@ -6,6 +8,9 @@ export interface Question {
   domain: string
   difficulty: 'easy' | 'medium' | 'hard'
   explanation: string
+  // Optional concept/variant fields — populated when questions are linked to concepts
+  concept_id?: string
+  variant_type?: VariantType
 }
 
 // 400 CRCST certification exam questions

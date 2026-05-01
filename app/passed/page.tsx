@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { Award, Medal, Microscope, type LucideIcon } from "lucide-react";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type Cert = "CRCST" | "CHL" | "CER";
@@ -20,7 +21,7 @@ const CERT_CONFIG: Record<Cert, {
   label: string;
   color: string;
   accent: string;
-  icon: string;
+  icon: LucideIcon;
   next: Cert | null;
   nextLabel: string | null;
   nextDesc: string | null;
@@ -29,7 +30,7 @@ const CERT_CONFIG: Record<Cert, {
     label: "Certified Registered Central Service Technician",
     color: "#0D7377",
     accent: "#14BDAC",
-    icon: "🏅",
+    icon: Award,
     next: "CHL",
     nextLabel: "Certified Healthcare Leader (CHL)",
     nextDesc: "Step into leadership. The CHL proves you can manage a sterile processing department, not just work in one.",
@@ -38,7 +39,7 @@ const CERT_CONFIG: Record<Cert, {
     label: "Certified Healthcare Leader",
     color: "#1A4A8A",
     accent: "#4A90D9",
-    icon: "🎖️",
+    icon: Medal,
     next: "CER",
     nextLabel: "Certified Endoscope Reprocessor (CER)",
     nextDesc: "Endoscope reprocessing is one of the fastest-growing specialties in SPD. Add CER and become indispensable.",
@@ -47,7 +48,7 @@ const CERT_CONFIG: Record<Cert, {
     label: "Certified Endoscope Reprocessor",
     color: "#5B2D8E",
     accent: "#9B59D6",
-    icon: "🔬",
+    icon: Microscope,
     next: null,
     nextLabel: null,
     nextDesc: "You've completed all three HSPA certifications available on this platform. You're at the top of your field — consider mentoring the next generation of SPD professionals.",
@@ -162,9 +163,11 @@ function CertBadge({ cert, name, date }: { cert: Cert; name: string; date: strin
       })}
 
       {/* Icon */}
-      <text x="200" y="155" textAnchor="middle" fontSize="64" filter="url(#glow)">
-        {cfg.icon}
-      </text>
+      <foreignObject x="160" y="87" width="80" height="80">
+        <div xmlns="http://www.w3.org/1999/xhtml" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+          <cfg.icon size={64} color={cfg.accent} strokeWidth={1.25} />
+        </div>
+      </foreignObject>
 
       {/* Cert abbreviation */}
       <text
@@ -770,7 +773,7 @@ export default function PassedExamFlow() {
             padding: "2rem",
             marginBottom: "2rem",
           }}>
-            <div style={{ fontSize: "3.5rem", marginBottom: "0.75rem" }}>{nextCfg.icon}</div>
+            <div style={{ marginBottom: "0.75rem" }}><nextCfg.icon size={56} color={nextCfg.accent} strokeWidth={1.25} /></div>
             <div style={{ color: nextCfg.accent, fontSize: "2rem", fontWeight: "900", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
               {cfg.next}
             </div>

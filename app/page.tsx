@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { Settings, Medal, Microscope, Brain, BarChart2, Zap, Flame, ClipboardList, Award, type LucideIcon } from "lucide-react";
 
 // ─── INTERSECTION OBSERVER HOOK ───────────────────────────────────────────────
 function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
@@ -40,20 +41,20 @@ function Counter({ end, suffix = "", duration = 1800 }: { end: number; suffix?: 
 }
 
 // ─── CERT CARD ────────────────────────────────────────────────────────────────
-const CERTS = [
-  { code: "CRCST", name: "Central Service Technician", color: "#0D7377", accent: "#14BDAC", icon: "⚙️", questions: 400, desc: "The foundational certification. Master sterilization, decontamination, and instrument processing." },
-  { code: "CHL",   name: "Healthcare Leader",          color: "#1A4A8A", accent: "#4A90D9", icon: "🎖️", questions: 240, desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise." },
-  { code: "CER",   name: "Endoscope Reprocessor",      color: "#5B2D8E", accent: "#9B59D6", icon: "🔬", questions: 147, desc: "The specialist cert. Master flexible and rigid endoscope reprocessing protocols." },
+const CERTS: { code: string; name: string; color: string; accent: string; icon: LucideIcon; questions: number; desc: string }[] = [
+  { code: "CRCST", name: "Central Service Technician", color: "#0D7377", accent: "#14BDAC", icon: Settings,    questions: 400, desc: "The foundational certification. Master sterilization, decontamination, and instrument processing." },
+  { code: "CHL",   name: "Healthcare Leader",          color: "#1A4A8A", accent: "#4A90D9", icon: Medal,       questions: 240, desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise." },
+  { code: "CER",   name: "Endoscope Reprocessor",      color: "#5B2D8E", accent: "#9B59D6", icon: Microscope,  questions: 147, desc: "The specialist cert. Master flexible and rigid endoscope reprocessing protocols." },
 ];
 
 // ─── FEATURES ─────────────────────────────────────────────────────────────────
-const FEATURES = [
-  { icon: "🧠", title: "AI Study Chat", desc: "Ask anything. Get expert answers about sterile processing, instruments, and exam concepts — powered by Claude." },
-  { icon: "📊", title: "Domain Mastery Tracking", desc: "See exactly which chapters need work. Color-coded progress bars show your weak spots before they cost you on exam day." },
-  { icon: "⚡", title: "Custom Quiz Mode", desc: "Filter by domain, difficulty, or chapter. Build targeted practice sessions around your specific gaps." },
-  { icon: "🔥", title: "Streak Tracking", desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
-  { icon: "📋", title: "Exam Readiness Score", desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
-  { icon: "🏅", title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
+const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
+  { icon: Brain,         title: "AI Study Chat",           desc: "Ask anything. Get expert answers about sterile processing, instruments, and exam concepts — powered by Claude." },
+  { icon: BarChart2,     title: "Domain Mastery Tracking", desc: "See exactly which chapters need work. Color-coded progress bars show your weak spots before they cost you on exam day." },
+  { icon: Zap,           title: "Custom Quiz Mode",        desc: "Filter by domain, difficulty, or chapter. Build targeted practice sessions around your specific gaps." },
+  { icon: Flame,         title: "Streak Tracking",         desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
+  { icon: ClipboardList, title: "Exam Readiness Score",    desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
+  { icon: Award,         title: "Certification Badges",    desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
 ];
 
 // ─── PRICING ──────────────────────────────────────────────────────────────────
@@ -299,7 +300,7 @@ export default function LandingPage() {
           transition: "all 0.3s",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <span style={{ fontSize: "1.3rem" }}>⚙️</span>
+            <Settings size={22} color="#14BDAC" strokeWidth={1.75} />
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.15rem", fontWeight: 700, color: "#FFFFFF" }}>
               SPD Cert <em style={{ color: "#14BDAC" }}>Prep</em>
             </span>
@@ -433,7 +434,7 @@ export default function LandingPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.25rem" }}>
             {FEATURES.map((f, i) => (
               <div key={i} className={`feat-card reveal ${featInView ? "visible" : ""} reveal-delay-${(i % 4) + 1}`}>
-                <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{f.icon}</div>
+                <div style={{ marginBottom: "1rem" }}><f.icon size={32} color="rgba(255,255,255,0.75)" strokeWidth={1.5} /></div>
                 <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "1.05rem", fontWeight: 600, marginBottom: "0.6rem", color: "#FFFFFF" }}>{f.title}</h3>
                 <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.88rem", lineHeight: 1.65, fontWeight: 300 }}>{f.desc}</p>
               </div>
@@ -458,7 +459,7 @@ export default function LandingPage() {
               {CERTS.map((c, i) => (
                 <div key={i} className={`cert-card reveal ${certInView ? "visible" : ""} reveal-delay-${i + 1}`} style={{ borderColor: `${c.accent}20` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                    <div style={{ fontSize: "2.2rem" }}>{c.icon}</div>
+                    <c.icon size={36} color={c.accent} strokeWidth={1.5} />
                     <span style={{ background: `${c.color}40`, border: `1px solid ${c.accent}`, borderRadius: 100, padding: "0.2rem 0.7rem", color: c.accent, fontSize: "0.7rem", fontFamily: "'DM Mono', monospace", fontWeight: 600 }}>
                       {c.questions}+ Qs
                     </span>

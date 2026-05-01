@@ -7,6 +7,7 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { BookOpen, Zap, Target, Settings, type LucideIcon } from 'lucide-react'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -551,32 +552,14 @@ export default function Home() {
             CHOOSE A STUDY MODE
           </div>
           <div className="grid grid-cols-2 gap-3 mb-8">
-            {[
-              {
-                icon: '📚',
-                name: 'Practice Quiz',
-                desc: '20 questions with instant feedback',
-                mode: 'practice' as QuizMode,
-              },
-              {
-                icon: '⚡',
-                name: 'Flashcards',
-                desc: 'Flip through 25 cards',
-                mode: 'flashcards' as QuizMode,
-              },
-              {
-                icon: '🎯',
-                name: 'Mock Exam',
-                desc: 'Timed 50-question simulation',
-                mode: 'mock' as QuizMode,
-              },
-              {
-                icon: '⚙️',
-                name: 'Custom Quiz',
-                desc: 'Build your own quiz',
-                mode: 'custom' as QuizMode,
-              },
-            ].map(({ icon, name, desc, mode: m }) => (
+            {(
+              [
+                { icon: BookOpen, name: 'Practice Quiz', desc: '20 questions with instant feedback', mode: 'practice' as QuizMode },
+                { icon: Zap,      name: 'Flashcards',    desc: 'Flip through 25 cards',             mode: 'flashcards' as QuizMode },
+                { icon: Target,   name: 'Mock Exam',     desc: 'Timed 50-question simulation',      mode: 'mock' as QuizMode },
+                { icon: Settings, name: 'Custom Quiz',   desc: 'Build your own quiz',               mode: 'custom' as QuizMode },
+              ] as { icon: LucideIcon; name: string; desc: string; mode: QuizMode }[]
+            ).map(({ icon: Icon, name, desc, mode: m }) => (
               <button
                 key={m}
                 onClick={() => {
@@ -588,7 +571,7 @@ export default function Home() {
                 }}
                 className="bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-teal hover:shadow-lg transition text-left"
               >
-                <div className="text-2xl mb-2">{icon}</div>
+                <div className="mb-2"><Icon size={24} className="text-teal" /></div>
                 <div className="font-serif text-navy font-bold text-sm">{name}</div>
                 <div className="text-xs text-text-3 mt-1">{desc}</div>
               </button>

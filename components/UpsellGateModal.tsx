@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Crown, X, Check } from 'lucide-react'
+
+const supabase = createClient()
 
 interface UpsellGateModalProps {
   isOpen: boolean

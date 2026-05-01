@@ -93,8 +93,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Libre Baskerville', 'Georgia', serif;
-  --font-mono: 'DM Mono', 'Geist Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'DM Mono', 'ui-monospace', monospace;
   --font-serif: 'Libre Baskerville', 'Georgia', serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);

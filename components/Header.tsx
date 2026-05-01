@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
+const supabase = createClient()
 
 interface HeaderProps {
-  user: any
+  user: { id: string; email?: string } | null
   streak?: number
 }
 

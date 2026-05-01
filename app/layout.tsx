@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Libre_Baskerville, DM_Mono } from 'next/font/google'
+import { Libre_Baskerville, Inter, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import FeedbackButton from '@/components/FeedbackButton'
 import './globals.css'
@@ -9,6 +9,11 @@ const libreBaskerville = Libre_Baskerville({
   weight: ['400', '700'],
   style: ['normal', 'italic'],
   variable: '--font-serif',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
 })
 
 const dmMono = DM_Mono({
@@ -46,8 +51,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable}`}>
-      <body className="font-mono antialiased bg-cream text-text">
+    <html lang="en" className={`${libreBaskerville.variable} ${inter.variable} ${dmMono.variable}`}>
+      <body className="font-sans antialiased bg-cream text-text">
         {children}
         <FeedbackButton />
         <Analytics />

@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClientWithAuthHeader } from '@/lib/supabase/server'
 import { getUserSubscription, getHourlyUsage, getDailyAiChatUsage, FREE_LIMITS } from '@/lib/subscription'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: { Authorization: request.headers.get('Authorization') || '' },
-        },
-      }
-    )
+    const supabase = createClientWithAuthHeader(request.headers.get('Authorization') || '')
 
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) {

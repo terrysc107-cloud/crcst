@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-const supabase = createClient()
 
 interface StatusData {
   plan: 'free' | 'pro' | 'triple_crown'
@@ -42,6 +41,7 @@ const CERT_COLORS: Record<string, { color: string; accent: string }> = {
 }
 
 export default function AccountPage() {
+  const supabase = createClient()
   const router = useRouter()
   const [user, setUser] = useState<{ id: string; email: string } | null>(null)
   const [statusData, setStatusData] = useState<StatusData | null>(null)

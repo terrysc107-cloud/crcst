@@ -8,8 +8,6 @@ import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
 
-const supabase = createClient()
-
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
 
@@ -27,6 +25,7 @@ interface Stats {
 }
 
 export default function Home() {
+  const supabase = createClient()
   const [screen, setScreen] = useState<Screen>('auth')
   const [user, setUser] = useState<any>(null)
   const [mode, setMode] = useState<QuizMode>('practice')
@@ -745,6 +744,7 @@ export default function Home() {
 
 // Auth Screen Component
 function AuthScreen() {
+  const supabase = createClient()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

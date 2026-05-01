@@ -5,8 +5,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Check, Crown, Sparkles, Clock } from 'lucide-react'
 
-const supabase = createClient()
-
 const PLANS = [
   {
     id: 'free',
@@ -66,6 +64,7 @@ const PLANS = [
 ]
 
 export default function PricingPage() {
+  const supabase = createClient()
   const [currentPlan, setCurrentPlan] = useState<string | null>(null)
   const [tierExpiry, setTierExpiry] = useState<string | null>(null)
   const [loading, setLoading] = useState<string | null>(null)

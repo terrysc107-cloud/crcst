@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-const supabase = createClient()
 
 interface Message {
   role: 'user' | 'ai'
@@ -10,7 +9,7 @@ interface Message {
 }
 
 export default function ChatBot() {
-  
+  const supabase = createClient()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')

@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-const supabase = createClient()
 import { useSubscription } from '@/hooks/useSubscription'
 
 interface Certification {
@@ -55,6 +54,7 @@ const certifications: Certification[] = [
 const totalQuestions = 400 + 240 + 147
 
 export default function DashboardPage() {
+  const supabase = createClient()
   const router = useRouter()
   const [earnedCerts, setEarnedCerts] = useState<{cert: string}[]>([])
   const sub = useSubscription()

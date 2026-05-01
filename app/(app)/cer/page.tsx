@@ -10,8 +10,6 @@ import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
 
-const supabase = createClient()
-
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
 
@@ -29,6 +27,7 @@ interface Stats {
 }
 
 export default function CERPage() {
+  const supabase = createClient()
   const [screen, setScreen] = useState<Screen>('auth')
   const [user, setUser] = useState<any>(null)
   const [mode, setMode] = useState<QuizMode>('practice')
@@ -567,6 +566,7 @@ export default function CERPage() {
 
 // Auth Screen Component
 function AuthScreen() {
+  const supabase = createClient()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

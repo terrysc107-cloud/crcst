@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Crown, X, Check } from 'lucide-react'
 
-const supabase = createClient()
-
 interface UpsellGateModalProps {
   isOpen: boolean
   onClose: () => void
@@ -14,6 +12,7 @@ interface UpsellGateModalProps {
 }
 
 export function UpsellGateModal({ isOpen, onClose, certName = 'CHL and CER' }: UpsellGateModalProps) {
+  const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import type { Question } from '@/lib/questions'
 import { createClient } from '@/lib/supabase/client'
-const supabase = createClient()
 
 interface QuizData {
   questions: Question[]
@@ -41,6 +40,7 @@ interface QuizProps {
 }
 
 export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user }: QuizProps) {
+  const supabase = createClient()
   const [current, setCurrent] = useState(quizData.currentIndex || 0)
   const [answers, setAnswers] = useState<(number | null)[]>(quizData.answers)
   const [showExplanation, setShowExplanation] = useState(false)

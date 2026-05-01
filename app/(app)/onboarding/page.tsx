@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-const supabase = createClient()
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -205,6 +204,7 @@ function CertCard({
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function OnboardingPage() {
+  const supabase = createClient()
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [userEmail, setUserEmail] = useState('')

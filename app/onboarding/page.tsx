@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { Sprout, Settings, Award, Pencil, Brain, Layers, Timer, type LucideIcon } from 'lucide-react'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -50,52 +51,17 @@ const CERTS = [
   },
 ]
 
-const EXPERIENCE_OPTIONS = [
-  {
-    id: 'new' as ExperienceLevel,
-    label: 'New to SPD',
-    desc: 'Just starting out or recently entered the field',
-    icon: '🌱',
-  },
-  {
-    id: 'some' as ExperienceLevel,
-    label: '1–3 Years Experience',
-    desc: 'Working in sterile processing, studying for first cert',
-    icon: '⚙️',
-  },
-  {
-    id: 'experienced' as ExperienceLevel,
-    label: '3+ Years Experience',
-    desc: 'Seasoned professional, adding to your credentials',
-    icon: '🏅',
-  },
+const EXPERIENCE_OPTIONS: { id: ExperienceLevel; label: string; desc: string; icon: LucideIcon }[] = [
+  { id: 'new',        label: 'New to SPD',           desc: 'Just starting out or recently entered the field',              icon: Sprout   },
+  { id: 'some',       label: '1–3 Years Experience', desc: 'Working in sterile processing, studying for first cert',       icon: Settings },
+  { id: 'experienced',label: '3+ Years Experience',  desc: 'Seasoned professional, adding to your credentials',           icon: Award    },
 ]
 
-const FEATURES = [
-  {
-    icon: '📝',
-    title: 'Practice Quizzes',
-    desc: 'Instant feedback on 20 randomized questions from the full question bank.',
-    href: '/crcst',
-  },
-  {
-    icon: '🧠',
-    title: 'AI Study Chat',
-    desc: 'Ask anything. Get expert explanations powered by Claude AI.',
-    href: '/crcst',
-  },
-  {
-    icon: '🃏',
-    title: 'Flashcards',
-    desc: 'Flip through key concepts to memorize definitions and procedures.',
-    href: '/crcst',
-  },
-  {
-    icon: '⏱️',
-    title: 'Mock Exam',
-    desc: 'Full timed simulation of the real certification exam format.',
-    href: '/crcst',
-  },
+const FEATURES: { icon: LucideIcon; title: string; desc: string; href: string }[] = [
+  { icon: Pencil, title: 'Practice Quizzes', desc: 'Instant feedback on 20 randomized questions from the full question bank.', href: '/crcst' },
+  { icon: Brain,  title: 'AI Study Chat',    desc: 'Ask anything. Get expert explanations powered by Claude AI.',              href: '/crcst' },
+  { icon: Layers, title: 'Flashcards',       desc: 'Flip through key concepts to memorize definitions and procedures.',        href: '/crcst' },
+  { icon: Timer,  title: 'Mock Exam',        desc: 'Full timed simulation of the real certification exam format.',             href: '/crcst' },
 ]
 
 // ─── STEP INDICATOR ───────────────────────────────────────────────────────────
@@ -503,7 +469,7 @@ export default function OnboardingPage() {
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    <span style={{ fontSize: '1.75rem', flexShrink: 0 }}>{opt.icon}</span>
+                    <opt.icon size={28} color={selected ? '#14BDAC' : 'rgba(255,255,255,0.7)'} strokeWidth={1.5} style={{ flexShrink: 0 }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, color: selected ? '#14BDAC' : '#fff', fontSize: '0.95rem', marginBottom: '0.2rem' }}>
                         {opt.label}
@@ -642,7 +608,7 @@ export default function OnboardingPage() {
                     padding: '1rem',
                   }}
                 >
-                  <div style={{ fontSize: '1.5rem', flexShrink: 0, lineHeight: 1 }}>{f.icon}</div>
+                  <f.icon size={24} color="#14BDAC" strokeWidth={1.5} style={{ flexShrink: 0 }} />
                   <div>
                     <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{f.title}</div>
                     <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{f.desc}</div>

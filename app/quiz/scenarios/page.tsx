@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
+import { Brain } from "lucide-react";
 
 export default function ScenariosQuizPage() {
   const router = useRouter();
@@ -117,7 +118,7 @@ export default function ScenariosQuizPage() {
 
         <div className="max-w-2xl mx-auto px-6 py-12">
           <div className="bg-white rounded-2xl p-8 shadow-2xl text-center">
-            <div className="text-6xl mb-4">🧠</div>
+            <div className="mb-4 flex justify-center"><Brain size={64} className="text-teal" /></div>
             <h1 className="font-serif text-3xl text-navy mb-2">
               Scenarios Complete!
             </h1>
@@ -162,7 +163,7 @@ export default function ScenariosQuizPage() {
             ← Exit
           </Link>
           <div className="text-amber font-mono text-sm">
-            🧠 SITUATIONAL JUDGMENT
+            <Brain size={14} className="inline-block mr-1 align-middle" /> SITUATIONAL JUDGMENT
           </div>
           <div className="text-teal-3 font-mono text-sm">
             {current + 1} / {scenarioQuestions.length}

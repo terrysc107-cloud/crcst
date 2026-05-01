@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { getUserSubscription, getServiceSupabase } from '@/lib/subscription'
+import { createClientWithAuthHeader, createServiceClient } from '@/lib/supabase/server'
+import { getUserSubscription } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: { Authorization: request.headers.get('Authorization') || '' },
-        },
-      }
-    )
+    const supabase = createClientWithAuthHeader(request.headers.get('Authorization') || '')
 
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) {
@@ -25,15 +17,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Mark the subscription as cancelled without revoking access immediately.
-    // The user retains paid access until tier_expires_at is reached naturally —
-    // we do NOT set tier: 'free' or update tier_expires_at here.
-    // Access will be downgraded automatically once tier_expires_at passes.
-    const serviceSupabase = getServiceSupabase()
+    // The user retains paid access until tier_expires_at is reached naturally.
+    const serviceSupabase = createServiceClient()
     const { error: updateError } = await serviceSupabase
       .from('profiles')
-      .update({
-        cancelled: true,
-      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update({ cancelled: true } as any)
       .eq('id', user.id)
 
     if (updateError) {

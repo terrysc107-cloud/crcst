@@ -1,14 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 interface HeaderProps {
-  user: any
+  user: { id: string; email?: string } | null
   streak?: number
 }
 
 export default function Header({ user, streak = 0 }: HeaderProps) {
+  const supabase = createClient()
   const handleSignOut = async () => {
     await supabase.auth.signOut()
   }

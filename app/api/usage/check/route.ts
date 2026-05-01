@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClientWithAuthHeader } from '@/lib/supabase/server'
 import { canUserAccessPaidFeature } from '@/lib/subscription'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: { Authorization: request.headers.get('Authorization') || '' },
-        },
-      }
-    )
+    const supabase = createClientWithAuthHeader(request.headers.get('Authorization') || '')
 
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) {
@@ -27,10 +19,8 @@ export async function GET(request: NextRequest) {
     }
 
     const access = await canUserAccessPaidFeature(user.id, feature)
-
-    // For Pro/Triple Crown users, limit is -1 (unlimited) - return null instead
     const isUnlimited = access.limit === -1
-    
+
     return NextResponse.json({
       allowed: access.allowed,
       reason: access.reason,

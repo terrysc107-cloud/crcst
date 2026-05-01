@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Crown, X, Check } from 'lucide-react'
 
 interface UpsellGateModalProps {
@@ -12,6 +12,7 @@ interface UpsellGateModalProps {
 }
 
 export function UpsellGateModal({ isOpen, onClose, certName = 'CHL and CER' }: UpsellGateModalProps) {
+  const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 

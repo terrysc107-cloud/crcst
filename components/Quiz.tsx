@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { Question } from '@/lib/questions'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 interface QuizData {
   questions: Question[]
@@ -11,16 +11,36 @@ interface QuizData {
   startTime: number
 }
 
+export interface QuizResults {
+  correct: number
+  total: number
+  percentage: number
+  elapsed: number
+  mode: string
+  answers: (number | null)[]
+  questions: Question[]
+}
+
+export interface QuizSessionData {
+  mode: string
+  questionIds: string[]
+  answers: (number | null)[]
+  currentQuestionIndex: number
+  elapsedTimeSeconds: number
+  timeLeftSeconds: number
+}
+
 interface QuizProps {
   quizData: QuizData
   mode: 'practice' | 'flashcards' | 'mock' | 'custom'
-  onComplete: (results: any) => void
+  onComplete: (results: QuizResults) => void
   onExit: () => void
-  onPause?: (sessionData: any) => void
-  user?: any
+  onPause?: (sessionData: QuizSessionData) => void
+  user?: { id: string; email?: string } | null
 }
 
 export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user }: QuizProps) {
+  const supabase = createClient()
   const [current, setCurrent] = useState(quizData.currentIndex || 0)
   const [answers, setAnswers] = useState<(number | null)[]>(quizData.answers)
   const [showExplanation, setShowExplanation] = useState(false)

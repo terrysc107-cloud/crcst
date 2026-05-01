@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { getSupabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 interface Message {
   role: 'user' | 'ai'
@@ -9,7 +9,7 @@ interface Message {
 }
 
 export default function ChatBot() {
-  const supabase = getSupabase()
+  const supabase = createClient()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -58,12 +58,12 @@ export default function ChatBot() {
       }
       
       setMessages((prev) => [...prev, { role: 'ai', content: data.response }])
-    } catch (e: any) {
+    } catch (e: unknown) {
       setMessages((prev) => [
         ...prev,
         {
           role: 'ai',
-          content: e.message || 'Sorry, I encountered an error. Please try again.',
+          content: e instanceof Error ? e.message : 'Sorry, I encountered an error. Please try again.',
         },
       ])
     } finally {

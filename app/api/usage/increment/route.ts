@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClientWithAuthHeader } from '@/lib/supabase/server'
 import { incrementDailyUsage, canUserAccessPaidFeature } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: { Authorization: request.headers.get('Authorization') || '' },
-        },
-      }
-    )
+    const supabase = createClientWithAuthHeader(request.headers.get('Authorization') || '')
 
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) {
@@ -26,7 +18,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid field' }, { status: 400 })
     }
 
-    // Check if user can still access the feature BEFORE incrementing
     const feature = field === 'questions_attempted' ? 'questions' : 'ai_chat'
     const accessBefore = await canUserAccessPaidFeature(user.id, feature)
 
@@ -39,13 +30,8 @@ export async function POST(request: NextRequest) {
       }, { status: 429 })
     }
 
-    // Increment usage
     const result = await incrementDailyUsage(user.id, field)
-
-    // Check limit again after incrementing
     const accessAfter = await canUserAccessPaidFeature(user.id, feature)
-    
-    // For Pro/Triple Crown users, limit is -1 (unlimited) - return null instead
     const isUnlimited = accessAfter.limit === -1
 
     return NextResponse.json({

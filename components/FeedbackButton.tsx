@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 type FeedbackType = 'bug' | 'feature' | 'question' | 'other'
 
@@ -13,6 +13,7 @@ const feedbackTypes: { value: FeedbackType; label: string; icon: string }[] = [
 ]
 
 export default function FeedbackButton() {
+  const supabase = createClient()
   const [isOpen, setIsOpen] = useState(false)
   const [type, setType] = useState<FeedbackType>('feature')
   const [message, setMessage] = useState('')

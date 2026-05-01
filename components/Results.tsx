@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { Question } from '@/lib/questions'
 
 interface ResultsProps {
   results: {
@@ -10,7 +11,7 @@ interface ResultsProps {
     elapsed: number
     mode: string
     answers?: (number | null)[]
-    questions?: any[]
+    questions?: Question[]
   }
   onRetry: () => void
   onHome: () => void
@@ -152,7 +153,7 @@ function MissedQuestionsReview({
   questions,
   answers,
 }: {
-  questions: any[]
+  questions: Question[]
   answers: (number | null)[]
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -268,7 +269,7 @@ function DomainBreakdown({
   questions,
   answers,
 }: {
-  questions: any[]
+  questions: Question[]
   answers: (number | null)[]
 }) {
   // Calculate per-domain scores

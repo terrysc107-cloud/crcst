@@ -201,7 +201,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
               <span className="text-navy font-mono">{usageInfo.used}/{usageInfo.limit}</span>
             </div>
             <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
-              <div className="h-full bg-wrong" style={{ width: '100%' }} />
+              <div className="h-full bg-wrong w-full" />
             </div>
           </div>
         )}
@@ -276,24 +276,18 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         <div className="px-6 py-8">
           <div
             onClick={() => setIsFlipped(!isFlipped)}
-            className="cursor-pointer min-h-[300px]"
-            style={{ perspective: '1000px' }}
+            className="cursor-pointer min-h-[300px] [perspective:1000px]"
           >
             <div
-              className="relative w-full transition-transform duration-500"
-              style={{
-                transformStyle: 'preserve-3d',
-                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-              }}
+              className={`relative w-full transition-transform duration-500 [transform-style:preserve-3d] ${
+                isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
+              }`}
             >
               {/* Front - Question */}
               <div
-                className={`bg-white border-2 border-cream-2 rounded-xl p-8 shadow-lg min-h-[300px] flex flex-col justify-center ${
+                className={`bg-white border-2 border-cream-2 rounded-xl p-8 shadow-lg min-h-[300px] flex flex-col justify-center [backface-visibility:hidden] ${
                   isFlipped ? 'hidden' : ''
                 }`}
-                style={{
-                  backfaceVisibility: 'hidden',
-                }}
               >
                 <div className="text-xs text-teal tracking-widest mb-4">
                   {q.domain} • {q.difficulty}
@@ -308,13 +302,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
 
               {/* Back - Answer */}
               <div
-                className={`absolute top-0 left-0 w-full bg-teal text-white rounded-xl p-8 shadow-lg min-h-[300px] flex flex-col justify-center ${
+                className={`absolute top-0 left-0 w-full bg-teal text-white rounded-xl p-8 shadow-lg min-h-[300px] flex flex-col justify-center [backface-visibility:hidden] [transform:rotateY(180deg)] ${
                   !isFlipped ? 'hidden' : ''
                 }`}
-                style={{
-                  backfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg)',
-                }}
               >
                 <div className="text-xs tracking-widest mb-4 text-teal-3">
                   ANSWER

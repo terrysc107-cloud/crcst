@@ -199,18 +199,8 @@ export default function ScenariosQuizPage() {
 
         {/* Context block (if exists) */}
         {q.context && (
-          <div style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "10px",
-            padding: "1rem 1.25rem",
-            marginBottom: "1.25rem",
-            color: "rgba(255,255,255,0.72)",
-            fontSize: "0.9rem",
-            lineHeight: 1.7,
-            fontStyle: "italic",
-          }}>
-            <span style={{ display: "block", color: "#E8A020", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.5rem", fontStyle: "normal" }}>
+          <div className="bg-white/[0.04] border border-white/[0.08] rounded-[10px] px-5 py-4 mb-5 text-white/72 text-[0.9rem] leading-[1.7] italic">
+            <span className="block text-[#E8A020] text-[0.68rem] font-mono tracking-[0.08em] mb-2 not-italic">
               SCENARIO
             </span>
             {q.context}
@@ -275,17 +265,11 @@ export default function ScenariosQuizPage() {
 
             {/* Real World Note */}
             {q.realWorldNote && (
-              <div style={{
-                marginTop: "1rem",
-                background: "rgba(232,160,32,0.06)",
-                border: "1px solid rgba(232,160,32,0.2)",
-                borderRadius: "10px",
-                padding: "1rem 1.25rem",
-              }}>
-                <p style={{ color: "#E8A020", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>
+              <div className="mt-4 bg-[#E8A020]/[0.06] border border-[#E8A020]/20 rounded-[10px] px-5 py-4">
+                <p className="text-[#E8A020] text-[0.68rem] font-mono tracking-[0.08em] mb-1">
                   IN PRACTICE
                 </p>
-                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.85rem", lineHeight: 1.65, fontStyle: "italic" }}>
+                <p className="text-white/60 text-[0.85rem] leading-[1.65] italic">
                   {q.realWorldNote}
                 </p>
               </div>

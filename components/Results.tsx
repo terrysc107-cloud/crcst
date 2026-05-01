@@ -92,7 +92,7 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
 
       {/* Resume Service Banner — shown only on passing score */}
       {passed && (
-        <div className="rounded-lg px-4 py-3 mb-6 flex items-center gap-3" style={{ background: 'rgba(13,115,119,0.08)', border: '1px solid rgba(20,189,172,0.35)' }}>
+        <div className="rounded-lg px-4 py-3 mb-6 flex items-center gap-3 bg-teal-dark/[0.08] border border-teal/35">
           <span className="text-xl flex-shrink-0">📄</span>
           <p className="text-sm text-text leading-snug flex-1">
             Great score! Make sure your resume reflects your expertise.{' '}

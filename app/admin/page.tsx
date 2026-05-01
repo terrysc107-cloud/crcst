@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { getSupabase } from '@/lib/supabase'
 import { NORTHSTAR_AGENTS, type NorthstarAgent } from './agents/config'
 import {
-  FlaskConical, LayoutDashboard, ChevronRight,
+  Bot, FlaskConical, LayoutDashboard, ChevronRight,
   Layers, Sparkles, BookOpen
 } from 'lucide-react'
 

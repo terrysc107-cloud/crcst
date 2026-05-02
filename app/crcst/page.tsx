@@ -7,6 +7,7 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -39,6 +40,7 @@ export default function Home() {
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     // Check if onboarding is complete (localStorage or database)
@@ -75,6 +77,7 @@ export default function Home() {
         loadStats(session.user.id)
         loadRateLimitInfo()
       }
+      setChecking(false)
     })
 
     // Listen for auth changes
@@ -387,6 +390,30 @@ export default function Home() {
     const mastery = domainMastery[domain]
     if (!mastery || mastery.total === 0) return 0
     return Math.round((mastery.correct / mastery.total) * 100)
+  }
+
+  // Session check in progress — show skeleton to avoid auth form flash for logged-in users
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <div className="bg-gradient-to-b from-navy to-navy-2 px-6 py-12">
+          <div className="max-w-2xl mx-auto">
+            <Skeleton className="h-3 w-24 mb-3 bg-white/10" />
+            <Skeleton className="h-10 w-3/4 mb-2 bg-white/10" />
+            <Skeleton className="h-4 w-1/2 mb-8 bg-white/10" />
+            <Skeleton className="h-20 w-full bg-white/10 rounded-lg" />
+          </div>
+        </div>
+        <div className="max-w-2xl mx-auto px-6 py-8">
+          <Skeleton className="h-4 w-32 mb-4 bg-accent" />
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-lg bg-accent" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Auth Screen

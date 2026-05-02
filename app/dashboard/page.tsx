@@ -1,11 +1,11 @@
 'use client'
 
-// Dashboard - certification selector
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Certification {
   id: string
@@ -100,7 +100,9 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {!sub.loading && (
+            {sub.loading ? (
+              <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+            ) : (
               <span style={{
                 fontSize: '0.75rem',
                 padding: '0.25rem 0.7rem',
@@ -265,7 +267,23 @@ export default function DashboardPage() {
           SELECT YOUR CERTIFICATION
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-6">
-          {certifications.map((cert) => {
+          {sub.loading ? (
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white border-2 border-cream-2 rounded-xl overflow-hidden">
+                  <Skeleton className="h-24 w-full rounded-none" />
+                  <div className="p-6">
+                    <Skeleton className="h-3 w-full mb-2" />
+                    <Skeleton className="h-3 w-3/4 mb-4" />
+                    <div className="flex justify-end">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : null}
+          {!sub.loading && certifications.map((cert) => {
             // CHL and CER require Triple Crown access
             const requiresTripleCrown = cert.id === 'chl' || cert.id === 'cer'
             const isLocked = requiresTripleCrown && !sub.canAccessCHL
@@ -335,7 +353,7 @@ export default function DashboardPage() {
             )
           })}
           {/* Situational Judgment Card */}
-          {sub.isPaid ? (
+          {!sub.loading && (sub.isPaid ? (
             <div
               onClick={() => router.push("/quiz/scenarios")}
               className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-amber hover:shadow-xl transition-all duration-300 cursor-pointer"
@@ -387,7 +405,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          )}
+          ))}
         </div>
       </div>
 

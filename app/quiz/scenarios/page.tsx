@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
 
@@ -92,8 +93,17 @@ export default function ScenariosQuizPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
-        <div className="text-teal font-mono">Loading...</div>
+      <div className="min-h-screen bg-navy">
+        <div className="max-w-2xl mx-auto px-4 pt-8">
+          <Skeleton className="h-2 w-full mb-8 bg-white/10 rounded-full" />
+          <Skeleton className="h-6 w-1/3 mb-2 bg-white/10" />
+          <Skeleton className="h-8 w-3/4 mb-6 bg-white/10" />
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-14 w-full bg-white/10 rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

@@ -241,11 +241,11 @@ export default function OnboardingPage() {
       // Check database for existing onboarding data (for returning users on new devices)
       const { data: profile } = await supabase
         .from('profiles')
-        .select('target_cert')
+        .select('target_cert, onboarding_completed_at')
         .eq('id', user.id)
         .single()
 
-      if (profile?.target_cert) {
+      if (profile?.onboarding_completed_at || profile?.target_cert) {
         // User already completed onboarding - sync localStorage and redirect
         localStorage.setItem(`onboarding_complete_${user.id}`, 'true')
         router.push('/dashboard')
@@ -272,30 +272,20 @@ export default function OnboardingPage() {
   async function saveOnboarding() {
     setSaving(true)
     try {
-      // Save to Supabase (best effort — table may or may not exist)
-      await supabase.from('user_profiles').upsert({
-        user_id: userId,
+      const primaryCert = data.certGoals[0] ?? null
+      await supabase.from('profiles').upsert({
+        id: userId,
         display_name: data.displayName || userEmail.split('@')[0],
-        cert_goals: data.certGoals,
+        target_cert: primaryCert,
         experience_level: data.experienceLevel,
         exam_date: data.examDate || null,
         study_days_per_week: data.studyDaysPerWeek,
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' })
-
-      // Also upsert into profiles so the app can detect onboarding completion
-      // on new devices (app reads target_cert from profiles table)
-      const primaryCert = data.certGoals[0] ?? null
-      await supabase.from('profiles').upsert({
-        id: userId,
-        target_cert: primaryCert,
-        onboarding_completed: true,
       })
     } catch {
-      // Silently ignore if table doesn't exist yet
+      // Silently ignore schema errors on older deployments
     }
-    // Always mark complete locally
     localStorage.setItem(`onboarding_complete_${userId}`, 'true')
     setSaving(false)
     router.push('/dashboard')

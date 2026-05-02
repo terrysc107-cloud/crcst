@@ -59,6 +59,7 @@
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
+    "resend": "^6.12.2",
     "sonner": "^1.7.1",
     "square": "^42.0.0",
     "stripe": "^21.0.1",
@@ -68,7 +69,9 @@
     "zod": "^3.24.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["sharp"]
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.0",

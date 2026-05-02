@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 interface Profile {
   id: string;
   username: string;
-  display_name: string | null;
   created_at: string;
 }
 
@@ -29,7 +28,7 @@ async function getProfileData(username: string): Promise<{ profile: Profile; cer
 
   const { data: profile } = await sb
     .from("public_profiles")
-    .select("id, username, display_name, created_at")
+    .select("id, username, created_at")
     .eq("username", username)
     .single();
 
@@ -53,7 +52,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   const data = await getProfileData(username);
-  const displayName = data?.profile.display_name ?? username;
+  const displayName = username;
 
   return {
     title: `${displayName} — SPD Cert Prep`,
@@ -108,7 +107,7 @@ export default async function PublicProfilePage({
   if (!data) notFound();
 
   const { profile, certs } = data;
-  const displayName = profile.display_name ?? username;
+  const displayName = username;
   const joinDate = new Date(profile.created_at).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",

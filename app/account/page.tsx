@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { getCertPath } from '@/lib/plan'
 
 interface StatusData {
   plan: 'free' | 'pro' | 'triple_crown'
@@ -48,6 +49,8 @@ export default function AccountPage() {
   const [quizResults, setQuizResults] = useState<QuizResult[]>([])
   const [cancelling, setCancelling] = useState(false)
   const [cancelDone, setCancelDone] = useState(false)
+  const [weakDomain, setWeakDomain] = useState<string | null>(null)
+  const [targetCert, setTargetCert] = useState<string>('CRCST')
 
   useEffect(() => {
     async function load() {
@@ -102,9 +105,18 @@ export default function AccountPage() {
         results.push(...cerResults.map(r => ({ ...r, cert_type: 'CER' as const })))
       }
 
-      // Sort by date and take top 10
       results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       setQuizResults(results.slice(0, 10))
+
+      // Load study plan for weak domain
+      const sp = await fetch('/api/study-plan', {
+        headers: { Authorization: `Bearer ${session.data.session?.access_token}` },
+      })
+      if (sp.ok) {
+        const spData = await sp.json()
+        setWeakDomain(spData.weakDomain ?? null)
+        setTargetCert(spData.targetCert ?? 'CRCST')
+      }
     }
     load()
   }, [router])
@@ -396,6 +408,23 @@ export default function AccountPage() {
             </div>
           )}
         </div>
+
+        {/* Weak domain drill */}
+        {weakDomain && (
+          <div style={{ background: 'rgba(233,196,106,0.06)', border: '1px solid rgba(233,196,106,0.2)', borderRadius: 16, padding: '1.5rem 1.75rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: '0.7rem', color: '#e9c46a', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Weakest Domain</div>
+              <div style={{ color: '#fff', fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>{weakDomain}</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem' }}>Your lowest-scoring area. Drill it now to move the needle.</div>
+            </div>
+            <Link
+              href={`${getCertPath(targetCert)}?domain=${encodeURIComponent(weakDomain)}`}
+              style={{ background: 'rgba(233,196,106,0.15)', border: '1px solid rgba(233,196,106,0.4)', color: '#e9c46a', textDecoration: 'none', padding: '0.65rem 1.25rem', borderRadius: 8, fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap' }}
+            >
+              Drill this domain →
+            </Link>
+          </div>
+        )}
 
         {/* Cancel subscription */}
         {statusData.plan === 'pro' && statusData.status === 'active' && (

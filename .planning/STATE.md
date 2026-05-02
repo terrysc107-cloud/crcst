@@ -5,22 +5,22 @@
 
 ## Active Phase
 
-**Roadmap Phase 1 — Foundation Cleanup**
-- Status: `not started`
-- Started: —
-- Lead: `Backend Builder`
-- Contract: [.planning/contracts/PHASE-1-foundation-cleanup.md](contracts/PHASE-1-foundation-cleanup.md)
+**Roadmap Phase 6 — Content Depth**
+- Status: `active`
+- Started: 2026-05-02
+- Lead: `Content Systems Builder`
+- Contract: [.planning/contracts/PHASE-6-content-depth.md](contracts/PHASE-6-content-depth.md)
 
 ## Phase Status Summary
 
 | Phase | Name | Status | Lead Agent |
 |---|---|---|---|
-| 1 | Foundation Cleanup | not started | Backend Builder |
-| 2 | Design System Unification | blocked-by-1 | Frontend Builder |
-| 3 | Core Learning Loop Polish | blocked-by-2 | Frontend Builder |
-| 4 | Gamification Engine | blocked-by-3 | Assessment Builder |
-| 5 | Personalization + Study Plans | blocked-by-4 | Systems Architect |
-| 6 | Content Depth | blocked-by-5 | Content Systems Builder |
+| 1 | Foundation Cleanup | done | Backend Builder |
+| 2 | Design System Unification | done | Frontend Builder |
+| 3 | Core Learning Loop Polish | done | Frontend Builder |
+| 4 | Gamification Engine | done | Assessment Builder |
+| 5 | Personalization + Study Plans | done | Systems Architect |
+| 6 | Content Depth | active | Content Systems Builder |
 | 7 | Marketing Rebuild + Launch | blocked-by-6 | Chief Builder |
 
 ## Open Specialists
@@ -38,4 +38,4 @@ None active. Activate per phase contract.
 
 ---
 
-*Last updated 2026-04-25.*
+*Last updated 2026-05-02.*

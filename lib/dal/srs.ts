@@ -3,8 +3,15 @@ import type { QuestionState } from '@/lib/srs'
 
 type Cert = 'crcst' | 'chl' | 'cer'
 
-// Creates a Supabase client using service role for server-side DAL functions.
-// For client-side calls, pass the browser client directly via the overloaded helpers below.
+export interface QuestionStateUpdate {
+  ease: number
+  interval_days: number
+  next_due: string
+  last_result: 'correct' | 'incorrect'
+}
+
+// Fallback client using the anon key. RLS applies — queries are scoped by user_id.
+// For client-side calls, pass the browser client directly instead.
 function getServerClient(): SupabaseClient {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,13 +55,6 @@ export async function getDueToday(
     return 0
   }
   return count ?? 0
-}
-
-export interface QuestionStateUpdate {
-  ease: number
-  interval_days: number
-  next_due: string
-  last_result: 'correct' | 'incorrect'
 }
 
 // Upserts question state after each answer.

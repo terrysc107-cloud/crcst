@@ -44,6 +44,8 @@ export function updateState(
     newInterval = 1
   }
 
+  // Use UTC arithmetic so toISOString() produces the correct date regardless of timezone.
+  // Callers should pass a UTC-noon date (or Date.UTC) to avoid midnight boundary drift.
   const nextDate = new Date(today)
   nextDate.setUTCDate(nextDate.getUTCDate() + newInterval)
 

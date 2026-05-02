@@ -11,3 +11,4 @@ create table question_state (
 alter table question_state enable row level security;
 create policy "users own their state" on question_state
   for all using (auth.uid() = user_id);
+create index question_state_due_idx on question_state (user_id, next_due);

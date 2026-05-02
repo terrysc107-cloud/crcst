@@ -31,7 +31,7 @@ export default async function StatsBar() {
       value: questionsAnswered > 0 ? questionsAnswered.toLocaleString() : "787+",
       label: "Questions Answered",
     },
-    { value: "4", label: "Certifications Covered" },
+    { value: "3", label: "Certifications Covered" },
     {
       value: badgesClaimed > 0 ? badgesClaimed.toLocaleString() : "100+",
       label: "Badges Claimed",

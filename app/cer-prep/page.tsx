@@ -32,7 +32,7 @@ const jsonLd = {
 
 export default function CerPrepPage() {
   return (
-    <div className="min-h-screen bg-navy text-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-navy text-white" style={{ fontFamily: "var(--font-dm-sans)" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -60,7 +60,7 @@ export default function CerPrepPage() {
           <span className="font-mono text-amber text-[0.7rem] font-semibold tracking-widest">CER EXAM PREP</span>
         </div>
 
-        <h1 className="text-[clamp(2rem,5vw,3.6rem)] font-black leading-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="text-[clamp(2rem,5vw,3.6rem)] font-black leading-tight mb-6" style={{ fontFamily: "var(--font-display)" }}>
           CER Practice Questions
           <br />
           <span className="text-amber">Master Endoscope Reprocessing</span>
@@ -86,7 +86,7 @@ export default function CerPrepPage() {
       {/* Content */}
       <section className="max-w-3xl mx-auto px-4 py-12 space-y-8">
         <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "var(--font-display)" }}>
             What the CER Certification Exam Tests
           </h2>
           <p className="text-white/65 leading-relaxed">
@@ -95,7 +95,7 @@ export default function CerPrepPage() {
         </div>
 
         <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "var(--font-display)" }}>
             Why Endoscope Reprocessing Requires Specialized Training
           </h2>
           <p className="text-white/65 leading-relaxed">
@@ -104,7 +104,7 @@ export default function CerPrepPage() {
         </div>
 
         <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "var(--font-display)" }}>
             16 Chapters, 147+ Practice Questions
           </h2>
           <p className="text-white/65 leading-relaxed">
@@ -113,7 +113,7 @@ export default function CerPrepPage() {
         </div>
 
         <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "var(--font-display)" }}>
             High-Level Disinfection Protocol Questions
           </h2>
           <p className="text-white/65 leading-relaxed">
@@ -122,7 +122,7 @@ export default function CerPrepPage() {
         </div>
 
         <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-2xl font-bold mb-4 text-white" style={{ fontFamily: "var(--font-display)" }}>
             CER as Your Specialist Career Move
           </h2>
           <p className="text-white/65 leading-relaxed">
@@ -133,7 +133,7 @@ export default function CerPrepPage() {
 
       {/* Stats */}
       <section className="max-w-3xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { value: "147+", label: "CER Questions" },
             { value: "16", label: "Course Chapters" },
@@ -159,7 +159,7 @@ export default function CerPrepPage() {
 
       {/* CTA */}
       <section className="py-16 px-4 text-center border-t border-white/7">
-        <h2 className="text-3xl font-black mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 className="text-3xl font-black mb-4" style={{ fontFamily: "var(--font-display)" }}>
           Ready to master endoscope reprocessing?
         </h2>
         <p className="text-white/55 mb-8 max-w-lg mx-auto">CER access is included in the Triple Crown plan. One payment — CRCST, CHL, and CER.</p>

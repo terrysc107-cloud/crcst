@@ -101,7 +101,7 @@ const PLANS = [
 
 export default function LandingPage() {
   return (
-    <div className="bg-navy text-white overflow-x-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="bg-navy text-white overflow-x-hidden" style={{ fontFamily: "var(--font-dm-sans)" }}>
 
       {/* ── NAV ─────────────────────────────────────────────────────────────── */}
       <NavBar />
@@ -141,7 +141,7 @@ export default function LandingPage() {
             </span>
           </div>
 
-          <h1 className="lp-fade-up-1 text-[clamp(2.6rem,6vw,4.2rem)] font-black leading-[1.08] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="lp-fade-up-1 text-[clamp(2.6rem,6vw,4.2rem)] font-black leading-[1.08] mb-5" style={{ fontFamily: "var(--font-display)" }}>
             Pass Your{" "}
             <span className="lp-shimmer">CRCST / CBSPD Certification</span>
             <br />The First Time.
@@ -176,7 +176,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">What You Get</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "var(--font-display)" }}>
             Everything you need to pass.<br />
             <span className="text-teal">Nothing you don't.</span>
           </h2>
@@ -199,7 +199,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Exam Coverage</p>
-            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
               All Certifications Covered
             </h2>
             <p className="text-white/50 mt-3 text-base font-light">
@@ -230,7 +230,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">The Process</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
             From signup to certified<br />
             <span className="text-teal">in four steps.</span>
           </h2>
@@ -259,7 +259,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">From the Community</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
               Real techs. Real results.
             </h2>
           </div>
@@ -291,7 +291,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="font-mono text-teal text-[0.7rem] tracking-[0.12em] mb-3 uppercase">Career Services</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5" style={{ fontFamily: "var(--font-display)" }}>
               Your certification opens doors.<br />
               <span className="text-teal">A qualified resume gets you through them.</span>
             </h2>
@@ -328,7 +328,7 @@ export default function LandingPage() {
       <section id="pricing" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Plans</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
             Start free. Upgrade when<br />
             <span className="text-teal">you're ready to commit.</span>
           </h2>
@@ -398,7 +398,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
         <div className="max-w-3xl mx-auto text-center">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
-          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4" style={{ fontFamily: "var(--font-display)" }}>
             Do you need professional study assistance?
           </h2>
           <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
@@ -422,7 +422,7 @@ export default function LandingPage() {
       <section id="faq" className="py-24 px-4 max-w-2xl mx-auto">
         <div className="text-center mb-12">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">FAQ</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
             Common questions
           </h2>
         </div>
@@ -434,7 +434,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at center, rgba(42,157,143,0.15) 0%, transparent 70%)" }} />
         <div className="relative z-10 max-w-xl mx-auto">
-          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5" style={{ fontFamily: "var(--font-display)" }}>
             Your certification is<br />
             <span className="text-teal">closer than you think.</span>
           </h2>

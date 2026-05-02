@@ -322,7 +322,7 @@ export default function PassedExamFlow() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)",
-        fontFamily: "'Georgia', serif",
+        fontFamily: "var(--font-display)",
       }}>
         <div className="w-full max-w-lg">
           {/* Header */}
@@ -338,7 +338,7 @@ export default function PassedExamFlow() {
             }}>
               You passed your exam!
             </h1>
-            <p style={{ color: "#7B96A8", fontSize: "1rem", fontFamily: "Calibri, sans-serif" }}>
+            <p style={{ color: "#7B96A8", fontSize: "1rem", fontFamily: "var(--font-dm-sans)" }}>
               Let's make it official. Enter your details to receive your digital badge.
             </p>
           </div>
@@ -354,7 +354,7 @@ export default function PassedExamFlow() {
 
             {/* Cert selector */}
             <div className="mb-6">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
+              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "var(--font-dm-sans)" }}>
                 WHICH CERTIFICATION DID YOU PASS?
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -372,7 +372,7 @@ export default function PassedExamFlow() {
                       fontSize: "0.95rem",
                       cursor: "pointer",
                       transition: "all 0.2s",
-                      fontFamily: "Georgia, serif",
+                      fontFamily: "var(--font-display)",
                     }}
                   >
                     {c}
@@ -383,7 +383,7 @@ export default function PassedExamFlow() {
 
             {/* Name */}
             <div className="mb-5">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
+              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "var(--font-dm-sans)" }}>
                 YOUR FULL NAME
               </label>
               <input
@@ -399,17 +399,17 @@ export default function PassedExamFlow() {
                   background: "rgba(255,255,255,0.05)",
                   color: "#FFFFFF",
                   fontSize: "1rem",
-                  fontFamily: "Calibri, sans-serif",
+                  fontFamily: "var(--font-dm-sans)",
                   outline: "none",
                   boxSizing: "border-box",
                 }}
               />
-              {errors.name && <p style={{ color: "#E85D04", fontSize: "0.8rem", marginTop: "0.3rem", fontFamily: "Calibri, sans-serif" }}>{errors.name}</p>}
+              {errors.name && <p style={{ color: "#E85D04", fontSize: "0.8rem", marginTop: "0.3rem", fontFamily: "var(--font-dm-sans)" }}>{errors.name}</p>}
             </div>
 
             {/* HSPA # */}
             <div className="mb-5">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
+              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "var(--font-dm-sans)" }}>
                 HSPA MEMBER NUMBER
               </label>
               <input
@@ -425,20 +425,20 @@ export default function PassedExamFlow() {
                   background: "rgba(255,255,255,0.05)",
                   color: "#FFFFFF",
                   fontSize: "1rem",
-                  fontFamily: "Calibri, sans-serif",
+                  fontFamily: "var(--font-dm-sans)",
                   outline: "none",
                   boxSizing: "border-box",
                 }}
               />
               {errors.hspaMember
-                ? <p style={{ color: "#E85D04", fontSize: "0.8rem", marginTop: "0.3rem", fontFamily: "Calibri, sans-serif" }}>{errors.hspaMember}</p>
-                : <p style={{ color: "#7B96A8", fontSize: "0.78rem", marginTop: "0.35rem", fontFamily: "Calibri, sans-serif" }}>Found on your HSPA membership card or at hspa.com</p>
+                ? <p style={{ color: "#E85D04", fontSize: "0.8rem", marginTop: "0.3rem", fontFamily: "var(--font-dm-sans)" }}>{errors.hspaMember}</p>
+                : <p style={{ color: "#7B96A8", fontSize: "0.78rem", marginTop: "0.35rem", fontFamily: "var(--font-dm-sans)" }}>Found on your HSPA membership card or at hspa.com</p>
               }
             </div>
 
             {/* Pass date */}
             <div className="mb-7">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
+              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "var(--font-dm-sans)" }}>
                 DATE YOU PASSED
               </label>
               <input
@@ -456,7 +456,7 @@ export default function PassedExamFlow() {
                   background: "rgba(255,255,255,0.05)",
                   color: "#FFFFFF",
                   fontSize: "1rem",
-                  fontFamily: "Calibri, sans-serif",
+                  fontFamily: "var(--font-dm-sans)",
                   outline: "none",
                   boxSizing: "border-box",
                   colorScheme: "dark",
@@ -473,7 +473,7 @@ export default function PassedExamFlow() {
                 padding: "0.85rem 1rem",
                 marginBottom: "1rem",
               }}>
-                <p style={{ color: "#E85D04", fontSize: "0.88rem", margin: 0, fontFamily: "Calibri, sans-serif" }}>
+                <p style={{ color: "#E85D04", fontSize: "0.88rem", margin: 0, fontFamily: "var(--font-dm-sans)" }}>
                   {errors.submit}
                 </p>
               </div>
@@ -493,7 +493,7 @@ export default function PassedExamFlow() {
                 fontWeight: "700",
                 cursor: "pointer",
                 letterSpacing: "0.03em",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
                 boxShadow: `0 4px 20px ${cfg.accent}40`,
                 transition: "all 0.2s",
               }}
@@ -501,7 +501,7 @@ export default function PassedExamFlow() {
               Claim My {cert} Badge →
             </button>
 
-            <p style={{ textAlign: "center", color: "#7B96A8", fontSize: "0.75rem", marginTop: "1rem", fontFamily: "Calibri, sans-serif" }}>
+            <p style={{ textAlign: "center", color: "#7B96A8", fontSize: "0.75rem", marginTop: "1rem", fontFamily: "var(--font-dm-sans)" }}>
               Your badge is yours to download and share on LinkedIn
             </p>
             
@@ -514,7 +514,7 @@ export default function PassedExamFlow() {
                 color: "#7B96A8",
                 fontSize: "0.85rem",
                 marginTop: "1.5rem",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
                 textDecoration: "none",
               }}
             >
@@ -541,10 +541,10 @@ export default function PassedExamFlow() {
             animation: "spin 0.8s linear infinite",
           }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <p style={{ color: "#FFFFFF", fontSize: "1.1rem", fontFamily: "Georgia, serif" }}>
+          <p style={{ color: "#FFFFFF", fontSize: "1.1rem", fontFamily: "var(--font-display)" }}>
             Verifying your certification…
           </p>
-          <p style={{ color: "#7B96A8", fontSize: "0.85rem", marginTop: "0.5rem", fontFamily: "Calibri, sans-serif" }}>
+          <p style={{ color: "#7B96A8", fontSize: "0.85rem", marginTop: "0.5rem", fontFamily: "var(--font-dm-sans)" }}>
             Generating your badge
           </p>
         </div>
@@ -557,7 +557,7 @@ export default function PassedExamFlow() {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{
         background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 40%, #021B3A 100%)",
-        fontFamily: "Georgia, serif",
+        fontFamily: "var(--font-display)",
       }}>
         {/* Confetti canvas */}
         <canvas
@@ -579,7 +579,7 @@ export default function PassedExamFlow() {
               fontSize: "0.75rem",
               color: cfg.accent,
               letterSpacing: "0.12em",
-              fontFamily: "Calibri, sans-serif",
+              fontFamily: "var(--font-dm-sans)",
               marginBottom: "1rem",
             }}>
               CERTIFIED ✓
@@ -597,7 +597,7 @@ export default function PassedExamFlow() {
             <span style={{ color: cfg.accent }}>{name}!</span>
           </h1>
 
-          <p style={{ color: "#A0BCD0", fontSize: "1rem", marginBottom: "2.5rem", fontFamily: "Calibri, sans-serif" }}>
+          <p style={{ color: "#A0BCD0", fontSize: "1rem", marginBottom: "2.5rem", fontFamily: "var(--font-dm-sans)" }}>
             You are now a <strong style={{ color: "#FFFFFF" }}>{cert}</strong> — {cfg.label}.
             <br />This is a real achievement. Be proud of it.
           </p>
@@ -651,7 +651,7 @@ export default function PassedExamFlow() {
                 padding: "1rem 0.5rem",
               }}>
                 <div style={{ color: cfg.accent, fontSize: "1.1rem", fontWeight: "700" }}>{s.value}</div>
-                <div style={{ color: "#7B96A8", fontSize: "0.7rem", letterSpacing: "0.08em", fontFamily: "Calibri, sans-serif", marginTop: "0.2rem" }}>{s.label.toUpperCase()}</div>
+                <div style={{ color: "#7B96A8", fontSize: "0.7rem", letterSpacing: "0.08em", fontFamily: "var(--font-dm-sans)", marginTop: "0.2rem" }}>{s.label.toUpperCase()}</div>
               </div>
             ))}
           </div>
@@ -671,7 +671,7 @@ export default function PassedExamFlow() {
                 fontSize: "1rem",
                 fontWeight: "700",
                 cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
                 boxShadow: `0 4px 20px ${cfg.accent}40`,
                 transition: "all 0.2s",
                 display: "flex",
@@ -696,7 +696,7 @@ export default function PassedExamFlow() {
                   fontSize: "0.9rem",
                   fontWeight: "500",
                   cursor: "pointer",
-                  fontFamily: "Calibri, sans-serif",
+                  fontFamily: "var(--font-dm-sans)",
                   transition: "all 0.2s",
                   display: "flex",
                   alignItems: "center",
@@ -724,7 +724,7 @@ export default function PassedExamFlow() {
                   color: "rgba(255,255,255,0.6)",
                   fontSize: "0.88rem",
                   textDecoration: "none",
-                  fontFamily: "Calibri, sans-serif",
+                  fontFamily: "var(--font-dm-sans)",
                   transition: "all 0.2s",
                 }}
               >
@@ -745,7 +745,7 @@ export default function PassedExamFlow() {
                   fontSize: "1rem",
                   fontWeight: "600",
                   cursor: "pointer",
-                  fontFamily: "Calibri, sans-serif",
+                  fontFamily: "var(--font-dm-sans)",
                   transition: "all 0.2s",
                 }}
               >
@@ -765,7 +765,7 @@ export default function PassedExamFlow() {
                 color: "#FFFFFF",
                 fontSize: "0.9rem",
                 cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
                 textDecoration: "none",
                 textAlign: "center",
               }}
@@ -787,7 +787,7 @@ export default function PassedExamFlow() {
               "Every instrument you process, every patient protected —
               that's what this certification means. The work you do every day saves lives."
             </p>
-            <p style={{ color: cfg.accent, fontSize: "0.78rem", marginTop: "0.75rem", letterSpacing: "0.08em", fontFamily: "Calibri, sans-serif" }}>
+            <p style={{ color: cfg.accent, fontSize: "0.78rem", marginTop: "0.75rem", letterSpacing: "0.08em", fontFamily: "var(--font-dm-sans)" }}>
               — ASEPTIC TECHNICAL SOLUTIONS
             </p>
           </div>
@@ -803,7 +803,7 @@ export default function PassedExamFlow() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{
         background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)",
-        fontFamily: "Georgia, serif",
+        fontFamily: "var(--font-display)",
       }}>
         <div className="w-full max-w-lg text-center">
 
@@ -815,13 +815,13 @@ export default function PassedExamFlow() {
             <span style={{
               background: `${cfg.color}40`, border: `1px solid ${cfg.accent}`,
               borderRadius: "100px", padding: "0.25rem 0.8rem",
-              color: cfg.accent, fontSize: "0.8rem", fontFamily: "Calibri, sans-serif",
+              color: cfg.accent, fontSize: "0.8rem", fontFamily: "var(--font-dm-sans)",
             }}>{cert} ✓</span>
             <span style={{ color: "#7B96A8", fontSize: "1.2rem" }}>→</span>
             <span style={{
               background: `${nextCfg.color}30`, border: `1px solid ${nextCfg.accent}`,
               borderRadius: "100px", padding: "0.25rem 0.8rem",
-              color: nextCfg.accent, fontSize: "0.8rem", fontFamily: "Calibri, sans-serif",
+              color: nextCfg.accent, fontSize: "0.8rem", fontFamily: "var(--font-dm-sans)",
             }}>{cfg.next}</span>
           </div>
 
@@ -830,7 +830,7 @@ export default function PassedExamFlow() {
             <span style={{ color: nextCfg.accent }}>next level?</span>
           </h1>
 
-          <p style={{ color: "#A0BCD0", fontSize: "1rem", marginBottom: "2.5rem", lineHeight: 1.6, fontFamily: "Calibri, sans-serif" }}>
+          <p style={{ color: "#A0BCD0", fontSize: "1rem", marginBottom: "2.5rem", lineHeight: 1.6, fontFamily: "var(--font-dm-sans)" }}>
             {cfg.nextDesc}
           </p>
 
@@ -846,7 +846,7 @@ export default function PassedExamFlow() {
             <div style={{ color: nextCfg.accent, fontSize: "2rem", fontWeight: "900", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
               {cfg.next}
             </div>
-            <div style={{ color: "#FFFFFF", fontSize: "0.95rem", fontFamily: "Calibri, sans-serif", opacity: 0.85 }}>
+            <div style={{ color: "#FFFFFF", fontSize: "0.95rem", fontFamily: "var(--font-dm-sans)", opacity: 0.85 }}>
               {cfg.nextLabel}
             </div>
 
@@ -865,7 +865,7 @@ export default function PassedExamFlow() {
                   borderBottom: i < 4 ? "1px solid rgba(255,255,255,0.05)" : "none",
                 }}>
                   <span style={{ color: nextCfg.accent, fontSize: "0.9rem" }}>✓</span>
-                  <span style={{ color: "#D0E4EE", fontSize: "0.88rem", fontFamily: "Calibri, sans-serif" }}>{item}</span>
+                  <span style={{ color: "#D0E4EE", fontSize: "0.88rem", fontFamily: "var(--font-dm-sans)" }}>{item}</span>
                 </div>
               ))}
             </div>
@@ -885,7 +885,7 @@ export default function PassedExamFlow() {
                 fontSize: "1.05rem",
                 fontWeight: "700",
                 cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
                 boxShadow: `0 4px 24px ${nextCfg.accent}50`,
               }}
             >
@@ -903,7 +903,7 @@ export default function PassedExamFlow() {
                 color: "#7B96A8",
                 fontSize: "0.9rem",
                 cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
               }}
             >
               ← Back to my badge
@@ -913,7 +913,7 @@ export default function PassedExamFlow() {
           {/* ATS mention */}
           <p style={{
             color: "#7B96A8", fontSize: "0.78rem", marginTop: "2rem",
-            fontFamily: "Calibri, sans-serif", lineHeight: 1.5,
+            fontFamily: "var(--font-dm-sans)", lineHeight: 1.5,
           }}>
             Need facility-wide training?{" "}
             <a href="https://aseptictechnicalsolutions.com" style={{ color: cfg.accent, textDecoration: "none" }}>
@@ -939,7 +939,7 @@ export default function PassedExamFlow() {
             </div>
             <h3 style={{
               fontSize: "1.15rem", fontWeight: "800", color: "#FFFFFF",
-              fontFamily: "Georgia, serif", marginBottom: "0.75rem", lineHeight: 1.3,
+              fontFamily: "var(--font-display)", marginBottom: "0.75rem", lineHeight: 1.3,
             }}>
               You passed. Now land the job.
             </h3>
@@ -949,7 +949,7 @@ export default function PassedExamFlow() {
                 "ATS-optimized for healthcare & SPD roles",
                 "87% of clients land interviews",
               ].map((item, i) => (
-                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "#C8D8E0", fontSize: "0.88rem", fontFamily: "Calibri, sans-serif" }}>
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "#C8D8E0", fontSize: "0.88rem", fontFamily: "var(--font-dm-sans)" }}>
                   <span style={{ color: "#E8A020", flexShrink: 0 }}>✓</span>
                   {item}
                 </li>
@@ -968,7 +968,7 @@ export default function PassedExamFlow() {
                 fontWeight: "700",
                 fontSize: "0.88rem",
                 textDecoration: "none",
-                fontFamily: "Calibri, sans-serif",
+                fontFamily: "var(--font-dm-sans)",
               }}
             >
               Get My Resume – Starting at $29 →

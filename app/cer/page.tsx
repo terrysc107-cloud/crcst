@@ -7,6 +7,7 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
+import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
 
@@ -40,7 +41,8 @@ export default function CERPage() {
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [showUpsellModal, setShowUpsellModal] = useState(false)
-  
+  const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({})
+
   const sub = useSubscription()
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function CERPage() {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        loadCorrectCounts(session.user.id)
       } else {
         // Redirect unauthenticated users to sign up first
         window.location.href = '/crcst'
@@ -60,6 +63,7 @@ export default function CERPage() {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        loadCorrectCounts(session.user.id)
       } else {
         // Redirect to sign up
         window.location.href = '/crcst'
@@ -137,6 +141,18 @@ export default function CERPage() {
 
     } catch (error) {
       console.error('Error loading stats:', error)
+    }
+  }
+
+  const loadCorrectCounts = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('question_attempts')
+        .select('question_id, was_correct')
+        .eq('user_id', userId)
+      if (data) setCorrectCounts(buildCorrectCountMap(data))
+    } catch {
+      // non-critical: quiz works fine without variant data
     }
   }
 
@@ -265,9 +281,14 @@ export default function CERPage() {
     if (quizMode === 'flashcards') selected = questions.slice(0, 25)
     if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
 
+    const withVariants = selected.map((q) => ({
+      ...q,
+      question: selectQuestionText(q.id, q.question, correctCounts[q.id] ?? 0),
+    }))
+
     setMode(quizMode)
     setQuizData({
-      questions: selected,
+      questions: withVariants,
       currentIndex: 0,
       answers: new Array(selected.length).fill(null),
       startTime: Date.now(),

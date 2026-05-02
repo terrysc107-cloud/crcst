@@ -7,6 +7,7 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -39,6 +40,7 @@ export default function Home() {
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     // Check if onboarding is complete (localStorage or database)
@@ -74,6 +76,7 @@ export default function Home() {
         setScreen('home')
         loadStats(session.user.id)
         loadRateLimitInfo()
+        loadCorrectCounts(session.user.id)
       }
     })
 
@@ -89,6 +92,7 @@ export default function Home() {
         setScreen('home')
         loadStats(session.user.id)
         loadRateLimitInfo()
+        loadCorrectCounts(session.user.id)
       } else {
         setUser(null)
         setScreen('auth')
@@ -170,6 +174,18 @@ export default function Home() {
 
     } catch (error) {
       console.error('Error loading stats:', error)
+    }
+  }
+
+  const loadCorrectCounts = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('question_attempts')
+        .select('question_id, was_correct')
+        .eq('user_id', userId)
+      if (data) setCorrectCounts(buildCorrectCountMap(data))
+    } catch {
+      // non-critical: quiz works fine without variant data
     }
   }
 
@@ -356,9 +372,15 @@ export default function Home() {
     if (quizMode === 'flashcards') selected = questions.slice(0, 25)
     if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
 
+    // Apply wording variants based on how well the user knows each question
+    const withVariants = selected.map((q) => ({
+      ...q,
+      question: selectQuestionText(q.id, q.question, correctCounts[q.id] ?? 0),
+    }))
+
     setMode(quizMode)
     setQuizData({
-      questions: selected,
+      questions: withVariants,
       currentIndex: 0,
       answers: new Array(selected.length).fill(null),
       startTime: Date.now(),

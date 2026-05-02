@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getSupabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
@@ -9,6 +9,12 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
+import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
+import { getRecentMistakeIds } from '@/lib/dal/mistakes'
+import { loadPausedSessions, saveSession, loadSession, deleteSession as deleteSessionDAL } from '@/lib/dal/sessions'
+import { calculateStreak } from '@/lib/dal/streaks'
+import SrsProgressWidget from '@/components/SrsProgressWidget'
+import DomainMasterySection from '@/components/DomainMasterySection'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -39,17 +45,39 @@ export default function CHLPage() {
   const [domainMastery, setDomainMastery] = useState<Record<string, { correct: number; total: number }>>({})
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
+  const [srsStats, setSrsStats] = useState<SrsStats | null>(null)
+  const [chatPrefill, setChatPrefill] = useState('')
+  const [allCaughtUp, setAllCaughtUp] = useState(false)
   const [showUpsellModal, setShowUpsellModal] = useState(false)
   
   const sub = useSubscription()
 
   useEffect(() => {
     // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        getSrsStats(session.user.id, 'chl', getSupabase()).then(setSrsStats)
+
+        if (typeof window !== 'undefined') {
+          const urlMode = new URLSearchParams(window.location.search).get('mode')
+          if (urlMode === 'review') {
+            const ids = await getDueTodayIds(session.user.id, 'chl', getSupabase())
+            if (ids.length > 0) {
+              setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+            } else {
+              setAllCaughtUp(true)
+              getSrsStats(session.user.id, 'chl', getSupabase()).then(setSrsStats)
+            }
+          } else if (urlMode === 'mistakes') {
+            const ids = await getRecentMistakeIds(session.user.id, 'chl', 20, getSupabase())
+            if (ids.length > 0) {
+              setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+            }
+          }
+        }
       } else {
         // Redirect unauthenticated users to sign up first
         window.location.href = '/crcst'
@@ -101,44 +129,11 @@ export default function CHLPage() {
         })
         setDomainMastery(masterySummary)
 
-        // Calculate streak
-        const uniqueDays = [...new Set(data.map((r) => {
-          const date = new Date(r.created_at)
-          return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-        }))].sort().reverse()
-        
-        let currentStreak = 0
-        const today = new Date()
-        const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
-        const yesterday = new Date(today)
-        yesterday.setDate(yesterday.getDate() - 1)
-        const yesterdayStr = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`
-        
-        if (uniqueDays[0] === todayStr || uniqueDays[0] === yesterdayStr) {
-          currentStreak = 1
-          let checkDate = new Date(uniqueDays[0] === todayStr ? today : yesterday)
-          
-          for (let i = 1; i < uniqueDays.length; i++) {
-            checkDate.setDate(checkDate.getDate() - 1)
-            const checkStr = `${checkDate.getFullYear()}-${checkDate.getMonth()}-${checkDate.getDate()}`
-            if (uniqueDays[i] === checkStr) {
-              currentStreak++
-            } else {
-              break
-            }
-          }
-        }
-        setStreak(currentStreak)
+        setStreak(calculateStreak(data.map((r: any) => r.created_at)))
       }
 
-      // Load paused sessions
-      const { data: sessions } = await supabase
-        .from('chl_quiz_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_paused', true)
-
-      if (sessions) setPausedSessions(sessions)
+      const sessions = await loadPausedSessions(userId, 'chl', getSupabase())
+      setPausedSessions(sessions)
 
     } catch (error) {
       console.error('Error loading stats:', error)
@@ -182,93 +177,67 @@ export default function CHLPage() {
 
   const savePausedSession = async (sessionData: any) => {
     if (!user) return
-    try {
-      const { error } = await supabase.from('chl_quiz_sessions').insert({
-        user_id: user.id,
-        quiz_mode: sessionData.mode,
-        question_ids: sessionData.questionIds,
-        answers: sessionData.answers,
-        current_question_index: sessionData.currentQuestionIndex,
-        selected_domains: selectedDomains,
-        difficulty,
-        elapsed_time_seconds: sessionData.elapsedTimeSeconds,
-        is_paused: true,
-      })
-
-      if (!error) {
-        const { data: sessions } = await supabase
-          .from('chl_quiz_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('is_paused', true)
-        if (sessions) setPausedSessions(sessions)
-      }
-    } catch (error) {
-      console.error('Error saving paused session:', error)
-    }
+    await saveSession({
+      userId: user.id,
+      cert: 'chl',
+      mode: sessionData.mode,
+      questionIds: sessionData.questionIds,
+      answers: sessionData.answers,
+      currentQuestionIndex: sessionData.currentQuestionIndex,
+      selectedDomains: selectedDomains ?? [],
+      difficulty: difficulty ?? 'all',
+      elapsedTimeSeconds: sessionData.elapsedTimeSeconds,
+    }, getSupabase())
+    const sessions = await loadPausedSessions(user.id, 'chl', getSupabase())
+    setPausedSessions(sessions)
   }
 
   const resumeSession = async (sessionId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('chl_quiz_sessions')
-        .select('*')
-        .eq('id', sessionId)
-        .single()
-
-      if (data && !error) {
-        const questionIds = data.question_ids as string[]
-        const resumeQuestions = QUESTIONS.filter((q) => questionIds.includes(q.id))
-
-        setQuizData({
-          questions: resumeQuestions,
-          currentIndex: data.current_question_index || 0,
-          answers: data.answers || new Array(resumeQuestions.length).fill(null),
-          startTime: Date.now() - (data.elapsed_time_seconds * 1000),
-        })
-        setMode(data.quiz_mode)
-        setScreen('quiz')
-
-        await supabase.from('chl_quiz_sessions').delete().eq('id', sessionId)
-      }
-    } catch (error) {
-      console.error('Error resuming session:', error)
-    }
+    const data = await loadSession(sessionId, getSupabase())
+    if (!data) return
+    const resumeQuestions = QUESTIONS.filter((q) => data.question_ids.includes(q.id))
+    setQuizData({
+      questions: resumeQuestions,
+      currentIndex: data.current_question_index || 0,
+      answers: data.answers || new Array(resumeQuestions.length).fill(null),
+      startTime: Date.now() - (data.elapsed_time_seconds * 1000),
+    })
+    setMode(data.quiz_mode as any)
+    setScreen('quiz')
+    await deleteSessionDAL(sessionId, getSupabase())
   }
 
   const deleteSession = async (sessionId: string) => {
     if (!user) return
-    try {
-      await supabase.from('chl_quiz_sessions').delete().eq('id', sessionId)
-      const { data: sessions } = await supabase
-        .from('chl_quiz_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_paused', true)
-      if (sessions) setPausedSessions(sessions)
-    } catch (error) {
-      console.error('Error deleting session:', error)
-    }
+    await deleteSessionDAL(sessionId, getSupabase())
+    const sessions = await loadPausedSessions(user.id, 'chl', getSupabase())
+    setPausedSessions(sessions)
   }
 
-  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string) => {
+  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string, reviewIds?: string[]) => {
     let questions = [...QUESTIONS]
 
-    if (domains && domains.length > 0) {
-      questions = questions.filter((q) => domains.includes(q.domain))
+    if (reviewIds && reviewIds.length > 0) {
+      questions = questions.filter((q) => reviewIds.includes(q.id))
+      questions = questions.sort(() => Math.random() - 0.5)
+    } else {
+      if (domains && domains.length > 0) {
+        questions = questions.filter((q) => domains.includes(q.domain))
+      }
+
+      if (diff && diff !== 'all') {
+        questions = questions.filter((q) => q.difficulty === diff)
+      }
+
+      questions = questions.sort(() => Math.random() - 0.5)
+
+      if (quizMode === 'practice') questions = questions.slice(0, 20)
+      if (quizMode === 'mock') questions = questions.slice(0, 50)
+      if (quizMode === 'flashcards') questions = questions.slice(0, 25)
+      if (quizMode === 'custom') questions = questions.slice(0, customQuestionCount)
     }
 
-    if (diff && diff !== 'all') {
-      questions = questions.filter((q) => q.difficulty === diff)
-    }
-
-    questions = questions.sort(() => Math.random() - 0.5)
-
-    let selected = questions
-    if (quizMode === 'practice') selected = questions.slice(0, 20)
-    if (quizMode === 'mock') selected = questions.slice(0, 50)
-    if (quizMode === 'flashcards') selected = questions.slice(0, 25)
-    if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
+    const selected = questions
 
     setMode(quizMode)
     setQuizData({
@@ -284,16 +253,16 @@ export default function CHLPage() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
+    if (user?.id) getSrsStats(user.id, 'chl', getSupabase()).then(setSrsStats)
+  }
+
+  const handleReturnHome = () => {
+    setScreen('home')
+    if (user?.id) getSrsStats(user.id, 'chl', getSupabase()).then(setSrsStats)
   }
 
   const getDomains = () => {
     return Array.from(new Set(QUESTIONS.map((q) => q.domain)))
-  }
-
-  const getDomainMasteryPercentage = (domain: string) => {
-    const mastery = domainMastery[domain]
-    if (!mastery || mastery.total === 0) return 0
-    return Math.round((mastery.correct / mastery.total) * 100)
   }
 
   // Auth Screen
@@ -342,12 +311,14 @@ export default function CHLPage() {
         <Quiz
           quizData={quizData}
           mode={mode}
+          cert="chl"
           onComplete={handleQuizComplete}
-          onExit={() => setScreen('home')}
+          onExit={handleReturnHome}
           onPause={savePausedSession}
+          onAskAI={(prompt) => setChatPrefill(prompt)}
           user={user}
         />
-        <ChatBot />
+        <ChatBot prefill={chatPrefill} />
       </div>
     )
   }
@@ -360,7 +331,7 @@ export default function CHLPage() {
         <Results
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
-          onHome={() => setScreen('home')}
+          onHome={handleReturnHome}
         />
         <ChatBot />
       </div>
@@ -381,7 +352,7 @@ export default function CHLPage() {
           questionCount={customQuestionCount}
           setQuestionCount={setCustomQuestionCount}
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
-          onBack={() => setScreen('home')}
+          onBack={handleReturnHome}
         />
         <ChatBot />
       </div>
@@ -453,6 +424,30 @@ export default function CHLPage() {
             </div>
           </div>
         </div>
+
+        {/* All Caught Up Banner */}
+        {allCaughtUp && (
+          <div className="mx-6 mt-6 p-4 bg-correct-bg border border-correct rounded-lg">
+            <div className="font-mono text-sm font-bold text-correct mb-1">
+              ✓ All caught up!
+            </div>
+            <div className="text-sm text-text-3">
+              {srsStats?.nextDue
+                ? `Your next review is scheduled for ${new Date(srsStats.nextDue + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}.`
+                : 'No reviews scheduled yet — answer some questions to build your review deck.'}
+            </div>
+            <button
+              onClick={() => setAllCaughtUp(false)}
+              className="mt-3 text-xs font-mono text-teal hover:underline"
+            >
+              Study something new →
+            </button>
+          </div>
+        )}
+
+        {srsStats && (srsStats.mastered > 0 || srsStats.learning > 0) && (
+          <SrsProgressWidget srsStats={srsStats} totalQuestions={QUESTIONS.length} />
+        )}
 
         {/* Study Modes */}
         <div className="px-6 py-8">
@@ -535,36 +530,7 @@ export default function CHLPage() {
           )}
 
           {/* Domain Mastery */}
-          <div className="text-xs tracking-widest text-text-3 mb-4">
-            DOMAIN MASTERY
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {getDomains().map((domain) => {
-              const pct = getDomainMasteryPercentage(domain)
-              const mastery = domainMastery[domain]
-              return (
-                <div
-                  key={domain}
-                  className="bg-white rounded-lg p-3 border border-cream-2"
-                >
-                  <div className="font-serif text-sm text-navy font-bold mb-2 truncate">
-                    {domain}
-                  </div>
-                  <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        pct >= 70 ? 'bg-correct' : pct >= 40 ? 'bg-amber' : 'bg-teal'
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-text-3 mt-1">
-                    {pct}% ({mastery?.total || 0} questions)
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <DomainMasterySection domains={getDomains()} domainMastery={domainMastery} />
         </div>
       </div>
       <ChatBot />

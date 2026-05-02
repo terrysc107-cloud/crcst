@@ -8,13 +8,24 @@ interface Message {
   content: string
 }
 
-export default function ChatBot() {
+interface ChatBotProps {
+  prefill?: string
+}
+
+export default function ChatBot({ prefill }: ChatBotProps = {}) {
   const supabase = getSupabase()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (prefill) {
+      setOpen(true)
+      setInput(prefill)
+    }
+  }, [prefill])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

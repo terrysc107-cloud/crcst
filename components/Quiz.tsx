@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Question } from '@/lib/questions'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
+import { updateState, DEFAULT_STATE, type QuestionState, type ConfidenceRating } from '@/lib/srs'
+import { upsertQuestionState } from '@/lib/dal/srs'
 
 interface QuizData {
   questions: Question[]
@@ -14,13 +16,15 @@ interface QuizData {
 interface QuizProps {
   quizData: QuizData
   mode: 'practice' | 'flashcards' | 'mock' | 'custom'
+  cert?: 'crcst' | 'chl' | 'cer'
   onComplete: (results: any) => void
   onExit: () => void
   onPause?: (sessionData: any) => void
+  onAskAI?: (prompt: string) => void
   user?: any
 }
 
-export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user }: QuizProps) {
+export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExit, onPause, onAskAI, user }: QuizProps) {
   const [current, setCurrent] = useState(quizData.currentIndex || 0)
   const [answers, setAnswers] = useState<(number | null)[]>(quizData.answers)
   const [showExplanation, setShowExplanation] = useState(false)
@@ -30,6 +34,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [pauseSaved, setPauseSaved] = useState(false)
   const [rateLimitReached, setRateLimitReached] = useState(false)
   const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null)
+  const [questionStates, setQuestionStates] = useState<Record<string, QuestionState>>({})
+  const [confidencePicked, setConfidencePicked] = useState(false)
+  const touchStartY = useRef<number | null>(null)
 
   const q = quizData.questions[current]
   const progress = ((current + 1) / quizData.questions.length) * 100
@@ -54,10 +61,61 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     return () => clearInterval(timer)
   }, [mode, timeLeft])
 
+  // Keyboard shortcuts: 1-4 select options, Space/Enter advances
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key) - 1
+        if (idx < q.options.length && !hasAnswered && !rateLimitReached) {
+          selectAnswer(idx)
+        }
+        return
+      }
+
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault()
+        if (mode === 'flashcards') {
+          setIsFlipped((f) => !f)
+        } else if (mode === 'practice') {
+          if (hasAnswered && showExplanation && confidencePicked) handleNext()
+        } else {
+          if (hasAnswered) handleNext()
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [current, hasAnswered, showExplanation, confidencePicked, mode, rateLimitReached])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const fireSrsUpdate = async (questionId: string, correct: boolean, confidence: ConfidenceRating) => {
+    if (!user?.id) return
+    const today = new Date()
+    const currentState: QuestionState = questionStates[questionId] ?? {
+      ...DEFAULT_STATE,
+      next_due: today.toISOString().split('T')[0],
+    }
+    const newState = updateState(currentState, correct ? 'correct' : 'incorrect', confidence, today)
+    setQuestionStates((prev) => ({ ...prev, [questionId]: newState }))
+    await upsertQuestionState(
+      user.id,
+      questionId,
+      { ...newState, last_result: correct ? 'correct' : 'incorrect' },
+      getSupabase()
+    )
+  }
+
+  const handleConfidencePick = (confidence: ConfidenceRating) => {
+    setConfidencePicked(true)
+    fireSrsUpdate(q.id, isCorrect, confidence)
   }
 
   const handleNext = () => {
@@ -65,6 +123,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       setCurrent(current + 1)
       setShowExplanation(false)
       setIsFlipped(false)
+      setConfidencePicked(false)
     } else {
       handleFinish()
     }
@@ -75,6 +134,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       setCurrent(current - 1)
       setShowExplanation(false)
       setIsFlipped(false)
+      setConfidencePicked(false)
     }
   }
 
@@ -107,6 +167,17 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       (a, i) => a === quizData.questions[i].correct_answer
     ).length
     const elapsed = Math.floor((Date.now() - quizData.startTime) / 1000)
+
+    // For mock mode, batch-fire SRS updates now that quiz is done
+    if (mode === 'mock' && user?.id) {
+      quizData.questions.forEach((q, i) => {
+        const ans = answers[i]
+        if (ans === null) return
+        const wasCorrect = ans === q.correct_answer
+        fireSrsUpdate(q.id, wasCorrect, wasCorrect ? 4 : 1)
+      })
+    }
+
     onComplete({
       correct,
       total: quizData.questions.length,
@@ -122,16 +193,16 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     if (mode === 'mock' && hasAnswered) return // No changing answers in mock mode
     if (hasAnswered) return // Don't count the same question twice
     if (rateLimitReached) return // Don't allow more answers if limit reached
-    
+
     const newAnswers = [...answers]
     newAnswers[current] = idx
     setAnswers(newAnswers)
 
     // Silent question attempts tracking
-    supabase.from('question_attempts').insert({
+    getSupabase().from('question_attempts').insert({
       user_id: user?.id ?? null,
       question_id: q.id,
-      cert: 'crcst',
+      cert,
       was_correct: idx === q.correct_answer,
       selected_answer: String.fromCharCode(65 + idx).toLowerCase(),
     }).then(() => {})
@@ -139,7 +210,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     // Increment daily usage count for rate limiting
     if (user?.id) {
       try {
-        const session = await supabase.auth.getSession()
+        const session = await getSupabase().auth.getSession()
         const token = session.data.session?.access_token
         const res = await fetch('/api/usage/increment', {
           method: 'POST',
@@ -149,7 +220,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           },
           body: JSON.stringify({ field: 'questions_attempted' }),
         })
-        
+
         const data = await res.json()
 
         if (res.status === 429 || data.error === 'limit_reached') {
@@ -160,12 +231,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           }
         } else if (data.used !== undefined && !data.unlimited) {
           // Update usage info (only for free users with limits)
-          setUsageInfo({ 
-            used: data.used, 
-            limit: data.limit || 20, 
-            remaining: data.remaining || 0 
+          setUsageInfo({
+            used: data.used,
+            limit: data.limit || 20,
+            remaining: data.remaining || 0
           })
-          
+
           // Check if we just hit the limit (free users only)
           if (data.remaining !== null && data.remaining <= 0) {
             setRateLimitReached(true)
@@ -179,6 +250,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     if (mode === 'practice') {
       setShowExplanation(true)
     }
+
+    // For custom mode, auto-fire SRS without a confidence picker
+    if (mode === 'custom') {
+      const wasCorrect = idx === q.correct_answer
+      fireSrsUpdate(q.id, wasCorrect, wasCorrect ? 4 : 1)
+    }
   }
 
   // Rate limit reached screen
@@ -190,10 +267,10 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           Hourly Limit Reached
         </h2>
         <p className="text-text-3 mb-6">
-          You&apos;ve used all {usageInfo?.limit || 20} free questions this hour. 
+          You&apos;ve used all {usageInfo?.limit || 20} free questions this hour.
           Your limit will reset in about an hour, or upgrade to Pro for unlimited access.
         </p>
-        
+
         {usageInfo && (
           <div className="bg-cream rounded-lg p-4 mb-6">
             <div className="flex justify-between text-sm mb-2">
@@ -276,6 +353,13 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         <div className="px-6 py-8">
           <div
             onClick={() => setIsFlipped(!isFlipped)}
+            onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY }}
+            onTouchEnd={(e) => {
+              if (touchStartY.current === null) return
+              const delta = e.changedTouches[0].clientY - touchStartY.current
+              touchStartY.current = null
+              if (Math.abs(delta) > 40) setIsFlipped(delta < 0 ? true : false)
+            }}
             className="cursor-pointer min-h-[300px]"
             style={{ perspective: '1000px' }}
           >
@@ -338,11 +422,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                   const newAnswers = [...answers]
                   newAnswers[current] = -1 // Mark as "didn't know"
                   setAnswers(newAnswers)
-                  
+                  fireSrsUpdate(q.id, false, 1)
+
                   // Increment usage count for flashcard (counts toward hourly limit)
                   if (user?.id) {
                     try {
-                      const session = await supabase.auth.getSession()
+                      const session = await getSupabase().auth.getSession()
                       const token = session.data.session?.access_token
                       const res = await fetch('/api/usage/increment', {
                         method: 'POST',
@@ -352,16 +437,16 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                         },
                         body: JSON.stringify({ field: 'questions_attempted' }),
                       })
-                      
+
                       const data = await res.json()
                       if (res.status === 429 || data.error === 'limit_reached') {
                         setRateLimitReached(true)
                         setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
                       } else if (data.used !== undefined) {
-                        setUsageInfo({ 
-                          used: data.used, 
-                          limit: data.limit || 20, 
-                          remaining: data.remaining || 0 
+                        setUsageInfo({
+                          used: data.used,
+                          limit: data.limit || 20,
+                          remaining: data.remaining || 0
                         })
                         if (data.remaining !== null && data.remaining <= 0) {
                           setRateLimitReached(true)
@@ -383,11 +468,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                   const newAnswers = [...answers]
                   newAnswers[current] = q.correct_answer // Mark as "knew it"
                   setAnswers(newAnswers)
-                  
+                  fireSrsUpdate(q.id, true, 5)
+
                   // Increment usage count for flashcard (counts toward hourly limit)
                   if (user?.id) {
                     try {
-                      const session = await supabase.auth.getSession()
+                      const session = await getSupabase().auth.getSession()
                       const token = session.data.session?.access_token
                       const res = await fetch('/api/usage/increment', {
                         method: 'POST',
@@ -397,16 +483,16 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                         },
                         body: JSON.stringify({ field: 'questions_attempted' }),
                       })
-                      
+
                       const data = await res.json()
                       if (res.status === 429 || data.error === 'limit_reached') {
                         setRateLimitReached(true)
                         setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
                       } else if (data.used !== undefined) {
-                        setUsageInfo({ 
-                          used: data.used, 
-                          limit: data.limit || 20, 
-                          remaining: data.remaining || 0 
+                        setUsageInfo({
+                          used: data.used,
+                          limit: data.limit || 20,
+                          remaining: data.remaining || 0
                         })
                         if (data.remaining !== null && data.remaining <= 0) {
                           setRateLimitReached(true)
@@ -512,19 +598,27 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       )}
 
       {/* Question */}
-      <div className="px-6 py-8">
-        <div className="text-xs text-teal tracking-widest mb-2">
-          {q.domain} • {q.difficulty}
-        </div>
-        <div className="font-serif text-xl text-navy mb-6 leading-relaxed">
-          {q.question}
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
+        {/* Elevated question card */}
+        <div className="bg-white rounded-2xl shadow-md border border-cream-2 p-5 sm:p-7 mb-5">
+          <div className="text-xs text-teal tracking-widest mb-3 font-mono">
+            {q.domain} • {q.difficulty}
+          </div>
+          <div className="font-serif text-xl text-navy leading-relaxed">
+            {q.question}
+          </div>
+          {mode === 'practice' && !hasAnswered && (
+            <div className="text-xs text-text-3 mt-4 hidden sm:block font-mono">
+              Press 1–4 to select · Space to advance
+            </div>
+          )}
         </div>
 
         {/* Options */}
-        <div className="space-y-3 mb-8">
+        <div className="space-y-3 mb-6">
           {q.options.map((opt, idx) => {
             let optionClass =
-              'w-full text-left px-4 py-3 rounded-lg border-2 transition font-mono text-sm'
+              'w-full text-left px-5 py-4 rounded-xl border-2 transition font-mono text-sm'
 
             if (mode === 'practice' && showExplanation) {
               if (idx === q.correct_answer) {
@@ -558,17 +652,59 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           })}
         </div>
 
-        {/* Explanation (practice mode only) */}
+        {/* Explanation + confidence picker (practice mode only) */}
         {mode === 'practice' && showExplanation && (
-          <div
-            className={`p-4 rounded-lg mb-6 fadeUp ${
-              isCorrect ? 'bg-correct-bg border border-correct' : 'bg-wrong-bg border border-wrong'
-            }`}
-          >
-            <div className="font-mono text-sm font-bold mb-2">
-              {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+          <div className="mb-6">
+            <div
+              className={`p-4 rounded-lg fadeUp ${
+                isCorrect ? 'bg-correct-bg border border-correct' : 'bg-wrong-bg border border-wrong'
+              }`}
+            >
+              <div className="font-mono text-sm font-bold mb-2">
+                {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+              </div>
+              <div className="text-sm leading-relaxed">{q.explanation}</div>
+              {onAskAI && (
+                <button
+                  onClick={() => onAskAI(`Explain this question to me: "${q.question}" — the correct answer is "${q.options[q.correct_answer]}". ${q.explanation}`)}
+                  className="mt-3 flex items-center gap-1.5 text-xs font-mono text-teal hover:text-teal-2 transition"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Ask AI to explain
+                </button>
+              )}
             </div>
-            <div className="text-sm leading-relaxed">{q.explanation}</div>
+
+            {/* Confidence picker */}
+            {!confidencePicked ? (
+              <div className="mt-3 p-4 bg-white border border-cream-2 rounded-lg">
+                <div className="text-xs tracking-widest text-text-3 mb-3">
+                  HOW WELL DID YOU KNOW THIS?
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {([
+                    { label: 'Guessed', value: 1 as ConfidenceRating, color: 'border-wrong text-wrong hover:bg-wrong/10' },
+                    { label: 'Unsure', value: 2 as ConfidenceRating, color: 'border-amber text-amber hover:bg-amber/10' },
+                    { label: 'Confident', value: 4 as ConfidenceRating, color: 'border-teal text-teal hover:bg-teal/10' },
+                    { label: 'Certain', value: 5 as ConfidenceRating, color: 'border-correct text-correct hover:bg-correct/10' },
+                  ] as const).map(({ label, value, color }) => (
+                    <button
+                      key={value}
+                      onClick={() => handleConfidencePick(value)}
+                      className={`px-2 py-2 rounded-lg border-2 font-mono text-xs transition ${color}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="mt-3 p-3 bg-cream rounded-lg text-center font-mono text-xs text-text-3">
+                Review scheduled ✓
+              </div>
+            )}
           </div>
         )}
 
@@ -577,16 +713,16 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           <button
             onClick={handlePrev}
             disabled={current === 0}
-            className="px-6 py-3 bg-cream-2 text-text rounded-lg font-mono disabled:opacity-50 hover:bg-cream transition"
+            className="px-6 py-4 bg-cream-2 text-text rounded-xl font-mono disabled:opacity-50 hover:bg-cream transition min-w-[100px]"
           >
-            ← Previous
+            ← Prev
           </button>
           <button
             onClick={handleNext}
-            disabled={mode === 'practice' && !showExplanation && !hasAnswered}
-            className="px-6 py-3 bg-teal text-white rounded-lg font-mono hover:bg-teal-2 disabled:opacity-50 transition"
+            disabled={mode === 'practice' && (!showExplanation || !confidencePicked)}
+            className="px-8 py-4 bg-teal text-white rounded-xl font-mono hover:bg-teal-2 disabled:opacity-50 transition min-w-[120px]"
           >
-            {current === quizData.questions.length - 1 ? 'Finish' : 'Next →'}
+            {current === quizData.questions.length - 1 ? 'Finish ✓' : 'Next →'}
           </button>
         </div>
       </div>

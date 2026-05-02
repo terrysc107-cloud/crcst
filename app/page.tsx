@@ -1,52 +1,51 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import NavBar from "@/components/landing/NavBar";
+import FaqAccordion from "@/components/landing/FaqAccordion";
+import StatsBar from "@/components/landing/StatsBar";
+import type { Metadata } from "next";
 
-// ─── INTERSECTION OBSERVER HOOK ───────────────────────────────────────────────
-function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const currentRef = ref.current;
-    if (!currentRef) return;
-    
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
-      { threshold }
-    );
-    obs.observe(currentRef);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return [ref, inView];
-}
+export const metadata: Metadata = {
+  alternates: { canonical: "https://spdcertprep.com" },
+};
 
-// ─── ANIMATED COUNTER ─────────────────────────────────────────────────────────
-function Counter({ end, suffix = "", duration = 1800 }: { end: number; suffix?: string; duration?: number }) {
-  const [count, setCount] = useState(0);
-  const [ref, inView] = useInView(0.5);
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = end / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= end) { setCount(end); clearInterval(timer); }
-      else setCount(Math.floor(start));
-    }, 16);
-    return () => clearInterval(timer);
-  }, [inView, end, duration]);
-  return <span ref={ref as React.RefObject<HTMLSpanElement>}>{count.toLocaleString()}{suffix}</span>;
-}
+// ── Data ────────────────────────────────────────────────────────────────────
 
-// ─── CERT CARD ────────────────────────────────────────────────────────────────
 const CERTS = [
-  { code: "CRCST", name: "Central Service Technician", color: "#0D7377", accent: "#14BDAC", icon: "⚙️", questions: 400, desc: "The foundational certification. Master sterilization, decontamination, and instrument processing." },
-  { code: "CHL",   name: "Healthcare Leader",          color: "#1A4A8A", accent: "#4A90D9", icon: "🎖️", questions: 240, desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise." },
-  { code: "CER",   name: "Endoscope Reprocessor",      color: "#5B2D8E", accent: "#9B59D6", icon: "🔬", questions: 147, desc: "The specialist cert. Master flexible and rigid endoscope reprocessing protocols." },
+  {
+    code: "CRCST",
+    name: "Central Service Technician",
+    icon: "⚙️",
+    questions: 400,
+    desc: "The foundational certification. Master sterilization, decontamination, and instrument processing.",
+    borderColor: "border-teal/20",
+    labelColor: "text-teal-2",
+    badgeBg: "bg-teal/15",
+    badgeBorder: "border-teal/40",
+  },
+  {
+    code: "CHL",
+    name: "Healthcare Leader",
+    icon: "🎖️",
+    questions: 240,
+    desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise.",
+    borderColor: "border-navy-3/40",
+    labelColor: "text-teal-3",
+    badgeBg: "bg-navy-3/20",
+    badgeBorder: "border-navy-3/60",
+  },
+  {
+    code: "CER",
+    name: "Endoscope Reprocessor",
+    icon: "🔬",
+    questions: 147,
+    desc: "The specialist cert. Master flexible and rigid endoscope reprocessing protocols.",
+    borderColor: "border-amber/20",
+    labelColor: "text-amber",
+    badgeBg: "bg-amber/10",
+    badgeBorder: "border-amber/30",
+  },
 ];
 
-// ─── FEATURES ─────────────────────────────────────────────────────────────────
 const FEATURES = [
   { icon: "🧠", title: "AI Study Chat", desc: "Ask anything. Get expert answers about sterile processing, instruments, and exam concepts — powered by Claude." },
   { icon: "📊", title: "Domain Mastery Tracking", desc: "See exactly which chapters need work. Color-coded progress bars show your weak spots before they cost you on exam day." },
@@ -56,740 +55,474 @@ const FEATURES = [
   { icon: "🏅", title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
 ];
 
-// ─── PRICING ──────────────────────────────────────────────────────────────────
-const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "",
-    highlight: false,
-    features: [
-      "20 practice questions/hour",
-      "5 AI chat questions/day",
-      "Basic progress tracking",
-      "CRCST certification only",
-      "Exam readiness score",
-    ],
-    cta: "Start Free",
-    note: "No credit card required",
-    href: "/crcst",
-  },
-  {
-    name: "Pro",
-    price: "$19",
-    period: "90 days",
-    highlight: true,
-    tier: "pro",
-    features: [
-      "Unlimited practice questions",
-      "Unlimited AI Study Chat",
-      "Full domain mastery tracking",
-      "Custom quiz builder",
-      "CRCST certification",
-    ],
-    cta: "Get Pro Access",
-    note: "One-time payment",
-  },
-  {
-    name: "Triple Crown",
-    price: "$39",
-    period: "90 days",
-    highlight: false,
-    tier: "triple_crown",
-    badge: "All 3 Certs",
-    features: [
-      "Everything in Pro",
-      "CRCST certification",
-      "CHL certification",
-      "CER certification",
-      "Best value for career growth",
-    ],
-    cta: "Get Triple Crown",
-    note: "One-time payment",
-  },
-];
-
-// ─── TESTIMONIALS ─────────────────────────────────────────────────────────────
 const TESTIMONIALS = [
   { name: "Darnell W.", cert: "CRCST", text: "I failed the CRCST twice before finding this. The AI chat feature alone is worth it — I could ask follow-up questions at 11pm when I was studying. Passed on my third attempt with a 92." },
   { name: "Maria G.", cert: "CER", text: "The endoscope reprocessing content is incredibly detailed. Every chapter quiz matches exactly what showed up on the actual CER exam. I felt genuinely prepared." },
   { name: "James T.", cert: "CHL", text: "Used it for my CHL after already having my CRCST. The leadership and regulatory questions are thorough. Passed first try. Already recommended it to my whole department." },
 ];
 
-// ─── FAQ ─────────────────────────────────────────────────────────────────────
-const FAQS = [
-  { q: "Which certifications does this cover?", a: "Currently CRCST, CHL, and CER certifications — plus a Situational Judgment (SJT) module. All question banks are built from current industry content outlines." },
-  { q: "How many questions are in the question bank?", a: "787+ questions across CRCST (400), CHL (240), and CER (147), categorized by domain, chapter, and difficulty. New questions are added regularly." },
-  { q: "Is the content aligned to the actual exam?", a: "Yes. All questions are mapped to the official content outlines for each certification. We include both multiple choice and true/false question types." },
-  { q: "What is the AI Study Chat?", a: "A Claude-powered chatbot specialized in sterile processing, instrumentation, and certification content. Ask it to explain a concept, quiz you verbally, or clarify a confusing answer." },
-  { q: "Can I use this on my phone?", a: "Yes. SPD Cert Prep is a web app that works on any device — phone, tablet, or computer. No download required." },
-  { q: "What happens after I pass?", a: "You can claim a digital certification badge by entering your name and certification details. Your badge is yours to download and share on LinkedIn. You'll also get guided toward your next certification." },
+const PLANS = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "",
+    features: ["20 practice questions/hour", "5 AI chat questions/day", "Basic progress tracking", "CRCST certification only"],
+    cta: "Start Free",
+    note: "No credit card required",
+    href: "/crcst",
+    highlight: false,
+    badge: null,
+  },
+  {
+    name: "Pro",
+    price: "$19",
+    period: "90 days",
+    features: ["Unlimited practice questions", "Unlimited AI Study Chat", "Full domain mastery tracking", "Custom quiz builder", "CRCST certification"],
+    cta: "Get Pro Access",
+    note: "One-time payment",
+    href: "/pricing",
+    highlight: true,
+    badge: "MOST POPULAR",
+  },
+  {
+    name: "Triple Crown",
+    price: "$39",
+    period: "90 days",
+    features: ["Everything in Pro", "CRCST + CHL + CER access", "Best value for career growth"],
+    cta: "Get Triple Crown",
+    note: "One-time payment",
+    href: "/pricing",
+    highlight: false,
+    badge: "ALL 3 CERTS",
+  },
 ];
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 export default function LandingPage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [navScrolled, setNavScrolled] = useState(false);
-  const [heroRef, heroInView] = useInView(0.1);
-  const [statsRef, statsInView] = useInView(0.2);
-  const [featRef, featInView] = useInView(0.1);
-  const [certRef, certInView] = useInView(0.1);
-  const [pricingRef, pricingInView] = useInView(0.1);
-  const [testRef, testInView] = useInView(0.1);
-
-  useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const css = `
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: #021B3A; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(32px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; } to { opacity: 1; }
-    }
-    @keyframes floatA {
-      0%,100% { transform: translateY(0px) rotate(0deg); }
-      50%      { transform: translateY(-18px) rotate(3deg); }
-    }
-    @keyframes floatB {
-      0%,100% { transform: translateY(0px) rotate(0deg); }
-      50%      { transform: translateY(-12px) rotate(-2deg); }
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 0.5; transform: scale(1); }
-      50%      { opacity: 0.8; transform: scale(1.04); }
-    }
-    @keyframes shimmer {
-      0%   { background-position: -200% center; }
-      100% { background-position: 200% center; }
-    }
-    @keyframes gradientShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-
-    .btn-primary {
-      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-      padding: 0.9rem 2rem; border-radius: 10px; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 1rem;
-      background: linear-gradient(135deg, #0D7377, #14BDAC);
-      color: #FFFFFF;
-      box-shadow: 0 4px 20px rgba(20,189,172,0.35);
-      transition: all 0.22s; letter-spacing: 0.01em;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(20,189,172,0.45); }
-
-    .btn-ghost {
-      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-      padding: 0.85rem 1.8rem; border-radius: 10px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.95rem;
-      border: 1.5px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.8);
-      transition: all 0.22s; letter-spacing: 0.01em;
-      text-decoration: none;
-    }
-    .btn-ghost:hover { border-color: rgba(20,189,172,0.5); color: #14BDAC; background: rgba(20,189,172,0.06); }
-
-    .cert-card {
-      border-radius: 16px; padding: 1.75rem;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.03);
-      transition: all 0.3s; cursor: default;
-    }
-    .cert-card:hover { transform: translateY(-4px); border-color: rgba(20,189,172,0.3); background: rgba(255,255,255,0.05); }
-
-    .feat-card {
-      border-radius: 14px; padding: 1.6rem;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.025);
-      transition: all 0.28s;
-    }
-    .feat-card:hover { transform: translateY(-3px); border-color: rgba(20,189,172,0.25); background: rgba(20,189,172,0.04); }
-
-    .pricing-card {
-      border-radius: 18px; padding: 2rem;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      transition: all 0.28s; position: relative; overflow: hidden;
-    }
-    .pricing-card:hover { transform: translateY(-3px); }
-    .pricing-card.highlight {
-      border-color: rgba(20,189,172,0.4);
-      background: rgba(13,115,119,0.12);
-    }
-
-    .testimonial-card {
-      border-radius: 16px; padding: 1.75rem;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.025);
-    }
-
-    .faq-item {
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      overflow: hidden;
-    }
-    .faq-q {
-      width: 100%; padding: 1.2rem 0; background: none; border: none;
-      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
-      color: #FFFFFF; text-align: left; gap: 1rem;
-      transition: color 0.2s;
-    }
-    .faq-q:hover { color: #14BDAC; }
-    .faq-a {
-      overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease;
-      max-height: 0; opacity: 0;
-    }
-    .faq-a.open { max-height: 200px; opacity: 1; }
-
-    .shimmer-text {
-      background: linear-gradient(90deg, #14BDAC 0%, #FFFFFF 40%, #E8A020 60%, #14BDAC 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 4s linear infinite;
-    }
-
-    .grid-dot-bg {
-      background-image:
-        radial-gradient(circle at 1px 1px, rgba(20,189,172,0.12) 1px, transparent 0);
-      background-size: 36px 36px;
-    }
-
-    @media (max-width: 768px) {
-      .hero-title { font-size: 2.4rem !important; }
-      .hide-mobile { display: none !important; }
-      .pricing-grid { grid-template-columns: 1fr !important; }
-      .resume-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-    }
-  `;
-
   return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: css }} />
+    <div className="bg-navy text-white overflow-x-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
 
-      <div style={{ background: "#021B3A", color: "#FFFFFF", fontFamily: "'DM Sans', sans-serif", overflowX: "hidden" }}>
+      {/* ── NAV ─────────────────────────────────────────────────────────────── */}
+      <NavBar />
 
-        {/* ── NAV ──────────────────────────────────────────────────────────── */}
-        <nav style={{
-          position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-          padding: "0 2rem",
-          height: 64,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: navScrolled ? "rgba(2,27,58,0.95)" : "transparent",
-          backdropFilter: navScrolled ? "blur(16px)" : "none",
-          borderBottom: navScrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
-          transition: "all 0.3s",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <span style={{ fontSize: "1.3rem" }}>⚙️</span>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.15rem", fontWeight: 700, color: "#FFFFFF" }}>
-              SPD Cert <em style={{ color: "#14BDAC" }}>Prep</em>
+      {/* ── HERO ────────────────────────────────────────────────────────────── */}
+      <section className="lp-grid-dots relative min-h-screen flex items-center justify-center px-4 pt-24 pb-16 overflow-hidden">
+
+        {/* Background orbs */}
+        <div className="absolute top-[15%] left-[5%] w-[500px] h-[500px] rounded-full lp-pulse-a pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(42,157,143,0.18) 0%, transparent 70%)" }} />
+        <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full lp-pulse-b pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(233,196,106,0.10) 0%, transparent 70%)" }} />
+
+        {/* Floating cert badges */}
+        <div className="hidden md:block absolute left-[8%] top-[30%] lp-float-a">
+          <div className="bg-teal/20 border border-teal/40 rounded-xl px-4 py-2 backdrop-blur-sm">
+            <span className="font-mono text-teal text-xs font-semibold tracking-wider">CRCST ✓</span>
+          </div>
+        </div>
+        <div className="hidden md:block absolute right-[8%] top-[25%] lp-float-b">
+          <div className="bg-navy-3/25 border border-navy-3/50 rounded-xl px-4 py-2 backdrop-blur-sm">
+            <span className="font-mono text-teal-3 text-xs font-semibold tracking-wider">CHL ✓</span>
+          </div>
+        </div>
+        <div className="hidden md:block absolute right-[12%] bottom-[28%] lp-float-c">
+          <div className="bg-amber/10 border border-amber/30 rounded-xl px-4 py-2 backdrop-blur-sm">
+            <span className="font-mono text-amber text-xs font-semibold tracking-wider">CER ✓</span>
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          {/* Pill */}
+          <div className="lp-fade-in inline-flex items-center gap-2 bg-teal/10 border border-teal/30 rounded-full px-4 py-1.5 mb-7">
+            <span className="w-2 h-2 rounded-full bg-teal shadow-[0_0_8px_theme(colors.teal.DEFAULT)] inline-block" />
+            <span className="font-mono text-teal text-[0.72rem] font-semibold tracking-widest">
+              NOW COVERING CRCST · CHL · CER · SJT
             </span>
           </div>
 
-          <div className="hide-mobile" style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
-            {["Features", "Certifications", "Pricing", "FAQ"].map(l => (
-              <a key={l} href={`#${l.toLowerCase()}`} style={{
-                color: "rgba(255,255,255,0.65)", fontSize: "0.9rem", fontWeight: 500,
-                textDecoration: "none", transition: "color 0.2s",
-              }}
-              onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
-              onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.65)"}
-              >{l}</a>
-            ))}
+          <h1 className="lp-fade-up-1 text-[clamp(2.6rem,6vw,4.2rem)] font-black leading-[1.08] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Pass Your{" "}
+            <span className="lp-shimmer">CRCST / CBSPD Certification</span>
+            <br />The First Time.
+          </h1>
+
+          <p className="lp-fade-up-2 text-[1.15rem] text-white/60 leading-relaxed max-w-xl mx-auto mb-10 font-light">
+            700+ exam-aligned questions, AI-powered study chat, and domain mastery tracking — built specifically for sterile processing professionals.
+          </p>
+
+          <div className="lp-fade-up-3 flex flex-wrap gap-4 justify-center">
+            <Link href="/crcst"
+              className="inline-flex items-center px-8 py-4 rounded-xl font-semibold text-[1.05rem] text-white shadow-lg shadow-teal/30 hover:-translate-y-0.5 hover:shadow-teal/50 transition-all"
+              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+              Start Studying Free
+            </Link>
+            <a href="#features"
+              className="inline-flex items-center px-7 py-4 rounded-xl text-[1.05rem] font-medium border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal hover:bg-teal/5 transition-all">
+              See How It Works
+            </a>
           </div>
 
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <Link href="/crcst" className="btn-ghost" style={{ padding: "0.55rem 1.2rem", fontSize: "0.88rem" }}>Sign In</Link>
-            <Link href="/crcst" className="btn-primary" style={{ padding: "0.55rem 1.2rem", fontSize: "0.88rem" }}>Start Free</Link>
-          </div>
-        </nav>
+          <p className="font-mono text-white/35 text-xs mt-5 tracking-wider">
+            Free tier includes 20 questions/hour · No credit card required
+          </p>
+        </div>
+      </section>
 
-        {/* ── HERO ─────────────────────────────────────────────────────────── */}
-        <section className="grid-dot-bg" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "8rem 1.5rem 5rem", overflow: "hidden" }}>
+      {/* ── STATS BAR ────────────────────────────────────────────────────────── */}
+      <StatsBar />
 
-          {/* Background orbs */}
-          <div style={{ position: "absolute", top: "15%", left: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(13,115,119,0.18) 0%, transparent 70%)", animation: "pulse 6s ease-in-out infinite", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: "10%", right: "5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(232,160,32,0.1) 0%, transparent 70%)", animation: "pulse 8s ease-in-out infinite 2s", pointerEvents: "none" }} />
+      {/* ── FEATURES ─────────────────────────────────────────────────────────── */}
+      <section id="features" className="py-24 px-4 max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">What You Get</p>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Everything you need to pass.<br />
+            <span className="text-teal">Nothing you don't.</span>
+          </h2>
+        </div>
 
-          {/* Floating badges */}
-          <div className="hide-mobile" style={{ position: "absolute", left: "8%", top: "30%", animation: "floatA 5s ease-in-out infinite" }}>
-            <div style={{ background: "rgba(13,115,119,0.25)", border: "1px solid rgba(20,189,172,0.4)", borderRadius: 12, padding: "0.6rem 1rem", backdropFilter: "blur(8px)" }}>
-              <span style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.8rem", fontWeight: 600 }}>CRCST ✓</span>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {FEATURES.map((f, i) => (
+            <div key={i}
+              className="rounded-2xl p-7 border border-white/6 bg-white/[0.025] hover:-translate-y-1 hover:border-teal/25 hover:bg-teal/[0.04] transition-all duration-300">
+              <div className="text-3xl mb-4">{f.icon}</div>
+              <h3 className="text-[1.05rem] font-semibold mb-2 text-white">{f.title}</h3>
+              <p className="text-white/55 text-sm leading-relaxed font-light">{f.desc}</p>
             </div>
-          </div>
-          <div className="hide-mobile" style={{ position: "absolute", right: "8%", top: "25%", animation: "floatB 6s ease-in-out infinite 1s" }}>
-            <div style={{ background: "rgba(26,74,138,0.25)", border: "1px solid rgba(74,144,217,0.4)", borderRadius: 12, padding: "0.6rem 1rem", backdropFilter: "blur(8px)" }}>
-              <span style={{ color: "#4A90D9", fontFamily: "'DM Mono', monospace", fontSize: "0.8rem", fontWeight: 600 }}>CHL ✓</span>
-            </div>
-          </div>
-          <div className="hide-mobile" style={{ position: "absolute", right: "12%", bottom: "28%", animation: "floatA 7s ease-in-out infinite 0.5s" }}>
-            <div style={{ background: "rgba(91,45,142,0.25)", border: "1px solid rgba(155,89,214,0.4)", borderRadius: 12, padding: "0.6rem 1rem", backdropFilter: "blur(8px)" }}>
-              <span style={{ color: "#9B59D6", fontFamily: "'DM Mono', monospace", fontSize: "0.8rem", fontWeight: 600 }}>CER ✓</span>
-            </div>
-          </div>
+          ))}
+        </div>
+      </section>
 
-          <div ref={heroRef} style={{ maxWidth: 780, textAlign: "center", position: "relative", zIndex: 2 }}>
-
-            {/* Badge */}
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              background: "rgba(20,189,172,0.1)", border: "1px solid rgba(20,189,172,0.3)",
-              borderRadius: 100, padding: "0.4rem 1.1rem", marginBottom: "1.75rem",
-              animation: heroInView ? "fadeIn 0.5s ease forwards" : "none",
-            }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#14BDAC", display: "inline-block", boxShadow: "0 0 8px #14BDAC" }} />
-              <span style={{ color: "#14BDAC", fontSize: "0.78rem", fontWeight: 600, fontFamily: "'DM Mono', monospace", letterSpacing: "0.08em" }}>
-                NOW COVERING CRCST · CHL · CER · SJT
-              </span>
-            </div>
-
-            <h1 className="hero-title" style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(2.6rem, 6vw, 4.2rem)",
-              fontWeight: 900, lineHeight: 1.08,
-              marginBottom: "1.5rem",
-              animation: heroInView ? "fadeUp 0.7s ease 0.1s both" : "none",
-            }}>
-              Pass Your{" "}
-              <span className="shimmer-text">CRCST / CBSPD Certification</span>
-              <br />The First Time.
-            </h1>
-
-            <p style={{
-              fontSize: "1.15rem", color: "rgba(255,255,255,0.62)", lineHeight: 1.7,
-              maxWidth: 580, margin: "0 auto 2.5rem",
-              fontWeight: 300,
-              animation: heroInView ? "fadeUp 0.7s ease 0.25s both" : "none",
-            }}>
-              700+ exam-aligned questions, AI-powered study chat, and domain mastery tracking — built specifically for sterile processing professionals.
-            </p>
-
-            <div style={{
-              display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap",
-              animation: heroInView ? "fadeUp 0.7s ease 0.4s both" : "none",
-            }}>
-              <Link href="/crcst" className="btn-primary" style={{ fontSize: "1.05rem", padding: "1rem 2.2rem" }}>
-                Start Studying Free
-              </Link>
-              <a href="#features" className="btn-ghost" style={{ fontSize: "1.05rem", padding: "1rem 2rem" }}>
-                See How It Works
-              </a>
-            </div>
-
-            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.8rem", marginTop: "1.25rem", fontFamily: "'DM Mono', monospace" }}>
-              Free tier includes 20 questions/hour · No credit card required
+      {/* ── CERTIFICATIONS ───────────────────────────────────────────────────── */}
+      <section id="certifications" className="py-20 px-4 bg-white/[0.015] border-t border-white/5 border-b border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Exam Coverage</p>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+              All Certifications Covered
+            </h2>
+            <p className="text-white/50 mt-3 text-base font-light">
+              One platform. Every certification you'll ever need in sterile processing.
             </p>
           </div>
-        </section>
 
-        {/* ── STATS BAR ────────────────────────────────────────────────────── */}
-        <section ref={statsRef} style={{ borderTop: "1px solid rgba(255,255,255,0.07)", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)", padding: "2.5rem 1.5rem" }}>
-          <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", textAlign: "center" }}>
-            {[
-              { n: 700, s: "+", label: "Practice Questions" },
-              { n: 4,   s: "",  label: "Certifications Covered" },
-              { n: 16,  s: "",  label: "CER Course Chapters" },
-              { n: 24,  s: "",  label: "CRCST Content Domains" },
-            ].map((st, i) => (
-              <div key={i} style={{ opacity: statsInView ? 1 : 0, transition: `opacity 0.5s ${i * 0.1}s` }}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 900, color: "#14BDAC", lineHeight: 1 }}>
-                  {statsInView ? <Counter end={st.n} suffix={st.s} /> : "0"}
+          <div className="grid md:grid-cols-3 gap-5">
+            {CERTS.map((c, i) => (
+              <div key={i}
+                className={`rounded-2xl p-7 border ${c.borderColor} bg-white/[0.03] hover:-translate-y-1 hover:bg-white/5 transition-all duration-300`}>
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-4xl">{c.icon}</span>
+                  <span className={`${c.badgeBg} border ${c.badgeBorder} rounded-full px-3 py-0.5 font-mono text-[0.68rem] font-semibold ${c.labelColor}`}>
+                    {c.questions}+ Qs
+                  </span>
                 </div>
-                <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem", marginTop: "0.4rem", fontWeight: 400, fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }}>{st.label}</div>
+                <div className={`font-mono text-2xl font-black tracking-wider mb-1 ${c.labelColor}`}>{c.code}</div>
+                <div className="text-white/70 text-sm font-medium mb-3">{c.name}</div>
+                <p className="text-white/45 text-[0.82rem] leading-relaxed font-light">{c.desc}</p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── FEATURES ─────────────────────────────���───────────────────────── */}
-        <section id="features" ref={featRef} style={{ padding: "6rem 1.5rem", maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>WHAT YOU GET</p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900, lineHeight: 1.15 }}>
-              Everything you need to pass.<br />
-              <span style={{ color: "#14BDAC" }}>Nothing you don't.</span>
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────────── */}
+      <section className="py-24 px-4 max-w-4xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">The Process</p>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            From signup to certified<br />
+            <span className="text-teal">in four steps.</span>
+          </h2>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { step: "01", title: "Create your account", desc: "Free sign up. Tell us which cert you're targeting and your exam date." },
+            { step: "02", title: "Practice by domain", desc: "Work through each chapter. Weak spots are flagged so you know where to focus." },
+            { step: "03", title: "Ask the AI anything", desc: "Stuck on a concept? The AI Study Chat explains it in plain language, instantly." },
+            { step: "04", title: "Pass and claim your badge", desc: "Download your digital badge and start the next cert." },
+          ].map((s, i) => (
+            <div key={i} className="text-center px-2 py-6">
+              <div className="w-14 h-14 rounded-full border-2 border-teal/40 flex items-center justify-center mx-auto mb-5 font-mono text-teal font-semibold">
+                {s.step}
+              </div>
+              <h3 className="text-base font-semibold mb-2 text-white">{s.title}</h3>
+              <p className="text-white/50 text-sm leading-relaxed font-light">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────────────────────── */}
+      <section className="py-20 px-4 bg-white/[0.015] border-t border-white/5 border-b border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">From the Community</p>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Real techs. Real results.
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.25rem" }}>
-            {FEATURES.map((f, i) => (
-              <div key={i} className={`feat-card reveal ${featInView ? "visible" : ""} reveal-delay-${(i % 4) + 1}`}>
-                <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{f.icon}</div>
-                <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "1.05rem", fontWeight: 600, marginBottom: "0.6rem", color: "#FFFFFF" }}>{f.title}</h3>
-                <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.88rem", lineHeight: 1.65, fontWeight: 300 }}>{f.desc}</p>
+          <div className="grid md:grid-cols-3 gap-5">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i}
+                className="rounded-2xl p-7 border border-white/7 bg-white/[0.025]">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, j) => (
+                    <span key={j} className="text-amber text-sm">★</span>
+                  ))}
+                </div>
+                <p className="text-white/70 text-sm leading-relaxed font-light italic mb-5">"{t.text}"</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-white text-sm font-semibold">{t.name}</span>
+                  <span className="bg-teal/12 border border-teal/30 rounded-full px-3 py-0.5 font-mono text-teal text-[0.7rem]">
+                    {t.cert} ✓
+                  </span>
+                </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── CERTIFICATIONS ───────────────────────────────────────────────── */}
-        <section id="certifications" ref={certRef} style={{ padding: "5rem 1.5rem", background: "rgba(255,255,255,0.015)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-              <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>EXAM COVERAGE</p>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900 }}>
-                All Certifications Covered
-              </h2>
-              <p style={{ color: "rgba(255,255,255,0.5)", marginTop: "0.75rem", fontSize: "1rem", fontWeight: 300 }}>
-                One platform. Every certification you'll ever need in sterile processing.
-              </p>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem" }}>
-              {CERTS.map((c, i) => (
-                <div key={i} className={`cert-card reveal ${certInView ? "visible" : ""} reveal-delay-${i + 1}`} style={{ borderColor: `${c.accent}20` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-                    <div style={{ fontSize: "2.2rem" }}>{c.icon}</div>
-                    <span style={{ background: `${c.color}40`, border: `1px solid ${c.accent}`, borderRadius: 100, padding: "0.2rem 0.7rem", color: c.accent, fontSize: "0.7rem", fontFamily: "'DM Mono', monospace", fontWeight: 600 }}>
-                      {c.questions}+ Qs
-                    </span>
-                  </div>
-                  <div style={{ color: c.accent, fontFamily: "'DM Mono', monospace", fontSize: "1.3rem", fontWeight: 700, letterSpacing: "0.05em", marginBottom: "0.3rem" }}>{c.code}</div>
-                  <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.85rem", fontWeight: 500, marginBottom: "0.75rem" }}>{c.name}</div>
-                  <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.82rem", lineHeight: 1.6, fontWeight: 300 }}>{c.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-        <section style={{ padding: "6rem 1.5rem", maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>THE PROCESS</p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900 }}>
-              From signup to certified<br />
-              <span style={{ color: "#14BDAC" }}>in four steps.</span>
+      {/* ── RESUME SERVICE ───────────────────────────────────────────────────── */}
+      <section className="py-20 px-4">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <p className="font-mono text-teal text-[0.7rem] tracking-[0.12em] mb-3 uppercase">Career Services</p>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Your certification opens doors.<br />
+              <span className="text-teal">A qualified resume gets you through them.</span>
             </h2>
+            <p className="text-white/60 leading-relaxed mb-8 text-[0.95rem]">
+              Certification is just the beginning. Stand out to hiring managers and pass ATS filters with a professionally written resume tailored for healthcare and SPD roles.
+            </p>
+            <a href="https://www.myqualifiedresume.com/" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-white font-bold text-[0.95rem] hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+              Explore Resume Services →
+            </a>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem" }}>
+          <div className="flex flex-col gap-4">
             {[
-              { step: "01", title: "Create your account", desc: "Free sign up. Tell us which cert you're targeting and your exam date." },
-              { step: "02", title: "Practice by domain", desc: "Work through each chapter. Weak spots are flagged so you know where to focus." },
-              { step: "03", title: "Ask the AI anything", desc: "Stuck on a concept? The AI Study Chat explains it in plain language, instantly." },
-              { step: "04", title: "Pass and claim your badge", desc: "Download your digital badge and start the next cert." },
-            ].map((s, i) => (
-              <div key={i} style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
-                <div style={{
-                  width: 56, height: 56, borderRadius: "50%",
-                  border: "2px solid rgba(20,189,172,0.4)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  margin: "0 auto 1.2rem",
-                  fontFamily: "'DM Mono', monospace", color: "#14BDAC", fontWeight: 600, fontSize: "0.95rem",
-                }}>
-                  {s.step}
+              { stat: "87%", label: "Interview Rate", desc: "Clients who land interviews after using our service" },
+              { stat: "48h", label: "Delivery Time", desc: "Expert-written and human-reviewed, fast" },
+              { stat: "$29", label: "Starting Price", desc: "Affordable packages from Starter to Premium" },
+            ].map(({ stat, label, desc }) => (
+              <div key={label}
+                className="flex items-start gap-5 bg-white/[0.04] border border-teal/20 rounded-2xl px-5 py-4">
+                <div className="font-serif text-3xl font-black text-teal leading-none flex-shrink-0">{stat}</div>
+                <div>
+                  <div className="font-semibold text-sm mb-0.5 text-white">{label}</div>
+                  <div className="text-xs text-white/50 leading-snug">{desc}</div>
                 </div>
-                <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.6rem", color: "#FFFFFF" }}>{s.title}</h3>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem", lineHeight: 1.6, fontWeight: 300 }}>{s.desc}</p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
-        <section ref={testRef} style={{ padding: "5rem 1.5rem", background: "rgba(255,255,255,0.015)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-              <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>FROM THE COMMUNITY</p>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)", fontWeight: 900 }}>
-                Real techs. Real results.
-              </h2>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.25rem" }}>
-              {TESTIMONIALS.map((t, i) => (
-                <div key={i} className={`testimonial-card reveal ${testInView ? "visible" : ""} reveal-delay-${i + 1}`}>
-                  <div style={{ display: "flex", gap: "0.3rem", marginBottom: "1rem" }}>
-                    {[...Array(5)].map((_, j) => <span key={j} style={{ color: "#E8A020", fontSize: "0.9rem" }}>★</span>)}
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", lineHeight: 1.7, fontWeight: 300, marginBottom: "1.25rem", fontStyle: "italic" }}>
-                    "{t.text}"
-                  </p>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ color: "#FFFFFF", fontSize: "0.88rem", fontWeight: 600 }}>{t.name}</span>
-                    <span style={{ background: "rgba(20,189,172,0.12)", border: "1px solid rgba(20,189,172,0.3)", borderRadius: 100, padding: "0.2rem 0.65rem", color: "#14BDAC", fontSize: "0.72rem", fontFamily: "'DM Mono', monospace" }}>
-                      {t.cert} ✓
-                    </span>
-                  </div>
+      {/* ── PRICING ──────────────────────────────────────────────────────────── */}
+      <section id="pricing" className="py-24 px-4 max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Plans</p>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Start free. Upgrade when<br />
+            <span className="text-teal">you're ready to commit.</span>
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-5 items-start">
+          {PLANS.map((p, i) => (
+            <div key={i}
+              className={`relative rounded-2xl p-8 border transition-all hover:-translate-y-1 ${
+                p.highlight
+                  ? "border-teal/40 bg-teal/10"
+                  : "border-white/8 bg-white/[0.03]"
+              }`}>
+              {p.highlight && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+                  style={{ background: "linear-gradient(90deg, var(--teal), var(--teal-2))" }} />
+              )}
+              {p.badge && (
+                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 font-mono text-[0.7rem] font-bold text-white whitespace-nowrap ${
+                  p.highlight
+                    ? "bg-gradient-to-r from-navy-3 to-teal"
+                    : "bg-gradient-to-r from-amber to-amber-2"
+                }`}>
+                  {p.badge}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              )}
 
-        {/* ── RESUME SERVICE ───────────────────────────────────────────────── */}
-        <section style={{ background: "#021B3A", padding: "5rem 1.5rem" }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }} className="resume-grid">
-              <div>
-                <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.72rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>CAREER SERVICES</p>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", fontWeight: 900, lineHeight: 1.2, marginBottom: "1.25rem" }}>
-                  Your certification opens doors.<br />
-                  <span style={{ color: "#14BDAC" }}>A qualified resume gets you through them.</span>
-                </h2>
-                <p style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7, marginBottom: "2rem", fontSize: "0.95rem" }}>
-                  Certification is just the beginning. Stand out to hiring managers and pass ATS filters with a professionally written resume tailored for healthcare and SPD roles.
-                </p>
-                <a
-                  href="https://www.myqualifiedresume.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.85rem 2rem", borderRadius: 10,
-                    background: "linear-gradient(135deg, #0D7377, #14BDAC)",
-                    color: "#fff", fontWeight: 700, textDecoration: "none", fontSize: "0.95rem",
-                  }}
-                >
-                  Explore Resume Services →
-                </a>
+              <div className="mb-6">
+                <h3 className={`font-mono text-[0.8rem] tracking-wider mb-3 ${p.highlight ? "text-teal" : "text-white/50"}`}>
+                  {p.name.toUpperCase()}
+                </h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="font-serif text-5xl font-black text-white">{p.price}</span>
+                  {p.period && <span className="text-white/40 text-sm">/ {p.period}</span>}
+                </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {[
-                  { stat: "87%", label: "Interview Rate", desc: "Clients who land interviews after using our service" },
-                  { stat: "48h", label: "Delivery Time", desc: "Expert-written and human-reviewed, fast" },
-                  { stat: "$29", label: "Starting Price", desc: "Affordable packages from Starter to Premium" },
-                ].map(({ stat, label, desc }) => (
-                  <div key={label} style={{
-                    display: "flex", alignItems: "flex-start", gap: "1.25rem",
-                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(20,189,172,0.2)",
-                    borderRadius: 14, padding: "1.25rem 1.5rem",
-                  }}>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "2rem", fontWeight: 900, color: "#14BDAC", lineHeight: 1, flexShrink: 0 }}>{stat}</div>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.9rem", marginBottom: "0.2rem" }}>{label}</div>
-                      <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{desc}</div>
-                    </div>
+
+              <div className="mb-7 space-y-2">
+                {p.features.map((f, j) => (
+                  <div key={j} className="flex items-start gap-2.5 py-1.5 border-b border-white/5 last:border-0">
+                    <span className={`text-sm mt-0.5 flex-shrink-0 ${p.highlight ? "text-teal" : p.badge === "ALL 3 CERTS" ? "text-amber" : "text-white/40"}`}>✓</span>
+                    <span className="text-white/70 text-sm font-light">{f}</span>
                   </div>
                 ))}
               </div>
+
+              <Link href={p.href}
+                className={`block w-full text-center py-3.5 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90 ${
+                  p.badge === "ALL 3 CERTS"
+                    ? "shadow-lg shadow-amber/25"
+                    : "shadow-lg shadow-teal/25"
+                }`}
+                style={{
+                  background: p.badge === "ALL 3 CERTS"
+                    ? "linear-gradient(135deg, var(--amber), var(--amber-2))"
+                    : "linear-gradient(135deg, var(--teal), var(--teal-2))",
+                }}>
+                {p.cta}
+              </Link>
+              <p className="font-mono text-white/30 text-[0.72rem] text-center mt-3">{p.note}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── ATS CALLOUT ──────────────────────────────────────────────────────── */}
+      <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Do you need professional study assistance?
+          </h2>
+          <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
+            Aseptic Technical Solutions offers a proven certification training program with flexible options built for every learner — in-person classes, live virtual sessions, and self-study formats. Whether you are preparing solo or building a high-performing SPD team, our expert instructors are ready to help you get certified and stay compliant.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a href="https://aseptictechnicalsolutions.com"
+              className="inline-flex items-center px-6 py-3 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+              Explore Training Programs at Aseptic Technical Solutions
+            </a>
+            <a href="mailto:contact@aseptictechnicalsolutions.com"
+              className="inline-flex items-center px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal transition-all">
+              Contact Us Directly
+            </a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── PRICING ──────────────────────────────────────────────────────── */}
-        <section id="pricing" ref={pricingRef} style={{ padding: "6rem 1.5rem", maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>PLANS</p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900 }}>
-              Start free. Upgrade when<br />
-              <span style={{ color: "#14BDAC" }}>you're ready to commit.</span>
-            </h2>
-          </div>
+      {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
+      <section id="faq" className="py-24 px-4 max-w-2xl mx-auto">
+        <div className="text-center mb-12">
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">FAQ</p>
+          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Common questions
+          </h2>
+        </div>
+        <FaqAccordion />
+      </section>
 
-          <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.25rem", alignItems: "start" }}>
-            {PLANS.map((p, i) => (
-              <div key={i} className={`pricing-card reveal ${pricingInView ? "visible" : ""} reveal-delay-${i + 1} ${p.highlight ? "highlight" : ""}`}>
-                {p.highlight && (
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #0D7377, #14BDAC)" }} />
-                )}
-                {(p.highlight || p.badge) && (
-                  <div style={{ 
-                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", 
-                    borderRadius: 100, padding: "0.25rem 1rem", fontSize: "0.72rem", 
-                    fontFamily: "'DM Mono', monospace", fontWeight: 600, whiteSpace: "nowrap",
-                    background: p.highlight ? "linear-gradient(135deg, #0D7377, #14BDAC)" : "linear-gradient(135deg, #DAA520, #E8A020)",
-                    color: "#FFFFFF"
-                  }}>
-                    {p.badge || "MOST POPULAR"}
-                  </div>
-                )}
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <h3 style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", letterSpacing: "0.08em", color: p.highlight ? "#14BDAC" : "rgba(255,255,255,0.5)", marginBottom: "0.75rem" }}>
-                    {p.name.toUpperCase()}
-                  </h3>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.2rem" }}>
-                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.8rem", fontWeight: 900, color: "#FFFFFF" }}>{p.price}</span>
-                    {p.period && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem" }}>/ {p.period}</span>}
-                  </div>
-                </div>
+      {/* ── FINAL CTA ────────────────────────────────────────────────────────── */}
+      <section className="py-24 px-4 text-center relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at center, rgba(42,157,143,0.15) 0%, transparent 70%)" }} />
+        <div className="relative z-10 max-w-xl mx-auto">
+          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Your certification is<br />
+            <span className="text-teal">closer than you think.</span>
+          </h2>
+          <p className="text-white/50 text-[1.05rem] leading-relaxed mb-10 font-light">
+            Start free today. 20 questions per hour, no credit card required. Upgrade when your exam date gets close and you need full access.
+          </p>
+          <a href="/crcst"
+            className="inline-flex items-center px-10 py-4 rounded-xl text-[1.1rem] font-semibold text-white shadow-xl shadow-teal/25 hover:-translate-y-0.5 hover:shadow-teal/40 transition-all"
+            style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+            Create Your Free Account →
+          </a>
+          <p className="font-mono text-white/30 text-[0.75rem] mt-4 tracking-wider">
+            Free · No credit card · Start in 60 seconds
+          </p>
+        </div>
+      </section>
 
-                <div style={{ marginBottom: "1.75rem" }}>
-                  {p.features.map((f, j) => (
-                    <div key={j} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", padding: "0.45rem 0", borderBottom: j < p.features.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                      <span style={{ color: p.highlight ? "#14BDAC" : p.badge ? "#DAA520" : "rgba(255,255,255,0.4)", fontSize: "0.85rem", marginTop: 1 }}>✓</span>
-                      <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.88rem", fontWeight: 300 }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link 
-                  href={p.href || "/pricing"} 
-                  className="btn-primary" 
-                  style={{ 
-                    width: "100%", padding: "0.9rem", textAlign: "center", textDecoration: "none", display: "block",
-                    background: p.badge ? "linear-gradient(135deg, #DAA520, #E8A020)" : undefined,
-                    boxShadow: p.badge ? "0 4px 20px rgba(218,165,32,0.35)" : undefined,
-                  }}
-                >
-                  {p.cta}
-                </Link>
-                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.75rem", textAlign: "center", marginTop: "0.75rem", fontFamily: "'DM Mono', monospace" }}>
-                  {p.note}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── ATS CALLOUT ──────────────────────────────────────────────────── */}
-        <section style={{ padding: "5rem 1.5rem", background: "rgba(13,115,119,0.06)", borderTop: "1px solid rgba(20,189,172,0.15)", borderBottom: "1px solid rgba(20,189,172,0.15)" }}>
-          <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-            <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "1rem" }}>FOR FACILITIES & DEPARTMENTS</p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)", fontWeight: 900, marginBottom: "1rem" }}>
-              Do you need professional study assistance?
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "1rem", lineHeight: 1.7, marginBottom: "2rem", fontWeight: 300 }}>
-              Aseptic Technical Solutions offers a proven certification training program with flexible options built for every learner — in-person classes, live virtual sessions, and self-study formats. Whether you are preparing solo or building a high-performing SPD team, our expert instructors are ready to help you get certified and stay compliant.
+      {/* ── FOOTER ───────────────────────────────────────────────────────────── */}
+      <footer className="border-t border-white/7 px-4 py-12">
+        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <div className="font-serif text-lg font-bold mb-3">
+              SPD Cert <em className="not-italic text-teal">Prep</em>
+            </div>
+            <p className="text-white/35 text-sm leading-relaxed font-light">
+              The exam prep platform built for sterile processing professionals.
             </p>
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-              <a href="https://aseptictechnicalsolutions.com" className="btn-primary" style={{ textDecoration: "none" }}>
-                Explore Training Programs at Aseptic Technical Solutions
-              </a>
-              <a href="mailto:contact@aseptictechnicalsolutions.com" className="btn-ghost" style={{ textDecoration: "none" }}>
-                Contact Us Directly
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-        <section id="faq" style={{ padding: "6rem 1.5rem", maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <p style={{ color: "#14BDAC", fontFamily: "'DM Mono', monospace", fontSize: "0.75rem", letterSpacing: "0.12em", marginBottom: "0.75rem" }}>FAQ</p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900 }}>
-              Common questions
-            </h2>
           </div>
 
           <div>
-            {FAQS.map((f, i) => (
-              <div key={i} className="faq-item">
-                <button className="faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                  <span>{f.q}</span>
-                  <span style={{ color: "#14BDAC", fontSize: "1.2rem", transition: "transform 0.3s", transform: openFaq === i ? "rotate(45deg)" : "rotate(0)" }}>+</span>
-                </button>
-                <div className={`faq-a ${openFaq === i ? "open" : ""}`}>
-                  <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.9rem", lineHeight: 1.7, paddingBottom: "1.25rem", fontWeight: 300 }}>{f.a}</p>
-                </div>
-              </div>
+            <p className="font-mono text-white/45 text-[0.7rem] tracking-widest mb-3 uppercase">Product</p>
+            {[
+              { label: "Features", href: "#features" },
+              { label: "Pricing", href: "/pricing" },
+              { label: "CRCST Prep", href: "/crcst-prep" },
+              { label: "CHL Prep", href: "/chl-prep" },
+              { label: "CER Prep", href: "/cer-prep" },
+            ].map((l) => (
+              <Link key={l.label} href={l.href}
+                className="block text-white/45 text-sm mb-1.5 hover:text-teal transition-colors">
+                {l.label}
+              </Link>
             ))}
           </div>
-        </section>
 
-        {/* ── FINAL CTA ──────────────────────���─────────────────────────────── */}
-        <section style={{ padding: "6rem 1.5rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(13,115,119,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ position: "relative", zIndex: 2, maxWidth: 620, margin: "0 auto" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 900, lineHeight: 1.1, marginBottom: "1.25rem" }}>
-              Your certification is<br />
-              <span style={{ color: "#14BDAC" }}>closer than you think.</span>
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.05rem", lineHeight: 1.7, marginBottom: "2.5rem", fontWeight: 300 }}>
-              Start free today. 20 questions per hour, no credit card required. Upgrade when your exam date gets close and you need full access.
-            </p>
-<a href="/crcst" className="btn-primary" style={{ fontSize: "1.1rem", padding: "1.1rem 2.6rem", textDecoration: "none" }}>
-  Create Your Free Account →
-  </a>
-            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.78rem", marginTop: "1rem", fontFamily: "'DM Mono', monospace" }}>
-              Free · No credit card · Start in 60 seconds
-            </p>
-          </div>
-        </section>
-
-        {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-        <footer style={{ borderTop: "1px solid rgba(255,255,255,0.07)", padding: "3rem 1.5rem" }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "2rem" }}>
-            <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.75rem" }}>
-                SPD Cert <em style={{ color: "#14BDAC" }}>Prep</em>
-              </div>
-              <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.82rem", lineHeight: 1.65, fontWeight: 300 }}>
-                The exam prep platform built for sterile processing professionals.
-              </p>
-            </div>
-            <div>
-              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>PRODUCT</p>
-              {[
-                { label: "Features", href: "#features" },
-                { label: "Pricing", href: "/pricing" },
-                { label: "CRCST Prep", href: "/crcst" },
-                { label: "CHL Prep", href: "/chl" },
-                { label: "CER Prep", href: "/cer" },
-              ].map(l => (
-                <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                  onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
-                  onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
-                >{l.label}</a></div>
-              ))}
-            </div>
-            <div>
-              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>ACCOUNT</p>
-              {[
-                { label: "Sign Up Free", href: "/crcst" },
-                { label: "Sign In", href: "/crcst" },
-                { label: "Claim Your Badge", href: "/passed" },
-                { label: "Upgrade to Pro", href: "/pricing" },
-              ].map(l => (
-                <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                  onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
-                  onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
-                >{l.label}</a></div>
-              ))}
-            </div>
-            <div>
-              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.72rem", letterSpacing: "0.1em", fontFamily: "'DM Mono', monospace", marginBottom: "0.75rem" }}>COMPANY</p>
-              {[
-                { label: "Aseptic Technical Solutions", href: "https://aseptictechnicalsolutions.com" },
-              ].map(l => (
-                <div key={l.label}><a href={l.href} style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                  onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
-                  onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
-                >{l.label}</a></div>
-              ))}
-              <div><span style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", display: "block", marginBottom: "0.4rem" }}>Scott Advisory Group</span></div>
-              <div><a href="mailto:support@spdcertprep.com" style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", textDecoration: "none", display: "block", marginBottom: "0.4rem", transition: "color 0.2s" }}
-                onMouseEnter={e => (e.target as HTMLElement).style.color = "#14BDAC"}
-                onMouseLeave={e => (e.target as HTMLElement).style.color = "rgba(255,255,255,0.45)"}
-              >Contact Us</a></div>
-              <div><span style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.85rem", display: "block", marginBottom: "0.4rem" }}>Baltimore 2025</span></div>
-            </div>
+          <div>
+            <p className="font-mono text-white/45 text-[0.7rem] tracking-widest mb-3 uppercase">Account</p>
+            {[
+              { label: "Sign Up Free", href: "/crcst" },
+              { label: "Sign In", href: "/crcst" },
+              { label: "Claim Your Badge", href: "/passed" },
+              { label: "Upgrade to Pro", href: "/pricing" },
+              { label: "Press Kit", href: "/press" },
+            ].map((l) => (
+              <Link key={l.label} href={l.href}
+                className="block text-white/45 text-sm mb-1.5 hover:text-teal transition-colors">
+                {l.label}
+              </Link>
+            ))}
           </div>
 
-          <div style={{ maxWidth: 1100, margin: "2rem auto 0", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.78rem", fontFamily: "'DM Mono', monospace" }}>
-              © 2026 Scott Advisory Group · Aseptic Technical Solutions
-            </p>
-            <div style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
-              <a href="/terms" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace", textDecoration: "none" }}>Terms of Service</a>
-              <a href="/privacy" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace", textDecoration: "none" }}>Privacy Policy</a>
-              <p style={{ color: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontFamily: "'DM Mono', monospace", margin: 0 }}>
-                All trademarks and certifications belong to their respective owners
-              </p>
-            </div>
+          <div>
+            <p className="font-mono text-white/45 text-[0.7rem] tracking-widest mb-3 uppercase">Company</p>
+            <a href="https://aseptictechnicalsolutions.com"
+              className="block text-white/45 text-sm mb-1.5 hover:text-teal transition-colors">
+              Aseptic Technical Solutions
+            </a>
+            <span className="block text-white/45 text-sm mb-1.5">Scott Advisory Group</span>
+            <a href="mailto:support@spdcertprep.com"
+              className="block text-white/45 text-sm mb-1.5 hover:text-teal transition-colors">
+              Contact Us
+            </a>
+            <span className="block text-white/45 text-sm">Baltimore 2025</span>
           </div>
-        </footer>
+        </div>
 
-      </div>
-    </>
+        <div className="max-w-6xl mx-auto pt-6 border-t border-white/6 flex flex-wrap justify-between items-center gap-4">
+          <p className="font-mono text-white/25 text-[0.75rem]">
+            © 2026 Scott Advisory Group · Aseptic Technical Solutions
+          </p>
+          <div className="flex flex-wrap gap-5 items-center">
+            <Link href="/terms" className="font-mono text-white/35 text-[0.72rem] hover:text-white/60 transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="font-mono text-white/35 text-[0.72rem] hover:text-white/60 transition-colors">Privacy Policy</Link>
+            <span className="font-mono text-white/25 text-[0.72rem]">All trademarks belong to their respective owners</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
   );
 }

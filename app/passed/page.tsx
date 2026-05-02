@@ -222,8 +222,9 @@ export default function PassedExamFlow() {
     new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
   const confettiRef = useConfetti(step === "celebration");
   const cfg = CERT_CONFIG[cert];
 
@@ -275,22 +276,45 @@ export default function PassedExamFlow() {
       return;
     }
 
+    // Fetch username for public profile link
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
+    if (profile?.username) setUsername(profile.username);
+
     setStep("celebration");
   }
 
-  async function handleShare() {
-    setSharing(true);
-    const text = `🎉 I just passed my ${cert} exam!\n\nCertified ${cfg.label}.\n\nPrepared with SPD Cert Prep — spdcertprep.com\n#SPD #SterileProcessing #${cert} #HealthcareCareers`;
+  function getProfileUrl() {
+    return username ? `https://spdcertprep.com/u/${username}` : "https://spdcertprep.com";
+  }
+
+  function getLinkedInShareUrl() {
+    const profileUrl = encodeURIComponent(getProfileUrl());
+    const title = encodeURIComponent(`I just passed my ${cert} certification!`);
+    const summary = encodeURIComponent(
+      `Proud to share that I'm now a ${cfg.label} (${cert}). Prepared with SPD Cert Prep. #SPD #SterileProcessing #${cert} #HealthcareCareers`
+    );
+    return `https://www.linkedin.com/sharing/share-offsite/?url=${profileUrl}&title=${title}&summary=${summary}`;
+  }
+
+  function handleShare() {
+    const url = getLinkedInShareUrl();
+    const popup = window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
+    if (!popup) {
+      // Popup blocked — navigate directly so the user still gets to LinkedIn
+      window.location.href = url;
+    }
+  }
+
+  async function handleCopyLink() {
     try {
-      if (navigator.share) {
-        await navigator.share({ title: `I passed my ${cert}!`, text });
-      } else {
-        await navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 3000);
-      }
+      await navigator.clipboard.writeText(getProfileUrl());
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 3000);
     } catch {}
-    setSharing(false);
   }
 
   // ── ENTRY FORM ──────────────────────────────────────────────────────────────
@@ -635,10 +659,9 @@ export default function PassedExamFlow() {
           {/* Action buttons */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: 380, margin: "0 auto 2rem" }}>
 
-            {/* Share */}
+            {/* LinkedIn Share */}
             <button
               onClick={handleShare}
-              disabled={sharing}
               style={{
                 padding: "1rem",
                 borderRadius: "12px",
@@ -657,8 +680,57 @@ export default function PassedExamFlow() {
                 gap: "0.5rem",
               }}
             >
-              {copied ? "✓ Copied to clipboard!" : sharing ? "Sharing…" : "🔗 Share on LinkedIn"}
+              🔗 Share on LinkedIn
             </button>
+
+            {/* Copy profile link */}
+            {username && (
+              <button
+                onClick={handleCopyLink}
+                style={{
+                  padding: "0.85rem",
+                  borderRadius: "12px",
+                  border: `1px solid ${cfg.accent}40`,
+                  background: "rgba(255,255,255,0.04)",
+                  color: "#FFFFFF",
+                  fontSize: "0.9rem",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  fontFamily: "Calibri, sans-serif",
+                  transition: "all 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                {copiedLink ? "✓ Link copied!" : `📋 Copy profile link — spdcertprep.com/u/${username}`}
+              </button>
+            )}
+
+            {/* View public profile */}
+            {username && (
+              <a
+                href={`/u/${username}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  padding: "0.85rem",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.03)",
+                  color: "rgba(255,255,255,0.6)",
+                  fontSize: "0.88rem",
+                  textDecoration: "none",
+                  fontFamily: "Calibri, sans-serif",
+                  transition: "all 0.2s",
+                }}
+              >
+                👤 View my public profile
+              </a>
+            )}
 
             {/* Next cert */}
             {cfg.next && (

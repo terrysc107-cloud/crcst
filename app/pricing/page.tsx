@@ -7,21 +7,23 @@ import { Check, Crown, Sparkles, Clock } from 'lucide-react'
 
 const PLANS = [
   {
-    id: 'free',
-    name: 'Free',
-    price: '$0',
-    period: '',
-    description: 'Get started with CRCST prep',
+    id: 'triple_crown',
+    name: 'Triple Crown',
+    price: '$39',
+    period: '90 days',
+    tier: 'triple_crown',
+    description: 'All 3 certifications — CRCST, CHL & CER',
     features: [
-      { text: '20 practice questions per hour', included: true },
-      { text: '5 AI chat messages per day', included: true },
-      { text: 'Basic progress tracking', included: true },
-      { text: 'CRCST certification only', included: true },
-      { text: 'CHL certification', included: false },
-      { text: 'CER certification', included: false },
+      { text: 'Unlimited practice questions', included: true },
+      { text: 'Unlimited AI chat', included: true },
+      { text: 'Full progress tracking', included: true },
+      { text: 'CRCST certification', included: true },
+      { text: 'CHL certification', included: true },
+      { text: 'CER certification', included: true },
     ],
-    cta: 'Start Free',
-    href: '/crcst',
+    cta: 'Get Triple Crown',
+    badge: 'Best Value',
+    icon: Crown,
   },
   {
     id: 'pro',
@@ -43,23 +45,21 @@ const PLANS = [
     highlight: true,
   },
   {
-    id: 'triple_crown',
-    name: 'Triple Crown',
-    price: '$39',
-    period: '90 days',
-    tier: 'triple_crown',
-    description: 'All 3 certifications unlocked',
+    id: 'free',
+    name: 'Free',
+    price: '$0',
+    period: '',
+    description: 'Get started with CRCST prep',
     features: [
-      { text: 'Unlimited practice questions', included: true },
-      { text: 'Unlimited AI chat', included: true },
-      { text: 'Full progress tracking', included: true },
-      { text: 'CRCST certification', included: true },
-      { text: 'CHL certification', included: true },
-      { text: 'CER certification', included: true },
+      { text: '20 practice questions per hour', included: true },
+      { text: '5 AI chat messages per day', included: true },
+      { text: 'Basic progress tracking', included: true },
+      { text: 'CRCST certification only', included: true },
+      { text: 'CHL certification', included: false },
+      { text: 'CER certification', included: false },
     ],
-    cta: 'Get Triple Crown',
-    badge: 'All 3 Certs',
-    icon: Crown,
+    cta: 'Start Free',
+    href: '/crcst',
   },
 ]
 
@@ -201,8 +201,10 @@ export default function PricingPage() {
             <div
               key={plan.id}
               className={`relative rounded-2xl border p-6 transition-all ${
-                plan.highlight
-                  ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10 scale-[1.02]'
+                plan.id === 'triple_crown'
+                  ? 'bg-amber/5 border-amber/60 shadow-lg shadow-amber/10 scale-[1.02]'
+                  : plan.highlight
+                  ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10'
                   : 'bg-card border-border hover:border-primary/50'
               }`}
             >

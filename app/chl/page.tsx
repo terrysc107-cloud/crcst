@@ -304,6 +304,7 @@ export default function CHLPage() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
+    if (user?.id) getSrsStats(user.id, 'chl', getSupabase()).then(setSrsStats)
   }
 
   const getDomains = () => {

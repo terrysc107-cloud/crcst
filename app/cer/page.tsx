@@ -299,6 +299,7 @@ export default function CERPage() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
+    if (user?.id) getSrsStats(user.id, 'cer', getSupabase()).then(setSrsStats)
   }
 
   const getDomains = () => {

@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
-import { getDueToday } from '@/lib/dal/srs'
+import { getDueToday, getSrsStats, type SrsStats } from '@/lib/dal/srs'
+import { getSupabase } from '@/lib/supabase'
 
 interface Certification {
   id: string
@@ -60,6 +61,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [earnedCerts, setEarnedCerts] = useState<{cert: string}[]>([])
   const [dueCounts, setDueCounts] = useState<DueCounts>({})
+  const [masteryStats, setMasteryStats] = useState<Record<string, SrsStats>>({})
   const sub = useSubscription()
 
   useEffect(() => {
@@ -79,19 +81,24 @@ export default function DashboardPage() {
         return
       }
 
-      const [certsResult, crcstDue, chlDue, cerDue] = await Promise.all([
+      const sb = getSupabase()
+      const [certsResult, crcstDue, chlDue, cerDue, crcstMastery, chlMastery, cerMastery] = await Promise.all([
         supabase
           .from("certified_users")
           .select("cert")
           .eq("user_id", user.id)
           .order("claimed_at", { ascending: true }),
-        getDueToday(user.id, 'crcst'),
-        getDueToday(user.id, 'chl'),
-        getDueToday(user.id, 'cer'),
+        getDueToday(user.id, 'crcst', sb),
+        getDueToday(user.id, 'chl', sb),
+        getDueToday(user.id, 'cer', sb),
+        getSrsStats(user.id, 'crcst', sb),
+        getSrsStats(user.id, 'chl', sb),
+        getSrsStats(user.id, 'cer', sb),
       ])
 
       if (certsResult.data) setEarnedCerts(certsResult.data)
       setDueCounts({ crcst: crcstDue, chl: chlDue, cer: cerDue })
+      setMasteryStats({ crcst: crcstMastery, chl: chlMastery, cer: cerMastery })
     }
     loadDashboard()
   }, [router])
@@ -366,6 +373,8 @@ export default function DashboardPage() {
             }
 
             const dueCount = dueCounts[cert.id] ?? 0
+            const mastery = masteryStats[cert.id]
+            const hasSrsData = mastery && (mastery.mastered > 0 || mastery.learning > 0)
             return (
               <Link
                 key={cert.id}
@@ -382,6 +391,24 @@ export default function DashboardPage() {
                   <p className="text-sm text-text-3 mb-4 leading-relaxed">
                     {cert.description}
                   </p>
+                  {/* SRS mastery mini-bar */}
+                  {hasSrsData && (
+                    <div className="mb-3">
+                      <div className="flex justify-between text-xs font-mono mb-1">
+                        <span style={{ color: '#14BDAC' }}>{mastery.mastered} mastered</span>
+                        <span style={{ color: '#DAA520' }}>{mastery.learning} learning</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${Math.round(((mastery.mastered + mastery.learning) / cert.questionCount) * 100)}%`,
+                            background: 'linear-gradient(90deg, #14BDAC, #DAA520)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     {dueCount > 0 ? (
                       <span className="text-xs font-mono font-semibold" style={{ color: '#DAA520' }}>

@@ -393,8 +393,8 @@ export default function Home() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
-    // Refresh rate limit info after completing quiz
     loadRateLimitInfo()
+    if (user?.id) getSrsStats(user.id, 'crcst', getSupabase()).then(setSrsStats)
   }
 
   const handleReturnHome = () => {

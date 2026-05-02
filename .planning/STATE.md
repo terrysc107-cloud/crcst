@@ -5,25 +5,24 @@
 
 ## Active Phase
 
-**Roadmap Phase 3 — Core Learning Loop Polish** *(in progress; Phases 1 + 2 deferred)*
-- Status: `in progress`
-- Started: 2026-04-25
+**Roadmap Phase 4 — Gamification Engine** *(next up; Phase 3 complete)*
+- Status: `not started`
 - Lead: Frontend Builder
-- Contract: [.planning/contracts/PHASE-3-learning-loop.md](contracts/PHASE-3-learning-loop.md)
 
-> **Note:** Phases 1 + 2 were deferred to ship the SRS learning loop first. Phase 1 (Foundation Cleanup) and Phase 2 (Design System) remain on the backlog. `lib/dal/srs.ts` exists as a partial DAL foothold from Phase 3 work. Full DAL migration, route groups, and design-token unification are still pending.
+> **Phase 3 Complete.** All 3.1–3.7 items shipped. Phase 4 (Gamification Engine) is next.
+> Phases 1 + 2 remain deferred. `lib/dal/srs.ts` exists as a partial DAL foothold. Full DAL migration, route groups, and design-token unification are still pending.
 
-## Phase 3 Sub-Plan Status
+## Phase 3 Sub-Plan Status (COMPLETE)
 
 | Plan | Description | Status | PR |
 |---|---|---|---|
 | 3.1 | SM-2 engine — `question_state` table, `lib/dal/srs.ts`, Due Today dashboard | `merged` | — |
-| 3.2 | Quiz integration — confidence picker, review mode (`?mode=review`), all three certs | `open` | #50 |
-| 3.3 | SRS progress widget + all-caught-up empty state (in #50) | `open` | #50 |
-| 3.4 | Dashboard mastery bars + post-quiz SRS refresh (in #50) | `open` | #50 |
-| 3.5 | `handleReturnHome` SRS refresh on all three cert pages | `open` | #51 |
-| 3.6 | "Ask AI to explain" button on every explanation card | `not started` | — |
-| 3.7 | Persist + resume quiz sessions across devices | `not started` | — |
+| 3.2 | Mistake bank — `lib/dal/mistakes.ts`, `?mode=mistakes` URL, dashboard "Review Misses" | `merged` | #50 |
+| 3.3 | SRS progress widget + all-caught-up empty state | `merged` | #50 |
+| 3.4 | Question card redesign — elevated card, swipe, keyboard shortcuts (1–4, Space) | `merged` | #50 |
+| 3.5 | Extract shared components — `SrsProgressWidget`, `DomainMasterySection`, `lib/dal/streaks.ts` | `merged` | #51 |
+| 3.6 | "Ask AI to explain" button on every explanation card | `merged` | #51 |
+| 3.7 | Persist + resume quiz sessions — `lib/dal/sessions.ts`, shared `quiz_sessions` table | `merged` | #51 |
 
 ## Phase Status Summary
 
@@ -31,8 +30,8 @@
 |---|---|---|---|
 | 1 | Foundation Cleanup | deferred | DAL partial (`lib/dal/srs.ts`); rest pending |
 | 2 | Design System Unification | deferred | Blocked on Phase 1 formally; deferred in practice |
-| 3 | Core Learning Loop Polish | in progress | 3.1 merged; 3.2–3.5 in open PRs |
-| 4 | Gamification Engine | not started | — |
+| 3 | Core Learning Loop Polish | **complete** | All 3.1–3.7 shipped |
+| 4 | Gamification Engine | not started | Next active phase |
 | 5 | Personalization + Study Plans | not started | — |
 | 6 | Content Depth | not started | — |
 | 7 | Marketing Rebuild + Launch | not started | — |
@@ -42,7 +41,7 @@
 | PR | Title | Phase | Status |
 |---|---|---|---|
 | #50 | feat(3.2): SM-2 quiz integration — confidence picker, review mode | 3.2–3.4 | open (draft) |
-| #51 | feat(3.5): refresh srsStats on every return-to-home navigation | 3.5 | open (draft) |
+| #51 | feat(3.5–3.7): shared components, AI explain, session persistence | 3.5–3.7 | open (draft) |
 
 ## Recent Decisions Pending Capture
 
@@ -56,4 +55,4 @@
 
 ---
 
-*Last updated 2026-05-02.*
+*Last updated 2026-05-02 — Phase 3 complete.*

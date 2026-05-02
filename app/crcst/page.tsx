@@ -10,6 +10,9 @@ import { QUESTIONS, type Question } from '@/lib/questions'
 import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
 import { getRecentMistakeIds } from '@/lib/dal/mistakes'
 import { loadPausedSessions, saveSession, loadSession, deleteSession as deleteSessionDAL } from '@/lib/dal/sessions'
+import { calculateStreak } from '@/lib/dal/streaks'
+import SrsProgressWidget from '@/components/SrsProgressWidget'
+import DomainMasterySection from '@/components/DomainMasterySection'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -153,35 +156,7 @@ export default function Home() {
         })
         setDomainMastery(masterySummary)
 
-        // Calculate streak (consecutive days with quiz activity)
-        const uniqueDays = [...new Set(data.map((r) => {
-          const date = new Date(r.created_at)
-          return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-        }))].sort().reverse()
-        
-        let currentStreak = 0
-        const today = new Date()
-        const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
-        const yesterday = new Date(today)
-        yesterday.setDate(yesterday.getDate() - 1)
-        const yesterdayStr = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`
-        
-        // Check if user studied today or yesterday
-        if (uniqueDays[0] === todayStr || uniqueDays[0] === yesterdayStr) {
-          currentStreak = 1
-          let checkDate = new Date(uniqueDays[0] === todayStr ? today : yesterday)
-          
-          for (let i = 1; i < uniqueDays.length; i++) {
-            checkDate.setDate(checkDate.getDate() - 1)
-            const checkStr = `${checkDate.getFullYear()}-${checkDate.getMonth()}-${checkDate.getDate()}`
-            if (uniqueDays[i] === checkStr) {
-              currentStreak++
-            } else {
-              break
-            }
-          }
-        }
-        setStreak(currentStreak)
+        setStreak(calculateStreak(data.map((r: any) => r.created_at)))
       }
 
       const sessions = await loadPausedSessions(userId, 'crcst', getSupabase())
@@ -375,12 +350,6 @@ export default function Home() {
     return Array.from(new Set(QUESTIONS.map((q) => q.domain)))
   }
 
-  const getDomainMasteryPercentage = (domain: string) => {
-    const mastery = domainMastery[domain]
-    if (!mastery || mastery.total === 0) return 0
-    return Math.round((mastery.correct / mastery.total) * 100)
-  }
-
   // Auth Screen
   if (screen === 'auth') {
     return <AuthScreen />
@@ -559,37 +528,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* SRS Progress Widget */}
         {srsStats && (srsStats.mastered > 0 || srsStats.learning > 0) && (
-          <div className="mx-6 mt-6 p-4 bg-white border border-cream-2 rounded-lg">
-            <div className="text-xs tracking-widest text-text-3 mb-3">
-              SPACED REPETITION PROGRESS
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-1 text-center">
-                <div className="font-serif text-2xl text-correct">{srsStats.mastered}</div>
-                <div className="text-xs text-text-3 mt-1">Mastered</div>
-              </div>
-              <div className="flex-1 text-center">
-                <div className="font-serif text-2xl text-amber">{srsStats.learning}</div>
-                <div className="text-xs text-text-3 mt-1">Learning</div>
-              </div>
-              <div className="flex-1 text-center">
-                <div className="font-serif text-2xl text-navy">
-                  {QUESTIONS.length - srsStats.mastered - srsStats.learning}
-                </div>
-                <div className="text-xs text-text-3 mt-1">New</div>
-              </div>
-            </div>
-            {srsStats.nextDue && (
-              <div className="mt-3 text-xs text-text-3 text-center">
-                Next review:{' '}
-                <span className="text-amber font-mono">
-                  {new Date(srsStats.nextDue + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                </span>
-              </div>
-            )}
-          </div>
+          <SrsProgressWidget srsStats={srsStats} totalQuestions={QUESTIONS.length} />
         )}
 
         {/* Study Modes */}
@@ -693,36 +633,7 @@ export default function Home() {
           )}
 
           {/* Domain Mastery */}
-          <div className="text-xs tracking-widest text-text-3 mb-4">
-            DOMAIN MASTERY
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {getDomains().map((domain) => {
-              const pct = getDomainMasteryPercentage(domain)
-              const mastery = domainMastery[domain]
-              return (
-                <div
-                  key={domain}
-                  className="bg-white rounded-lg p-3 border border-cream-2"
-                >
-                  <div className="font-serif text-sm text-navy font-bold mb-2 truncate">
-                    {domain}
-                  </div>
-                  <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        pct >= 70 ? 'bg-correct' : pct >= 40 ? 'bg-amber' : 'bg-teal'
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-text-3 mt-1">
-                    {pct}% ({mastery?.total || 0} questions)
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <DomainMasterySection domains={getDomains()} domainMastery={domainMastery} />
         </div>
       </div>
       <ChatBot />

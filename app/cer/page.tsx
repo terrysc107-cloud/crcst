@@ -9,6 +9,7 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
+import { Heading, Numeric } from '@/components/ui/typography'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -306,9 +307,9 @@ export default function CERPage() {
               <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 11h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V12z"/>
             </svg>
           </div>
-          <h1 className="font-serif text-3xl text-navy font-bold mb-4">
+          <Heading as="h1" className="text-3xl text-navy font-bold mb-4">
             CER is Triple Crown only
-          </h1>
+          </Heading>
           <p className="text-text-3 mb-8 max-w-md mx-auto">
             Unlock CER certification prep along with CRCST and CHL for just $39. Get full access for 90 days.
           </p>
@@ -389,9 +390,9 @@ export default function CERPage() {
           <div className="text-xs tracking-widest text-white/70 mb-3">
             ENDOSCOPE REPROCESSOR CERTIFICATION
           </div>
-          <h1 className="font-serif text-4xl mb-2 text-balance">
+          <Heading as="h1" className="text-4xl mb-2 text-balance">
             Pass your <em className="text-amber">CER</em> exam with confidence.
-          </h1>
+          </Heading>
           <p className="text-sm text-white/80 mb-8">
             {QUESTIONS.length} verified questions covering endoscope anatomy, reprocessing & microbiology
           </p>
@@ -402,7 +403,7 @@ export default function CERPage() {
               <div className="text-xs text-white/70 tracking-widest mb-1">
                 EXAM READINESS SCORE
               </div>
-              <div className="font-serif text-lg text-white">
+              <Heading as="div" className="text-lg text-white">
                 {stats.accuracy >= 80
                   ? 'Exam Ready!'
                   : stats.accuracy >= 60
@@ -410,12 +411,12 @@ export default function CERPage() {
                   : stats.answered > 0
                   ? 'Developing'
                   : 'Not Started'}
-              </div>
+              </Heading>
             </div>
             <div className="text-right">
-              <div className="font-serif text-4xl text-amber">
+              <Numeric className="text-4xl text-amber">
                 {stats.accuracy}%
-              </div>
+              </Numeric>
               <div className="text-xs text-white/60">
                 {stats.answered === 0 ? 'Not started' : `${stats.answered} questions`}
               </div>
@@ -425,19 +426,19 @@ export default function CERPage() {
           {/* Stats Row */}
           <div className="flex">
             <div className="flex-1 text-center py-2 bg-white/10 border-r border-white/20">
-              <div className="font-serif text-2xl text-amber">{QUESTIONS.length}</div>
+              <Numeric className="text-2xl text-amber">{QUESTIONS.length}</Numeric>
               <div className="text-xs text-white/60 uppercase tracking-wider">
                 Questions
               </div>
             </div>
             <div className="flex-1 text-center py-2 bg-white/10 border-r border-white/20">
-              <div className="font-serif text-2xl text-amber">{stats.answered}</div>
+              <Numeric className="text-2xl text-amber">{stats.answered}</Numeric>
               <div className="text-xs text-white/60 uppercase tracking-wider">
                 Answered
               </div>
             </div>
             <div className="flex-1 text-center py-2 bg-white/10">
-              <div className="font-serif text-2xl text-amber">{stats.accuracy}%</div>
+              <Numeric className="text-2xl text-amber">{stats.accuracy}%</Numeric>
               <div className="text-xs text-white/60 uppercase tracking-wider">
                 Accuracy
               </div>
@@ -468,8 +469,8 @@ export default function CERPage() {
                 }}
                 className="bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-blue-500 hover:shadow-lg transition text-left"
               >
-                <div className="w-8 h-8 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center font-serif font-bold mb-2">{icon}</div>
-                <div className="font-serif text-navy font-bold text-sm">{name}</div>
+                <div className="w-8 h-8 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center font-bold mb-2">{icon}</div>
+                <Heading as="div" className="text-navy font-bold text-sm">{name}</Heading>
                 <div className="text-xs text-text-3 mt-1">{desc}</div>
               </button>
             ))}
@@ -493,7 +494,7 @@ export default function CERPage() {
                       className="bg-white border-2 border-blue-500 rounded-lg p-4 flex justify-between items-center hover:shadow-md transition"
                     >
                       <div className="flex-1">
-                        <div className="font-serif text-navy font-bold mb-1">{modeName}</div>
+                        <Heading as="div" className="text-navy font-bold mb-1">{modeName}</Heading>
                         <div className="text-xs text-text-3 mb-2">
                           {session.current_question_index + 1} / {session.question_ids.length} questions
                         </div>
@@ -538,9 +539,9 @@ export default function CERPage() {
                   key={domain}
                   className="bg-white rounded-lg p-3 border border-cream-2"
                 >
-                  <div className="font-serif text-sm text-navy font-bold mb-2 truncate">
+                  <Heading as="div" className="text-sm text-navy font-bold mb-2 truncate">
                     {domain}
-                  </div>
+                  </Heading>
                   <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
@@ -625,9 +626,9 @@ function AuthScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-600 to-blue-500 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
-        <h1 className="font-serif text-2xl text-navy mb-2 text-center">
+        <Heading as="h1" className="text-2xl text-navy mb-2 text-center">
           SPD Cert <em className="text-blue-500">Companion</em>
-        </h1>
+        </Heading>
         <p className="text-xs text-center text-text-3 tracking-widest mb-6">
           Master CER Certification
         </p>
@@ -765,7 +766,7 @@ function CustomQuizBuilder({
         Back to Home
       </button>
 
-      <h2 className="font-serif text-2xl text-navy mb-2">Build Your Quiz</h2>
+      <Heading as="h2" className="text-2xl text-navy mb-2">Build Your Quiz</Heading>
       <p className="text-sm text-text-3 mb-8">Select domains and difficulty to create a custom quiz</p>
 
       {/* Domain Selection */}
@@ -840,9 +841,9 @@ function CustomQuizBuilder({
       {/* Preview */}
       <div className="bg-white rounded-lg p-4 border border-cream-2 mb-8">
         <div className="text-xs tracking-widest text-text-3 mb-2">QUIZ PREVIEW</div>
-        <div className="font-serif text-2xl text-navy">
+        <Numeric className="text-2xl text-navy">
           {Math.min(questionCount, availableQuestions)} Questions
-        </div>
+        </Numeric>
         <p className="text-sm text-text-3">{availableQuestions} questions available with current filters</p>
       </div>
 

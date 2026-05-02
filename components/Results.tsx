@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Heading, Numeric } from '@/components/ui/typography'
 
 interface ResultsProps {
   results: {
@@ -34,37 +35,37 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
       {/* Badge */}
       <div className="text-center mb-8">
         <div className="text-7xl mb-4 bounce-in">{badge.emoji}</div>
-        <h2 className="font-serif text-3xl text-navy mb-2">{badge.name}</h2>
+        <Heading as="h2" className="text-3xl text-navy mb-2">{badge.name}</Heading>
         <p className="text-sm text-text-3">{badge.message}</p>
       </div>
 
       {/* Score Card */}
       <div className="bg-white border-2 border-cream-2 rounded-xl p-8 mb-8 text-center shadow-lg">
-        <div
-          className={`font-serif text-6xl mb-2 ${
+        <Numeric
+          className={`text-6xl mb-2 ${
             passed ? 'text-correct' : 'text-wrong'
           }`}
         >
           {results.percentage}%
-        </div>
+        </Numeric>
         <div className="text-sm text-text-3 mb-6">
           {results.correct} of {results.total} correct
         </div>
 
         <div className="flex justify-center gap-8 text-center">
           <div>
-            <div className="font-serif text-2xl text-navy">
+            <Numeric className="text-2xl text-navy">
               {mins}:{secs.toString().padStart(2, '0')}
-            </div>
+            </Numeric>
             <div className="text-xs text-text-3 uppercase tracking-wider">
               Time
             </div>
           </div>
           <div className="w-px bg-cream-2" />
           <div>
-            <div className="font-serif text-2xl text-navy capitalize">
+            <Heading as="div" className="text-2xl text-navy capitalize">
               {results.mode}
-            </div>
+            </Heading>
             <div className="text-xs text-text-3 uppercase tracking-wider">
               Mode
             </div>
@@ -80,9 +81,9 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
             : 'bg-wrong-bg border border-wrong text-wrong'
         }`}
       >
-        <div className="font-serif text-lg font-bold">
+        <Heading as="div" className="text-lg font-bold">
           {passed ? '🎉 You Passed!' : 'Keep Practicing'}
-        </div>
+        </Heading>
         <div className="text-sm mt-1">
           {passed
             ? 'Great work! You\'re on track for certification.'
@@ -127,9 +128,9 @@ export default function Results({ results, onRetry, onHome }: ResultsProps) {
       {/* Domain Breakdown (if available) */}
       {results.questions && results.answers && (
         <div className="mt-8">
-          <h3 className="font-serif text-lg text-navy mb-4">
+          <Heading as="h3" className="text-lg text-navy mb-4">
             Domain Performance
-          </h3>
+          </Heading>
           <DomainBreakdown
             questions={results.questions}
             answers={results.answers}
@@ -164,7 +165,7 @@ function MissedQuestionsReview({
   if (missed.length === 0) {
     return (
       <div className="mt-8 p-6 bg-correct-bg border border-correct rounded-xl text-center">
-        <div className="font-serif text-lg text-correct mb-1">Perfect Score!</div>
+        <Heading as="div" className="text-lg text-correct mb-1">Perfect Score!</Heading>
         <div className="text-sm text-text-3">You answered every question correctly. Nothing to review.</div>
       </div>
     )
@@ -173,7 +174,7 @@ function MissedQuestionsReview({
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-serif text-lg text-navy">Review Missed Questions</h3>
+        <Heading as="h3" className="text-lg text-navy">Review Missed Questions</Heading>
         <span className="text-xs font-mono bg-wrong-bg border border-wrong text-wrong px-3 py-1 rounded-full">
           {missed.length} {missed.length === 1 ? 'question' : 'questions'} to review
         </span>
@@ -204,9 +205,9 @@ function MissedQuestionsReview({
                   <div className="text-xs text-teal tracking-widest mb-1">
                     Q{i + 1} · {q.domain} · {q.difficulty}
                   </div>
-                  <div className="font-serif text-sm text-navy leading-snug">
+                  <Heading as="div" className="text-sm text-navy leading-snug">
                     {q.question}
-                  </div>
+                  </Heading>
                 </div>
                 <span className="flex-shrink-0 text-text-3 text-sm ml-2 mt-1">
                   {isOpen ? '▲' : '▼'}
@@ -294,7 +295,7 @@ function DomainBreakdown({
             className="bg-white rounded-lg p-4 border border-cream-2"
           >
             <div className="flex justify-between items-center mb-2">
-              <div className="font-serif text-sm text-navy">{domain}</div>
+              <Heading as="div" className="text-sm text-navy">{domain}</Heading>
               <div className="text-xs text-text-3">
                 {scores.correct}/{scores.total} ({pct}%)
               </div>

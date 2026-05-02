@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import type { Question } from '@/lib/questions'
 import { supabase } from '@/lib/supabase'
+import { Heading } from '@/components/ui/typography'
 
 interface QuizData {
   questions: Question[]
@@ -186,9 +187,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     return (
       <div className="max-w-md mx-auto text-center py-12 px-6">
         <div className="text-6xl mb-6">&#9203;</div>
-        <h2 className="font-serif text-2xl text-navy mb-4">
+        <Heading as="h2" className="text-2xl text-navy mb-4">
           Hourly Limit Reached
-        </h2>
+        </Heading>
         <p className="text-text-3 mb-6">
           You&apos;ve used all {usageInfo?.limit || 20} free questions this hour. 
           Your limit will reset in about an hour, or upgrade to Pro for unlimited access.
@@ -298,9 +299,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                 <div className="text-xs text-teal tracking-widest mb-4">
                   {q.domain} • {q.difficulty}
                 </div>
-                <div className="font-serif text-xl text-navy leading-relaxed">
+                <Heading as="div" className="text-xl text-navy leading-relaxed">
                   {q.question}
-                </div>
+                </Heading>
                 <div className="text-xs text-text-3 mt-6 text-center">
                   Tap to reveal answer
                 </div>
@@ -319,9 +320,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                 <div className="text-xs tracking-widest mb-4 text-teal-3">
                   ANSWER
                 </div>
-                <div className="font-serif text-xl leading-relaxed mb-4">
+                <Heading as="div" className="text-xl leading-relaxed mb-4">
                   {q.options[q.correct_answer]}
-                </div>
+                </Heading>
                 <div className="text-sm text-teal-3 leading-relaxed">
                   {q.explanation}
                 </div>
@@ -516,9 +517,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         <div className="text-xs text-teal tracking-widest mb-2">
           {q.domain} • {q.difficulty}
         </div>
-        <div className="font-serif text-xl text-navy mb-6 leading-relaxed">
+        <Heading as="div" className="text-xl text-navy mb-6 leading-relaxed">
           {q.question}
-        </div>
+        </Heading>
 
         {/* Options */}
         <div className="space-y-3 mb-8">

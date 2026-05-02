@@ -9,7 +9,7 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
-import { getDueTodayIds } from '@/lib/dal/srs'
+import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -40,6 +40,8 @@ export default function CHLPage() {
   const [domainMastery, setDomainMastery] = useState<Record<string, { correct: number; total: number }>>({})
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
+  const [srsStats, setSrsStats] = useState<SrsStats | null>(null)
+  const [allCaughtUp, setAllCaughtUp] = useState(false)
   const [showUpsellModal, setShowUpsellModal] = useState(false)
   
   const sub = useSubscription()
@@ -51,11 +53,15 @@ export default function CHLPage() {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        getSrsStats(session.user.id, 'chl', getSupabase()).then(setSrsStats)
 
         if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'review') {
           const ids = await getDueTodayIds(session.user.id, 'chl', getSupabase())
           if (ids.length > 0) {
             setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+          } else {
+            setAllCaughtUp(true)
+            getSrsStats(session.user.id, 'chl', getSupabase()).then(setSrsStats)
           }
         }
       } else {
@@ -468,6 +474,59 @@ export default function CHLPage() {
             </div>
           </div>
         </div>
+
+        {/* All Caught Up Banner */}
+        {allCaughtUp && (
+          <div className="mx-6 mt-6 p-4 bg-correct-bg border border-correct rounded-lg">
+            <div className="font-mono text-sm font-bold text-correct mb-1">
+              ✓ All caught up!
+            </div>
+            <div className="text-sm text-text-3">
+              {srsStats?.nextDue
+                ? `Your next review is scheduled for ${new Date(srsStats.nextDue + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}.`
+                : 'No reviews scheduled yet — answer some questions to build your review deck.'}
+            </div>
+            <button
+              onClick={() => setAllCaughtUp(false)}
+              className="mt-3 text-xs font-mono text-teal hover:underline"
+            >
+              Study something new →
+            </button>
+          </div>
+        )}
+
+        {/* SRS Progress Widget */}
+        {srsStats && (srsStats.mastered > 0 || srsStats.learning > 0) && (
+          <div className="mx-6 mt-6 p-4 bg-white border border-cream-2 rounded-lg">
+            <div className="text-xs tracking-widest text-text-3 mb-3">
+              SPACED REPETITION PROGRESS
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1 text-center">
+                <div className="font-serif text-2xl text-correct">{srsStats.mastered}</div>
+                <div className="text-xs text-text-3 mt-1">Mastered</div>
+              </div>
+              <div className="flex-1 text-center">
+                <div className="font-serif text-2xl text-amber">{srsStats.learning}</div>
+                <div className="text-xs text-text-3 mt-1">Learning</div>
+              </div>
+              <div className="flex-1 text-center">
+                <div className="font-serif text-2xl text-navy">
+                  {QUESTIONS.length - srsStats.mastered - srsStats.learning}
+                </div>
+                <div className="text-xs text-text-3 mt-1">New</div>
+              </div>
+            </div>
+            {srsStats.nextDue && (
+              <div className="mt-3 text-xs text-text-3 text-center">
+                Next review:{' '}
+                <span className="text-amber font-mono">
+                  {new Date(srsStats.nextDue + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Study Modes */}
         <div className="px-6 py-8">

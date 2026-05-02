@@ -90,6 +90,55 @@ export async function getDueToday(
   return count ?? 0
 }
 
+export interface SrsStats {
+  mastered: number   // interval_days >= 21 (well-known cards)
+  learning: number   // 0 < interval_days < 21
+  nextDue: string | null  // earliest future next_due (YYYY-MM-DD)
+}
+
+// Returns SRS progress counts and the next scheduled review date for a cert.
+export async function getSrsStats(
+  userId: string,
+  cert: Cert,
+  client?: SupabaseClient
+): Promise<SrsStats> {
+  const sb = client ?? getServerClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  let query = sb
+    .from('question_state')
+    .select('interval_days, next_due')
+    .eq('user_id', userId)
+
+  if (cert === 'chl') {
+    query = query.like('question_id', 'chl-%')
+  } else if (cert === 'cer') {
+    query = query.like('question_id', 'cer-%')
+  } else {
+    query = query
+      .not('question_id', 'like', 'chl-%')
+      .not('question_id', 'like', 'cer-%')
+  }
+
+  const { data, error } = await query
+  if (error || !data) return { mastered: 0, learning: 0, nextDue: null }
+
+  let mastered = 0
+  let learning = 0
+  let nextDue: string | null = null
+
+  for (const row of data as { interval_days: number; next_due: string }[]) {
+    if (row.interval_days >= 21) mastered++
+    else learning++
+
+    if (row.next_due > today) {
+      if (!nextDue || row.next_due < nextDue) nextDue = row.next_due
+    }
+  }
+
+  return { mastered, learning, nextDue }
+}
+
 // Upserts question state after each answer.
 export async function upsertQuestionState(
   userId: string,

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import type { Question } from '@/lib/questions'
 import { supabase } from '@/lib/supabase'
 
@@ -30,6 +31,14 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [pauseSaved, setPauseSaved] = useState(false)
   const [rateLimitReached, setRateLimitReached] = useState(false)
   const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null)
+  const [audioEnabled, setAudioEnabled] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('quiz_audio_mode') === 'true'
+  })
+  const [flagState, setFlagState] = useState<'idle' | 'open' | 'submitting' | 'done'>('idle')
+  const [flagNote, setFlagNote] = useState('')
+  const flagPopoverRef = useRef<HTMLDivElement>(null)
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   const q = quizData.questions[current]
   const progress = ((current + 1) / quizData.questions.length) * 100
@@ -53,6 +62,59 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
 
     return () => clearInterval(timer)
   }, [mode, timeLeft])
+
+  // Audio: speak question + options when question changes and audio is on
+  useEffect(() => {
+    if (!audioEnabled || typeof window === 'undefined' || !window.speechSynthesis) return
+    window.speechSynthesis.cancel()
+    const text = `${q.question}. Option A: ${q.options[0]}. Option B: ${q.options[1]}. Option C: ${q.options[2]}. Option D: ${q.options[3]}.`
+    const utt = new SpeechSynthesisUtterance(text)
+    utt.rate = 0.95
+    utteranceRef.current = utt
+    window.speechSynthesis.speak(utt)
+    return () => { window.speechSynthesis.cancel() }
+  }, [current, audioEnabled])
+
+  const toggleAudio = useCallback(() => {
+    setAudioEnabled((prev: boolean) => {
+      const next = !prev
+      localStorage.setItem('quiz_audio_mode', String(next))
+      if (!next && typeof window !== 'undefined') window.speechSynthesis?.cancel()
+      return next
+    })
+  }, [])
+
+  // Close flag popover on outside click
+  useEffect(() => {
+    if (flagState !== 'open') return
+    const handler = (e: MouseEvent) => {
+      if (flagPopoverRef.current && !flagPopoverRef.current.contains(e.target as Node)) {
+        setFlagState('idle')
+        setFlagNote('')
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [flagState])
+
+  // Reset flag state when question changes
+  useEffect(() => {
+    setFlagState('idle')
+    setFlagNote('')
+  }, [current])
+
+  const submitFlag = async () => {
+    setFlagState('submitting')
+    try {
+      await fetch('/api/questions/flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_id: q.id, note: flagNote, user_id: user?.id ?? null }),
+      })
+    } catch (_) {}
+    setFlagState('done')
+    setFlagNote('')
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -478,18 +540,25 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
             ⏱ {formatTime(timeLeft)}
           </div>
         )}
+        <button
+          onClick={toggleAudio}
+          title={audioEnabled ? 'Turn off audio' : 'Read question aloud'}
+          className={`ml-3 px-3 py-2 rounded-lg text-sm font-mono transition ${audioEnabled ? 'bg-amber text-navy' : 'bg-cream-2 text-text hover:bg-cream'}`}
+        >
+          {audioEnabled ? '🔊' : '🔇'}
+        </button>
         {onPause && user && (
           <button
             onClick={handlePause}
             disabled={isPausing}
-            className="ml-3 px-4 py-2 bg-cream-2 text-text rounded-lg text-sm font-mono hover:bg-cream transition disabled:opacity-50"
+            className="ml-2 px-4 py-2 bg-cream-2 text-text rounded-lg text-sm font-mono hover:bg-cream transition disabled:opacity-50"
           >
             {isPausing ? 'Saving...' : 'Pause'}
           </button>
         )}
         <button
           onClick={onExit}
-          className="ml-4 text-teal-3 hover:text-white transition"
+          className="ml-3 text-teal-3 hover:text-white transition"
         >
           ✕
         </button>
@@ -513,9 +582,55 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
 
       {/* Question */}
       <div className="px-6 py-8">
-        <div className="text-xs text-teal tracking-widest mb-2">
-          {q.domain} • {q.difficulty}
+        <div className="flex items-start justify-between mb-2">
+          <div className="text-xs text-teal tracking-widest">
+            {q.domain} • {q.difficulty}
+          </div>
+          {/* Flag popover */}
+          <div className="relative" ref={flagPopoverRef}>
+            {flagState === 'done' ? (
+              <span className="text-xs font-mono text-amber">⚑ Flagged</span>
+            ) : (
+              <button
+                onClick={() => setFlagState(s => s === 'open' ? 'idle' : 'open')}
+                className="text-xs font-mono text-text-3 hover:text-amber transition"
+                title="Flag this question"
+              >
+                ⚑ Flag
+              </button>
+            )}
+            {flagState === 'open' && (
+              <div className="absolute right-0 top-6 z-50 w-64 bg-white border border-cream-2 rounded-xl shadow-xl p-4">
+                <div className="font-mono text-xs text-navy font-bold mb-2">Flag this question</div>
+                <textarea
+                  className="w-full border border-cream-2 rounded-lg p-2 text-xs font-mono resize-none mb-3 focus:outline-none focus:border-teal"
+                  rows={3}
+                  placeholder="Optional: describe the issue (typo, wrong answer, unclear…)"
+                  value={flagNote}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFlagNote(e.target.value)}
+                />
+                <button
+                  onClick={submitFlag}
+                  className="w-full px-3 py-2 bg-amber text-navy rounded-lg text-xs font-mono font-bold hover:bg-amber/80 transition"
+                >
+                  Submit Flag
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+        {q.image_url && (
+          <div className="mb-4 rounded-lg overflow-hidden border border-cream-2">
+            <Image
+              src={q.image_url}
+              alt="Question image"
+              width={600}
+              height={300}
+              className="w-full object-contain max-h-64"
+              unoptimized
+            />
+          </div>
+        )}
         <div className="font-serif text-xl text-navy mb-6 leading-relaxed">
           {q.question}
         </div>

@@ -354,6 +354,13 @@ export default function AccountPage() {
             </div>
           )}
           
+          {quizResults.some(r => r.difficulty === 'mock') && (
+            <div style={{ marginBottom: '1rem' }}>
+              <Link href="/account/mock-history" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#14BDAC', textDecoration: 'none', fontSize: '0.85rem', fontFamily: 'monospace', fontWeight: 600 }}>
+                📊 View full mock exam history →
+              </Link>
+            </div>
+          )}
           {quizResults.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>No quiz results yet</p>

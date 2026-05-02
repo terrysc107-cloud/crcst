@@ -24,6 +24,14 @@ export type ScenarioType =
   | "regulatory"
   | "judgment";
 
+export interface BranchingConsequence {
+  /** What happens in the real world when this answer is chosen */
+  a: string;
+  b: string;
+  c: string;
+  d: string;
+}
+
 export interface ScenarioQuestion {
   id: string;
   type: ScenarioType;
@@ -37,6 +45,10 @@ export interface ScenarioQuestion {
   realWorldNote?: string;     // What actually happens in practice
   standardRef?: string;       // AAMI, CDC, HSPA, OSHA reference if applicable
   tags: string[];
+  /** Per-choice real-world consequences shown after answer is revealed */
+  consequence?: BranchingConsequence;
+  /** ID of a follow-up question that branches from this one (shown after answer) */
+  followUpId?: string;
 }
 
 export const scenarioQuestions: ScenarioQuestion[] = [
@@ -665,6 +677,195 @@ export const scenarioQuestions: ScenarioQuestion[] = [
     tags: ["loaner set", "vendor sterilization", "reprocessing requirement", "chemical indicator", "transport integrity", "CIS content"],
   },
 
+  // ── BRANCHING SCENARIOS (Phase 6.3) — consequence trees ─────────────────
+  // Each question has a followUpId pointing to a follow-up question that
+  // branches based on what the user decided in the parent question.
+  // ────────────────────────────────────────────────────────────────────────
+
+  {
+    id: "branch-001",
+    type: "scenario",
+    domain: "Sterilization",
+    difficulty: "intermediate",
+    context: "You retrieve a STAT instrument tray from the steam sterilizer. The chemical indicator strip inside the tray has turned the correct color, but the biological indicator (BI) run in the same load is in the incubator and has not yet been read.",
+    question: "A circulating nurse calls urgently — the surgeon needs this tray for a case starting in 10 minutes. What do you do?",
+    options: {
+      a: "Release the tray immediately since the chemical indicator passed",
+      b: "Tell the nurse the tray cannot be released until the BI result is available — escalate to a supervisor and the OR charge nurse",
+      c: "Release the tray with a note that the BI is pending; if it comes back positive you will notify the OR",
+      d: "Re-sterilize the tray on a flash cycle to buy more time",
+    },
+    correct: "b",
+    explanation: "Chemical indicators confirm sterilization exposure conditions but do NOT prove sterility. BIs are the gold standard. Releasing a load before BI results are available is a policy violation that can result in patient harm. The correct action is to hold the load, escalate immediately, and coordinate with the OR team for an alternative instrument set or case delay.",
+    realWorldNote: "This exact scenario causes most BI-related recalls. 'The CI passed' is not sufficient justification under AAMI ST79 or facility policy. Supervisors and risk management must be involved.",
+    standardRef: "AAMI ST79 — Biological monitoring: load release policy",
+    tags: ["sterilization", "biological indicator", "STAT", "load release"],
+    consequence: {
+      a: "Patient risk: if the BI later turns positive the OR must be notified, instruments recalled, and potentially the patient monitored for infection. A regulatory incident report is required.",
+      b: "Correct escalation: case may be delayed but patient safety is protected. Supervisor and OR charge nurse find an alternative tray or reschedule the case.",
+      c: "Partial recall: releasing with a pending-BI note is still a policy violation. When the BI comes back positive you now have a used instrument set on a patient — a reportable event.",
+      d: "Flash sterilization is not a valid workaround for circumventing BI monitoring. Flash cycles are for emergency use, not for re-processing loads to sidestep protocol.",
+    },
+    followUpId: "branch-001b",
+  },
+
+  {
+    id: "branch-001b",
+    type: "decision",
+    domain: "Sterilization",
+    difficulty: "advanced",
+    context: "Following up: the BI from the earlier load came back POSITIVE (growth detected) after the tray was sent to the OR. The case is already underway.",
+    question: "What is the immediate priority action?",
+    options: {
+      a: "Document the positive BI in the sterilizer log and flag the sterilizer for PM — the case is already done so there's no point interrupting",
+      b: "Notify the surgeon and OR charge nurse immediately, pull all other items from the same load, and initiate a recall investigation per facility policy",
+      c: "Re-run the BI to confirm the positive result before taking action",
+      d: "Quarantine only the sterilizer until it passes a re-qualification run",
+    },
+    correct: "b",
+    explanation: "A positive BI means sterilization failure is suspected. Immediate notification of the clinical team is mandatory so the surgeon can assess risk to the patient. All items from the same load must be recalled (unless already used, in which case the patient must be tracked). The sterilizer must be taken out of service for investigation. Re-running the BI does not change what happened to the current load.",
+    realWorldNote: "AAMI and Joint Commission require a documented event report for every positive BI involving a released load. Risk management and infection prevention must be notified same shift.",
+    standardRef: "AAMI ST79 Section 10.5 — Positive BI response protocol",
+    tags: ["positive BI", "recall", "sterilization failure", "patient safety"],
+    consequence: {
+      a: "Regulatory failure: not notifying the clinical team is indefensible. Joint Commission can cite the facility for immediate threat to patient safety.",
+      b: "Correct: immediate escalation protects the patient and satisfies regulatory requirements. The surgeon can document informed consent for infection-related monitoring.",
+      c: "Re-running the BI on a new cycle does not retroactively validate the failed load. The damage is done — action must be taken now.",
+      d: "Quarantining the sterilizer alone does not address items already distributed from the failed load. Both must happen.",
+    },
+  },
+
+  {
+    id: "branch-002",
+    type: "pitfall",
+    domain: "Decontamination & Cleaning",
+    difficulty: "foundational",
+    context: "A technician finishes manually cleaning a rigid laparoscopic cannula set. Instead of running it through the ultrasonic cleaner, she places the instruments directly on the prep-and-pack table because 'they look clean.'",
+    question: "What is the critical error here?",
+    options: {
+      a: "No error — if instruments look clean they can skip the ultrasonic step",
+      b: "The ultrasonic cleaner is optional for smooth-surfaced rigid instruments",
+      c: "Visible cleanliness does not equal microbial cleanliness — skipping manufacturer-specified cleaning steps is a protocol violation that can lead to sterilization failure",
+      d: "The error is that she should have used the washer-disinfector instead of manual cleaning",
+    },
+    correct: "c",
+    explanation: "Instruments that look clean can still harbor bioburden in crevices, lumens, and joints. The IFU (Instructions for Use) from the instrument manufacturer specifies required cleaning steps. Skipping any step is non-compliant even if the device appears visibly clean. Ultrasonic cleaning removes soil from surfaces manual cleaning can't reach.",
+    realWorldNote: "Surveyors routinely cite facilities for staff skipping ultrasonic cleaning. 'It looked clean' is never an acceptable rationale in documentation.",
+    standardRef: "AAMI ST79 — Cleaning validation; manufacturer IFU compliance",
+    tags: ["manual cleaning", "ultrasonic", "IFU", "visible soil", "bioburden"],
+    consequence: {
+      a: "Patient risk: residual bioburden under the sterile wrap can prevent sterilant penetration, leaving the device non-sterile despite a passed CI.",
+      b: "Incorrect: the ultrasonic step is required per IFU for devices with internal channels, joints, and complex geometry.",
+      c: "Correct action identified: retrain the technician and return instruments to the ultrasonic cleaner before inspection and packaging.",
+      d: "The washer-disinfector may also be required, but skipping any IFU-specified step is the core error regardless of which cleaner is used.",
+    },
+    followUpId: "branch-002b",
+  },
+
+  {
+    id: "branch-002b",
+    type: "regulatory",
+    domain: "Decontamination & Cleaning",
+    difficulty: "intermediate",
+    context: "You are the SPD supervisor. During a quality audit you discover that the ultrasonic cleaner has not been validated with a soil-load test or protein test in six months.",
+    question: "What is the required corrective action?",
+    options: {
+      a: "Document the finding and schedule a test within the next 30 days",
+      b: "Take the ultrasonic cleaner out of service immediately until a validation test confirms performance",
+      c: "Continue using the unit — if instruments pass visual inspection the cleaner is working",
+      d: "Switch to manual cleaning only until the next scheduled PM visit",
+    },
+    correct: "b",
+    explanation: "Ultrasonic cleaners must be performance-tested at defined intervals (typically daily or per shift per facility policy). Using an unvalidated cleaner means you cannot confirm instruments are being adequately cleaned before sterilization. Until performance is confirmed, the unit should be taken out of service. Document the finding and perform immediate validation testing to restore the unit to service.",
+    realWorldNote: "AAMI ST79 requires documented proof of cleaning equipment performance. A 6-month gap is a serious compliance gap that surveyors will cite as an immediate risk.",
+    standardRef: "AAMI ST79 Section 7 — Cleaning equipment monitoring",
+    tags: ["ultrasonic", "validation", "quality audit", "compliance", "performance testing"],
+    consequence: {
+      a: "Insufficient: a 30-day window while continuing to use an unvalidated cleaner means potentially inadequate cleaning for hundreds of instrument sets.",
+      b: "Correct: out-of-service until validated. This is the only compliant response when performance cannot be confirmed.",
+      c: "Visual inspection cannot detect protein or bioburden at the microbial level. This rationale is indefensible in a survey.",
+      d: "Manual-only cleaning may be acceptable as a temporary bridge, but validation testing must still occur before the ultrasonic cleaner returns to service.",
+    },
+  },
+
+  {
+    id: "branch-003",
+    type: "judgment",
+    domain: "High-Level Disinfection",
+    difficulty: "advanced",
+    context: "You are processing a flexible bronchoscope. After leak testing (passes), manual cleaning, and enzymatic rinse, you load it into the automated endoscope reprocessor (AER). Mid-cycle, the AER alarms and halts — displaying an error code. You cannot immediately determine the cause.",
+    question: "What is the correct response before any further action?",
+    options: {
+      a: "Remove the scope, dry it, and document the incomplete cycle — then return it to inventory since the manual cleaning was completed",
+      b: "Restart the AER cycle from the beginning with the same scope still inside",
+      c: "Remove the scope, treat it as contaminated, return it to decontamination, and investigate the AER alarm before reusing the machine",
+      d: "Complete HLD manually using a glutaraldehyde soak since the AER failed",
+    },
+    correct: "c",
+    explanation: "A mid-cycle alarm means the HLD process was not completed. The scope's disinfection status is unknown — you cannot assume it is safe. The scope must be treated as contaminated, returned to decontamination, and fully reprocessed from the start. The AER must be investigated and documented before it can be used again. Restarting the cycle from inside the machine does not guarantee the HLD chemistry was effective from the beginning of the cycle.",
+    realWorldNote: "Mid-cycle AER failures are reportable events at many facilities. The scope cannot be assumed safe for patient use under any circumstances until full reprocessing is confirmed.",
+    standardRef: "AAMI ST91 — Endoscope reprocessing; AER cycle interruption",
+    tags: ["AER", "bronchoscope", "HLD", "mid-cycle alarm", "endoscope reprocessing"],
+    consequence: {
+      a: "Patient risk: returning the scope to inventory after an incomplete HLD cycle could expose the next patient to inadequately disinfected equipment.",
+      b: "Restarting mid-cycle does not reset the chemistry — the AER alarm indicates a process failure that restarting will not resolve.",
+      c: "Correct: full reprocessing from decontamination ensures the scope is safe. AER investigation prevents recurrence.",
+      d: "Manual glutaraldehyde HLD may be a facility-approved fallback, but the scope must still be returned to decontamination and cleaned before any HLD method is used.",
+    },
+    followUpId: "branch-003b",
+  },
+
+  {
+    id: "branch-003b",
+    type: "regulatory",
+    domain: "High-Level Disinfection",
+    difficulty: "advanced",
+    context: "You determine the AER alarm was caused by a kinked internal tubing connector. After repair and performance testing, the AER passes. The scope that was in the unit during the failure needs to be reprocessed.",
+    question: "Before reprocessing the scope, what must be confirmed?",
+    options: {
+      a: "That the AER passed its performance test — no additional scope checks are needed",
+      b: "That the scope passed a new leak test and is free of damage from the failed cycle, then complete full reprocessing per IFU",
+      c: "That the scope cleaning log shows the previous manual cleaning was documented correctly",
+      d: "That you have enough HLD chemical for a full cycle",
+    },
+    correct: "b",
+    explanation: "Before reprocessing the scope you must perform a fresh leak test — a mid-cycle failure involving pressure or chemistry changes could have damaged the scope's internal components. Full reprocessing per IFU must be completed from start to finish. Documentation of the prior cleaning step is necessary but is secondary to confirming the scope's integrity.",
+    realWorldNote: "Pressure-related AER failures can damage flexible endoscopes. A new leak test before reprocessing is standard practice to avoid sending a compromised scope back to clinical use.",
+    standardRef: "AAMI ST91 — Pre-reprocessing inspection; leak testing after equipment failure",
+    tags: ["leak test", "AER", "scope damage", "reprocessing", "IFU"],
+    consequence: {
+      a: "AER performance does not address potential damage to the scope itself. A damaged scope in service is a patient safety and liability issue.",
+      b: "Correct: fresh leak test + full IFU reprocessing. This is the only way to confirm both device and equipment are safe.",
+      c: "Documentation review is necessary for the record but does not confirm current scope integrity.",
+      d: "Sufficient HLD chemical volume is a prerequisite but not the primary concern compared to scope integrity.",
+    },
+  },
+
+  {
+    id: "branch-004",
+    type: "scenario",
+    domain: "Storage & Transport",
+    difficulty: "foundational",
+    context: "A sterile wrapped instrument tray is returned from the OR. The outer wrap is intact but there is a visible moisture stain (wet spot) on one corner of the package.",
+    question: "What is the correct handling of this package?",
+    options: {
+      a: "Inspect the stain — if it's small and the inner wrap is dry, the tray is still considered sterile",
+      b: "Return it to the sterile storage area but mark it for priority use before the expiration date",
+      c: "Consider the package non-sterile, remove it from circulation, and reprocess from decontamination",
+      d: "Dry the package with a clean towel and return it to sterile storage",
+    },
+    correct: "c",
+    explanation: "Moisture is a sterility event. A wet package is considered contaminated because moisture creates a pathway for microorganisms to wick through the packaging material (strike-through). The item must be removed from circulation and reprocessed. There is no acceptable way to 'dry and return' a wet sterile package.",
+    realWorldNote: "Strike-through contamination is the most common sterile storage event. Any moisture — condensation, rain, spill — renders the package non-sterile by definition regardless of how long the package has been in storage.",
+    standardRef: "AAMI ST79 — Event-related sterility; packaging moisture/strike-through",
+    tags: ["wet package", "strike-through", "sterile storage", "event-related sterility"],
+    consequence: {
+      a: "Incorrect: the size of the stain is irrelevant. Any moisture is a strike-through event and the package is considered non-sterile.",
+      b: "Returning a wet package to sterile storage creates patient risk and violates event-related sterility principles.",
+      c: "Correct: non-sterile, remove from circulation, decontaminate and reprocess.",
+      d: "Drying the outside does not address the potential contamination that may have wicked through the packaging to the instrument surface.",
+    },
+  },
 ];
 
 // ─── UTILITY EXPORTS ──────────────────────────────────────────────────────────

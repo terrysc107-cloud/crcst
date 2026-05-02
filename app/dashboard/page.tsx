@@ -444,8 +444,19 @@ export default function DashboardPage() {
       <footer className="bg-navy text-white px-6 py-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="font-serif text-lg mb-2">SPD Cert Companion</div>
-          <div className="text-xs text-teal-3">
+          <div className="text-xs text-teal-3 mb-4">
             Helping sterile processing professionals pass their certification exams
+          </div>
+          <div className="flex justify-center gap-6 text-xs">
+            <Link href="/glossary" className="text-teal-3 hover:text-white transition font-mono">
+              📖 SPD Glossary
+            </Link>
+            <Link href="/account/mock-history" className="text-teal-3 hover:text-white transition font-mono">
+              📊 Exam History
+            </Link>
+            <Link href="/pricing" className="text-teal-3 hover:text-white transition font-mono">
+              Upgrade to Pro
+            </Link>
           </div>
         </div>
       </footer>

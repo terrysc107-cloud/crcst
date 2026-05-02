@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getSupabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { getDueTodayIds } from '@/lib/dal/srs'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -74,6 +75,15 @@ export default function Home() {
         setScreen('home')
         loadStats(session.user.id)
         loadRateLimitInfo()
+
+        // Auto-start review if ?mode=review is in the URL
+        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'review') {
+          const ids = await getDueTodayIds(session.user.id, 'crcst', getSupabase())
+          if (ids.length > 0) {
+            // startQuiz checks rate limits — call after state is set
+            setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+          }
+        }
       }
     })
 
@@ -307,7 +317,7 @@ export default function Home() {
     }
   }
 
-  const startQuiz = async (quizMode: QuizMode, domains?: string[], diff?: string) => {
+  const startQuiz = async (quizMode: QuizMode, domains?: string[], diff?: string, reviewIds?: string[]) => {
     // Always check rate limit fresh before starting quiz
     try {
       const session = await supabase.auth.getSession()
@@ -336,25 +346,32 @@ export default function Home() {
 
     let questions = [...QUESTIONS]
 
-    // Filter by domains
-    if (domains && domains.length > 0) {
-      questions = questions.filter((q) => domains.includes(q.domain))
+    if (reviewIds && reviewIds.length > 0) {
+      // Review mode: use exactly the due questions (shuffled, no count limit)
+      questions = questions.filter((q) => reviewIds.includes(q.id))
+      questions = questions.sort(() => Math.random() - 0.5)
+    } else {
+      // Filter by domains
+      if (domains && domains.length > 0) {
+        questions = questions.filter((q) => domains.includes(q.domain))
+      }
+
+      // Filter by difficulty
+      if (diff && diff !== 'all') {
+        questions = questions.filter((q) => q.difficulty === diff)
+      }
+
+      // Shuffle questions
+      questions = questions.sort(() => Math.random() - 0.5)
+
+      // Select number of questions based on mode
+      if (quizMode === 'practice') questions = questions.slice(0, 20)
+      if (quizMode === 'mock') questions = questions.slice(0, 50)
+      if (quizMode === 'flashcards') questions = questions.slice(0, 25)
+      if (quizMode === 'custom') questions = questions.slice(0, customQuestionCount)
     }
 
-    // Filter by difficulty
-    if (diff && diff !== 'all') {
-      questions = questions.filter((q) => q.difficulty === diff)
-    }
-
-    // Shuffle questions
-    questions = questions.sort(() => Math.random() - 0.5)
-
-    // Select number of questions based on mode
-    let selected = questions
-    if (quizMode === 'practice') selected = questions.slice(0, 20)
-    if (quizMode === 'mock') selected = questions.slice(0, 50)
-    if (quizMode === 'flashcards') selected = questions.slice(0, 25)
-    if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
+    const selected = questions
 
     setMode(quizMode)
     setQuizData({
@@ -402,6 +419,7 @@ export default function Home() {
         <Quiz
           quizData={quizData}
           mode={mode}
+          cert="crcst"
           onComplete={handleQuizComplete}
           onExit={handleReturnHome}
           onPause={savePausedSession}

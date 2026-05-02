@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getSupabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
@@ -9,6 +9,7 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
+import { getDueTodayIds } from '@/lib/dal/srs'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -45,11 +46,18 @@ export default function CHLPage() {
 
   useEffect(() => {
     // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+
+        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'review') {
+          const ids = await getDueTodayIds(session.user.id, 'chl', getSupabase())
+          if (ids.length > 0) {
+            setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+          }
+        }
       } else {
         // Redirect unauthenticated users to sign up first
         window.location.href = '/crcst'
@@ -251,24 +259,30 @@ export default function CHLPage() {
     }
   }
 
-  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string) => {
+  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string, reviewIds?: string[]) => {
     let questions = [...QUESTIONS]
 
-    if (domains && domains.length > 0) {
-      questions = questions.filter((q) => domains.includes(q.domain))
+    if (reviewIds && reviewIds.length > 0) {
+      questions = questions.filter((q) => reviewIds.includes(q.id))
+      questions = questions.sort(() => Math.random() - 0.5)
+    } else {
+      if (domains && domains.length > 0) {
+        questions = questions.filter((q) => domains.includes(q.domain))
+      }
+
+      if (diff && diff !== 'all') {
+        questions = questions.filter((q) => q.difficulty === diff)
+      }
+
+      questions = questions.sort(() => Math.random() - 0.5)
+
+      if (quizMode === 'practice') questions = questions.slice(0, 20)
+      if (quizMode === 'mock') questions = questions.slice(0, 50)
+      if (quizMode === 'flashcards') questions = questions.slice(0, 25)
+      if (quizMode === 'custom') questions = questions.slice(0, customQuestionCount)
     }
 
-    if (diff && diff !== 'all') {
-      questions = questions.filter((q) => q.difficulty === diff)
-    }
-
-    questions = questions.sort(() => Math.random() - 0.5)
-
-    let selected = questions
-    if (quizMode === 'practice') selected = questions.slice(0, 20)
-    if (quizMode === 'mock') selected = questions.slice(0, 50)
-    if (quizMode === 'flashcards') selected = questions.slice(0, 25)
-    if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
+    const selected = questions
 
     setMode(quizMode)
     setQuizData({
@@ -342,6 +356,7 @@ export default function CHLPage() {
         <Quiz
           quizData={quizData}
           mode={mode}
+          cert="chl"
           onComplete={handleQuizComplete}
           onExit={() => setScreen('home')}
           onPause={savePausedSession}

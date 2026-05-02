@@ -294,7 +294,7 @@ export default function DashboardPage() {
               {(['crcst', 'chl', 'cer'] as const).map(cert => {
                 const count = dueCounts[cert] ?? 0
                 if (count === 0) return null
-                const href = `/${cert}`
+                const href = `/${cert}?mode=review`
                 return (
                   <Link
                     key={cert}

@@ -19,6 +19,39 @@ function getServerClient(): SupabaseClient {
   )
 }
 
+// Returns IDs of questions due today for a given cert.
+export async function getDueTodayIds(
+  userId: string,
+  cert: Cert,
+  client?: SupabaseClient
+): Promise<string[]> {
+  const sb = client ?? getServerClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  let query = sb
+    .from('question_state')
+    .select('question_id')
+    .eq('user_id', userId)
+    .lte('next_due', today)
+
+  if (cert === 'chl') {
+    query = query.like('question_id', 'chl-%')
+  } else if (cert === 'cer') {
+    query = query.like('question_id', 'cer-%')
+  } else {
+    query = query
+      .not('question_id', 'like', 'chl-%')
+      .not('question_id', 'like', 'cer-%')
+  }
+
+  const { data, error } = await query
+  if (error) {
+    console.error('getDueTodayIds error:', error)
+    return []
+  }
+  return (data ?? []).map((row: { question_id: string }) => row.question_id)
+}
+
 // Returns count of questions due today for a given cert.
 // question_id prefix convention:
 //   chl-*  → CHL

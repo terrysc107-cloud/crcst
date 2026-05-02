@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
 import { getDueToday, getSrsStats, type SrsStats } from '@/lib/dal/srs'
+import { getRecentMistakeCount } from '@/lib/dal/mistakes'
 import { getSupabase } from '@/lib/supabase'
 
 interface Certification {
@@ -62,6 +63,7 @@ export default function DashboardPage() {
   const [earnedCerts, setEarnedCerts] = useState<{cert: string}[]>([])
   const [dueCounts, setDueCounts] = useState<DueCounts>({})
   const [masteryStats, setMasteryStats] = useState<Record<string, SrsStats>>({})
+  const [mistakeCounts, setMistakeCounts] = useState<Record<string, number>>({})
   const sub = useSubscription()
 
   useEffect(() => {
@@ -82,7 +84,12 @@ export default function DashboardPage() {
       }
 
       const sb = getSupabase()
-      const [certsResult, crcstDue, chlDue, cerDue, crcstMastery, chlMastery, cerMastery] = await Promise.all([
+      const [
+        certsResult,
+        crcstDue, chlDue, cerDue,
+        crcstMastery, chlMastery, cerMastery,
+        crcstMistakes, chlMistakes, cerMistakes,
+      ] = await Promise.all([
         supabase
           .from("certified_users")
           .select("cert")
@@ -94,11 +101,15 @@ export default function DashboardPage() {
         getSrsStats(user.id, 'crcst', sb),
         getSrsStats(user.id, 'chl', sb),
         getSrsStats(user.id, 'cer', sb),
+        getRecentMistakeCount(user.id, 'crcst', sb),
+        getRecentMistakeCount(user.id, 'chl', sb),
+        getRecentMistakeCount(user.id, 'cer', sb),
       ])
 
       if (certsResult.data) setEarnedCerts(certsResult.data)
       setDueCounts({ crcst: crcstDue, chl: chlDue, cer: cerDue })
       setMasteryStats({ crcst: crcstMastery, chl: chlMastery, cer: cerMastery })
+      setMistakeCounts({ crcst: crcstMistakes, chl: chlMistakes, cer: cerMistakes })
     }
     loadDashboard()
   }, [router])
@@ -319,6 +330,52 @@ export default function DashboardPage() {
                     }}
                   >
                     {cert.toUpperCase()} — {count} due
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Review Mistakes */}
+        {Object.values(mistakeCounts).some(n => n > 0) && (
+          <div style={{
+            background: 'rgba(239,68,68,0.04)',
+            border: '1px solid rgba(239,68,68,0.2)',
+            borderRadius: 12,
+            padding: '1rem 1.25rem',
+            marginBottom: '1.25rem',
+          }}>
+            <p style={{
+              color: '#ef4444',
+              fontSize: '0.68rem',
+              letterSpacing: '0.1em',
+              fontFamily: 'monospace',
+              marginBottom: '0.6rem',
+            }}>
+              RECENT MISSES
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {(['crcst', 'chl', 'cer'] as const).map(cert => {
+                const count = mistakeCounts[cert] ?? 0
+                if (count === 0) return null
+                return (
+                  <Link
+                    key={cert}
+                    href={`/${cert}?mode=mistakes`}
+                    style={{
+                      background: 'rgba(239,68,68,0.08)',
+                      border: '1px solid #ef4444',
+                      borderRadius: 100,
+                      padding: '0.25rem 0.9rem',
+                      color: '#ef4444',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      fontFamily: 'monospace',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {cert.toUpperCase()} — {count} {count === 1 ? 'miss' : 'misses'}
                   </Link>
                 )
               })}

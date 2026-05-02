@@ -10,6 +10,7 @@ import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
 import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
+import { getRecentMistakeIds } from '@/lib/dal/mistakes'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -54,13 +55,21 @@ export default function CERPage() {
         loadStats(session.user.id)
         getSrsStats(session.user.id, 'cer', getSupabase()).then(setSrsStats)
 
-        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'review') {
-          const ids = await getDueTodayIds(session.user.id, 'cer', getSupabase())
-          if (ids.length > 0) {
-            setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
-          } else {
-            setAllCaughtUp(true)
-            getSrsStats(session.user.id, 'cer', getSupabase()).then(setSrsStats)
+        if (typeof window !== 'undefined') {
+          const urlMode = new URLSearchParams(window.location.search).get('mode')
+          if (urlMode === 'review') {
+            const ids = await getDueTodayIds(session.user.id, 'cer', getSupabase())
+            if (ids.length > 0) {
+              setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+            } else {
+              setAllCaughtUp(true)
+              getSrsStats(session.user.id, 'cer', getSupabase()).then(setSrsStats)
+            }
+          } else if (urlMode === 'mistakes') {
+            const ids = await getRecentMistakeIds(session.user.id, 'cer', 20, getSupabase())
+            if (ids.length > 0) {
+              setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+            }
           }
         }
       } else {

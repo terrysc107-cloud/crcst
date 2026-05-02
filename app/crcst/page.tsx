@@ -8,6 +8,7 @@ import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
 import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
+import { getRecentMistakeIds } from '@/lib/dal/mistakes'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -79,15 +80,21 @@ export default function Home() {
         loadRateLimitInfo()
         getSrsStats(session.user.id, 'crcst', getSupabase()).then(setSrsStats)
 
-        // Auto-start review if ?mode=review is in the URL
-        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'review') {
-          const ids = await getDueTodayIds(session.user.id, 'crcst', getSupabase())
-          if (ids.length > 0) {
-            // startQuiz checks rate limits — call after state is set
-            setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
-          } else {
-            setAllCaughtUp(true)
-            getSrsStats(session.user.id, 'crcst', getSupabase()).then(setSrsStats)
+        if (typeof window !== 'undefined') {
+          const urlMode = new URLSearchParams(window.location.search).get('mode')
+          if (urlMode === 'review') {
+            const ids = await getDueTodayIds(session.user.id, 'crcst', getSupabase())
+            if (ids.length > 0) {
+              setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+            } else {
+              setAllCaughtUp(true)
+              getSrsStats(session.user.id, 'crcst', getSupabase()).then(setSrsStats)
+            }
+          } else if (urlMode === 'mistakes') {
+            const ids = await getRecentMistakeIds(session.user.id, 'crcst', 20, getSupabase())
+            if (ids.length > 0) {
+              setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+            }
           }
         }
       }

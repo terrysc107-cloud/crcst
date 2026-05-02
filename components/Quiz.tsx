@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Question } from '@/lib/questions'
 import { getSupabase } from '@/lib/supabase'
 import { updateState, DEFAULT_STATE, type QuestionState, type ConfidenceRating } from '@/lib/srs'
@@ -35,6 +35,7 @@ export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExi
   const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null)
   const [questionStates, setQuestionStates] = useState<Record<string, QuestionState>>({})
   const [confidencePicked, setConfidencePicked] = useState(false)
+  const touchStartY = useRef<number | null>(null)
 
   const q = quizData.questions[current]
   const progress = ((current + 1) / quizData.questions.length) * 100
@@ -58,6 +59,35 @@ export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExi
 
     return () => clearInterval(timer)
   }, [mode, timeLeft])
+
+  // Keyboard shortcuts: 1-4 select options, Space/Enter advances
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        const idx = parseInt(e.key) - 1
+        if (idx < q.options.length && !hasAnswered && !rateLimitReached) {
+          selectAnswer(idx)
+        }
+        return
+      }
+
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault()
+        if (mode === 'flashcards') {
+          setIsFlipped((f) => !f)
+        } else if (mode === 'practice') {
+          if (hasAnswered && showExplanation && confidencePicked) handleNext()
+        } else {
+          if (hasAnswered) handleNext()
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [current, hasAnswered, showExplanation, confidencePicked, mode, rateLimitReached])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -322,6 +352,13 @@ export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExi
         <div className="px-6 py-8">
           <div
             onClick={() => setIsFlipped(!isFlipped)}
+            onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY }}
+            onTouchEnd={(e) => {
+              if (touchStartY.current === null) return
+              const delta = e.changedTouches[0].clientY - touchStartY.current
+              touchStartY.current = null
+              if (Math.abs(delta) > 40) setIsFlipped(delta < 0 ? true : false)
+            }}
             className="cursor-pointer min-h-[300px]"
             style={{ perspective: '1000px' }}
           >
@@ -560,19 +597,27 @@ export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExi
       )}
 
       {/* Question */}
-      <div className="px-6 py-8">
-        <div className="text-xs text-teal tracking-widest mb-2">
-          {q.domain} • {q.difficulty}
-        </div>
-        <div className="font-serif text-xl text-navy mb-6 leading-relaxed">
-          {q.question}
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
+        {/* Elevated question card */}
+        <div className="bg-white rounded-2xl shadow-md border border-cream-2 p-5 sm:p-7 mb-5">
+          <div className="text-xs text-teal tracking-widest mb-3 font-mono">
+            {q.domain} • {q.difficulty}
+          </div>
+          <div className="font-serif text-xl text-navy leading-relaxed">
+            {q.question}
+          </div>
+          {mode === 'practice' && !hasAnswered && (
+            <div className="text-xs text-text-3 mt-4 hidden sm:block font-mono">
+              Press 1–4 to select · Space to advance
+            </div>
+          )}
         </div>
 
         {/* Options */}
-        <div className="space-y-3 mb-8">
+        <div className="space-y-3 mb-6">
           {q.options.map((opt, idx) => {
             let optionClass =
-              'w-full text-left px-4 py-3 rounded-lg border-2 transition font-mono text-sm'
+              'w-full text-left px-5 py-4 rounded-xl border-2 transition font-mono text-sm'
 
             if (mode === 'practice' && showExplanation) {
               if (idx === q.correct_answer) {
@@ -656,16 +701,16 @@ export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExi
           <button
             onClick={handlePrev}
             disabled={current === 0}
-            className="px-6 py-3 bg-cream-2 text-text rounded-lg font-mono disabled:opacity-50 hover:bg-cream transition"
+            className="px-6 py-4 bg-cream-2 text-text rounded-xl font-mono disabled:opacity-50 hover:bg-cream transition min-w-[100px]"
           >
-            ← Previous
+            ← Prev
           </button>
           <button
             onClick={handleNext}
             disabled={mode === 'practice' && (!showExplanation || !confidencePicked)}
-            className="px-6 py-3 bg-teal text-white rounded-lg font-mono hover:bg-teal-2 disabled:opacity-50 transition"
+            className="px-8 py-4 bg-teal text-white rounded-xl font-mono hover:bg-teal-2 disabled:opacity-50 transition min-w-[120px]"
           >
-            {current === quizData.questions.length - 1 ? 'Finish' : 'Next →'}
+            {current === quizData.questions.length - 1 ? 'Finish ✓' : 'Next →'}
           </button>
         </div>
       </div>

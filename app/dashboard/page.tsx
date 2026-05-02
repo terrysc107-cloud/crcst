@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
+import { getDueToday, getSrsStats, type SrsStats } from '@/lib/dal/srs'
+import { getSupabase } from '@/lib/supabase'
 
 interface Certification {
   id: string
@@ -53,15 +55,19 @@ const certifications: Certification[] = [
 
 const totalQuestions = 400 + 240 + 147
 
+type DueCounts = Record<string, number>
+
 export default function DashboardPage() {
   const router = useRouter()
   const [earnedCerts, setEarnedCerts] = useState<{cert: string}[]>([])
+  const [dueCounts, setDueCounts] = useState<DueCounts>({})
+  const [masteryStats, setMasteryStats] = useState<Record<string, SrsStats>>({})
   const sub = useSubscription()
 
   useEffect(() => {
-    async function loadCerts() {
+    async function loadDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       // Redirect to sign-in if not authenticated
       if (!user) {
         router.push('/crcst')
@@ -75,14 +81,26 @@ export default function DashboardPage() {
         return
       }
 
-      const { data } = await supabase
-        .from("certified_users")
-        .select("cert")
-        .eq("user_id", user.id)
-        .order("claimed_at", { ascending: true })
-      if (data) setEarnedCerts(data)
+      const sb = getSupabase()
+      const [certsResult, crcstDue, chlDue, cerDue, crcstMastery, chlMastery, cerMastery] = await Promise.all([
+        supabase
+          .from("certified_users")
+          .select("cert")
+          .eq("user_id", user.id)
+          .order("claimed_at", { ascending: true }),
+        getDueToday(user.id, 'crcst', sb),
+        getDueToday(user.id, 'chl', sb),
+        getDueToday(user.id, 'cer', sb),
+        getSrsStats(user.id, 'crcst', sb),
+        getSrsStats(user.id, 'chl', sb),
+        getSrsStats(user.id, 'cer', sb),
+      ])
+
+      if (certsResult.data) setEarnedCerts(certsResult.data)
+      setDueCounts({ crcst: crcstDue, chl: chlDue, cer: cerDue })
+      setMasteryStats({ crcst: crcstMastery, chl: chlMastery, cer: cerMastery })
     }
-    loadCerts()
+    loadDashboard()
   }, [router])
 
   return (
@@ -261,6 +279,53 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Due Today */}
+        {Object.values(dueCounts).some(n => n > 0) && (
+          <div style={{
+            background: 'rgba(218,165,32,0.06)',
+            border: '1px solid rgba(218,165,32,0.25)',
+            borderRadius: 12,
+            padding: '1rem 1.25rem',
+            marginBottom: '1.25rem',
+          }}>
+            <p style={{
+              color: '#DAA520',
+              fontSize: '0.68rem',
+              letterSpacing: '0.1em',
+              fontFamily: 'monospace',
+              marginBottom: '0.6rem',
+            }}>
+              DUE TODAY
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {(['crcst', 'chl', 'cer'] as const).map(cert => {
+                const count = dueCounts[cert] ?? 0
+                if (count === 0) return null
+                const href = `/${cert}?mode=review`
+                return (
+                  <Link
+                    key={cert}
+                    href={href}
+                    style={{
+                      background: 'rgba(218,165,32,0.12)',
+                      border: '1px solid #DAA520',
+                      borderRadius: 100,
+                      padding: '0.25rem 0.9rem',
+                      color: '#DAA520',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      fontFamily: 'monospace',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {cert.toUpperCase()} — {count} due
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="text-xs tracking-widest text-text-3 mb-6 text-center">
           SELECT YOUR CERTIFICATION
         </div>
@@ -307,6 +372,9 @@ export default function DashboardPage() {
               )
             }
 
+            const dueCount = dueCounts[cert.id] ?? 0
+            const mastery = masteryStats[cert.id]
+            const hasSrsData = mastery && (mastery.mastered > 0 || mastery.learning > 0)
             return (
               <Link
                 key={cert.id}
@@ -323,7 +391,32 @@ export default function DashboardPage() {
                   <p className="text-sm text-text-3 mb-4 leading-relaxed">
                     {cert.description}
                   </p>
-                  <div className="flex items-center justify-end">
+                  {/* SRS mastery mini-bar */}
+                  {hasSrsData && (
+                    <div className="mb-3">
+                      <div className="flex justify-between text-xs font-mono mb-1">
+                        <span style={{ color: '#14BDAC' }}>{mastery.mastered} mastered</span>
+                        <span style={{ color: '#DAA520' }}>{mastery.learning} learning</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${Math.round(((mastery.mastered + mastery.learning) / cert.questionCount) * 100)}%`,
+                            background: 'linear-gradient(90deg, #14BDAC, #DAA520)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    {dueCount > 0 ? (
+                      <span className="text-xs font-mono font-semibold" style={{ color: '#DAA520' }}>
+                        Review {dueCount} due
+                      </span>
+                    ) : (
+                      <span />
+                    )}
                     <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-teal group-hover:text-white transition-colors">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

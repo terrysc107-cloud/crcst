@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getSupabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
@@ -9,6 +9,7 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
+import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -39,16 +40,29 @@ export default function CERPage() {
   const [domainMastery, setDomainMastery] = useState<Record<string, { correct: number; total: number }>>({})
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
+  const [srsStats, setSrsStats] = useState<SrsStats | null>(null)
+  const [allCaughtUp, setAllCaughtUp] = useState(false)
   const [showUpsellModal, setShowUpsellModal] = useState(false)
   
   const sub = useSubscription()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)
+        getSrsStats(session.user.id, 'cer', getSupabase()).then(setSrsStats)
+
+        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'review') {
+          const ids = await getDueTodayIds(session.user.id, 'cer', getSupabase())
+          if (ids.length > 0) {
+            setTimeout(() => startQuiz('practice', undefined, undefined, ids), 0)
+          } else {
+            setAllCaughtUp(true)
+            getSrsStats(session.user.id, 'cer', getSupabase()).then(setSrsStats)
+          }
+        }
       } else {
         // Redirect unauthenticated users to sign up first
         window.location.href = '/crcst'
@@ -246,24 +260,30 @@ export default function CERPage() {
     }
   }
 
-  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string) => {
+  const startQuiz = (quizMode: QuizMode, domains?: string[], diff?: string, reviewIds?: string[]) => {
     let questions = [...QUESTIONS]
 
-    if (domains && domains.length > 0) {
-      questions = questions.filter((q) => domains.includes(q.domain))
+    if (reviewIds && reviewIds.length > 0) {
+      questions = questions.filter((q) => reviewIds.includes(q.id))
+      questions = questions.sort(() => Math.random() - 0.5)
+    } else {
+      if (domains && domains.length > 0) {
+        questions = questions.filter((q) => domains.includes(q.domain))
+      }
+
+      if (diff && diff !== 'all') {
+        questions = questions.filter((q) => q.difficulty === diff)
+      }
+
+      questions = questions.sort(() => Math.random() - 0.5)
+
+      if (quizMode === 'practice') questions = questions.slice(0, 20)
+      if (quizMode === 'mock') questions = questions.slice(0, 50)
+      if (quizMode === 'flashcards') questions = questions.slice(0, 25)
+      if (quizMode === 'custom') questions = questions.slice(0, customQuestionCount)
     }
 
-    if (diff && diff !== 'all') {
-      questions = questions.filter((q) => q.difficulty === diff)
-    }
-
-    questions = questions.sort(() => Math.random() - 0.5)
-
-    let selected = questions
-    if (quizMode === 'practice') selected = questions.slice(0, 20)
-    if (quizMode === 'mock') selected = questions.slice(0, 50)
-    if (quizMode === 'flashcards') selected = questions.slice(0, 25)
-    if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
+    const selected = questions
 
     setMode(quizMode)
     setQuizData({
@@ -279,6 +299,7 @@ export default function CERPage() {
     setResults(quizResults)
     setScreen('results')
     saveResults(quizResults)
+    if (user?.id) getSrsStats(user.id, 'cer', getSupabase()).then(setSrsStats)
   }
 
   const getDomains = () => {
@@ -335,6 +356,7 @@ export default function CERPage() {
         <Quiz
           quizData={quizData}
           mode={mode}
+          cert="cer"
           onComplete={handleQuizComplete}
           onExit={() => setScreen('home')}
           onPause={savePausedSession}
@@ -444,6 +466,59 @@ export default function CERPage() {
             </div>
           </div>
         </div>
+
+        {/* All Caught Up Banner */}
+        {allCaughtUp && (
+          <div className="mx-6 mt-6 p-4 bg-correct-bg border border-correct rounded-lg">
+            <div className="font-mono text-sm font-bold text-correct mb-1">
+              ✓ All caught up!
+            </div>
+            <div className="text-sm text-text-3">
+              {srsStats?.nextDue
+                ? `Your next review is scheduled for ${new Date(srsStats.nextDue + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}.`
+                : 'No reviews scheduled yet — answer some questions to build your review deck.'}
+            </div>
+            <button
+              onClick={() => setAllCaughtUp(false)}
+              className="mt-3 text-xs font-mono text-teal hover:underline"
+            >
+              Study something new →
+            </button>
+          </div>
+        )}
+
+        {/* SRS Progress Widget */}
+        {srsStats && (srsStats.mastered > 0 || srsStats.learning > 0) && (
+          <div className="mx-6 mt-6 p-4 bg-white border border-cream-2 rounded-lg">
+            <div className="text-xs tracking-widest text-text-3 mb-3">
+              SPACED REPETITION PROGRESS
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1 text-center">
+                <div className="font-serif text-2xl text-correct">{srsStats.mastered}</div>
+                <div className="text-xs text-text-3 mt-1">Mastered</div>
+              </div>
+              <div className="flex-1 text-center">
+                <div className="font-serif text-2xl text-amber">{srsStats.learning}</div>
+                <div className="text-xs text-text-3 mt-1">Learning</div>
+              </div>
+              <div className="flex-1 text-center">
+                <div className="font-serif text-2xl text-navy">
+                  {QUESTIONS.length - srsStats.mastered - srsStats.learning}
+                </div>
+                <div className="text-xs text-text-3 mt-1">New</div>
+              </div>
+            </div>
+            {srsStats.nextDue && (
+              <div className="mt-3 text-xs text-text-3 text-center">
+                Next review:{' '}
+                <span className="text-amber font-mono">
+                  {new Date(srsStats.nextDue + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Study Modes */}
         <div className="px-6 py-8">

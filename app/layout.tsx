@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Libre_Baskerville, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import FeedbackButton from '@/components/FeedbackButton'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const libreBaskerville = Libre_Baskerville({
@@ -46,11 +47,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable}`}>
-      <body className="font-mono antialiased bg-cream text-text">
-        {children}
-        <FeedbackButton />
-        <Analytics />
+    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable}`} suppressHydrationWarning>
+      <body className="font-mono antialiased bg-background text-foreground">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+          <FeedbackButton />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )

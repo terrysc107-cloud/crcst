@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import ThemeToggle from '@/components/ThemeToggle'
 
 interface HeaderProps {
   user: any
@@ -24,6 +25,7 @@ export default function Header({ user, streak = 0 }: HeaderProps) {
         </div>
       </Link>
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <div className="bg-navy-2 border border-amber text-amber text-xs px-2 py-1 rounded-full flex items-center gap-1">
           <span>🔥</span>
           <span>{streak}</span>

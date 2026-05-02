@@ -202,7 +202,7 @@ export default function PricingPage() {
               key={plan.id}
               className={`relative rounded-2xl border p-6 transition-all ${
                 plan.id === 'triple_crown'
-                  ? 'bg-amber-500/5 border-amber-500/60 shadow-lg shadow-amber-500/10 scale-[1.02]'
+                  ? 'bg-amber/5 border-amber/60 shadow-lg shadow-amber/10 scale-[1.02]'
                   : plan.highlight
                   ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10'
                   : 'bg-card border-border hover:border-primary/50'

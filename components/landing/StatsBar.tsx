@@ -6,17 +6,21 @@ async function fetchStats() {
 
   if (!url || !key) return { questionsAnswered: 0, badgesClaimed: 0 };
 
-  const sb = createClient(url, key);
+  try {
+    const sb = createClient(url, key);
 
-  const [{ count: qCount }, { count: bCount }] = await Promise.all([
-    sb.from("question_attempts").select("*", { count: "exact", head: true }),
-    sb.from("certified_users").select("*", { count: "exact", head: true }),
-  ]);
+    const [{ count: qCount }, { count: bCount }] = await Promise.all([
+      sb.from("question_attempts").select("*", { count: "exact", head: true }),
+      sb.from("certified_users").select("*", { count: "exact", head: true }),
+    ]);
 
-  return {
-    questionsAnswered: qCount ?? 0,
-    badgesClaimed: bCount ?? 0,
-  };
+    return {
+      questionsAnswered: qCount ?? 0,
+      badgesClaimed: bCount ?? 0,
+    };
+  } catch {
+    return { questionsAnswered: 0, badgesClaimed: 0 };
+  }
 }
 
 export default async function StatsBar() {

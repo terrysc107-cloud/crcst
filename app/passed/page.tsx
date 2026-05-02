@@ -222,7 +222,6 @@ export default function PassedExamFlow() {
     new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -301,12 +300,13 @@ export default function PassedExamFlow() {
     return `https://www.linkedin.com/sharing/share-offsite/?url=${profileUrl}&title=${title}&summary=${summary}`;
   }
 
-  async function handleShare() {
-    setSharing(true);
-    try {
-      window.open(getLinkedInShareUrl(), "_blank", "noopener,noreferrer,width=600,height=600");
-    } catch {}
-    setSharing(false);
+  function handleShare() {
+    const url = getLinkedInShareUrl();
+    const popup = window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
+    if (!popup) {
+      // Popup blocked — navigate directly so the user still gets to LinkedIn
+      window.location.href = url;
+    }
   }
 
   async function handleCopyLink() {
@@ -662,7 +662,6 @@ export default function PassedExamFlow() {
             {/* LinkedIn Share */}
             <button
               onClick={handleShare}
-              disabled={sharing}
               style={{
                 padding: "1rem",
                 borderRadius: "12px",
@@ -681,7 +680,7 @@ export default function PassedExamFlow() {
                 gap: "0.5rem",
               }}
             >
-              {sharing ? "Opening LinkedIn…" : "🔗 Share on LinkedIn"}
+              🔗 Share on LinkedIn
             </button>
 
             {/* Copy profile link */}

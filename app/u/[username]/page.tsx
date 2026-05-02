@@ -28,7 +28,7 @@ async function getProfileData(username: string): Promise<{ profile: Profile; cer
   const sb = createClient(url, key);
 
   const { data: profile } = await sb
-    .from("profiles")
+    .from("public_profiles")
     .select("id, username, display_name, created_at")
     .eq("username", username)
     .single();

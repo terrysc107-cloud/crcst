@@ -213,6 +213,7 @@ export default function Home() {
     })
 
     try {
+      const isMock = quizResults.mode === 'mock'
       await supabase.from('crcst_quiz_results').insert({
         user_id: user.id,
         difficulty: quizResults.mode,
@@ -226,6 +227,11 @@ export default function Home() {
           total: stats.total,
           percentage: Math.round((stats.correct / stats.total) * 100)
         })),
+        // Store per-question data for mock exams to enable history replay
+        ...(isMock && {
+          question_ids: quizResults.questions?.map((q: Question) => q.id) ?? [],
+          answers: quizResults.answers ?? [],
+        }),
       })
       loadStats(user.id)
     } catch (error) {

@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
 
+// Build a lookup map for follow-up questions
+const scenarioById: Record<string, ScenarioQuestion> = Object.fromEntries(
+  scenarioQuestions.map(q => [q.id, q])
+);
+
 export default function ScenariosQuizPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -16,11 +21,16 @@ export default function ScenariosQuizPage() {
   );
   const [showExplanation, setShowExplanation] = useState(false);
   const [quizComplete, setQuizComplete] = useState(false);
+  const [followUpActive, setFollowUpActive] = useState<ScenarioQuestion | null>(null);
+  const [followUpAnswer, setFollowUpAnswer] = useState<string | null>(null);
+  const [showFollowUpExplanation, setShowFollowUpExplanation] = useState(false);
 
-  const q = scenarioQuestions[current];
+  const baseQ = scenarioQuestions[current];
+  const q = followUpActive ?? baseQ;
   const progress = ((current + 1) / scenarioQuestions.length) * 100;
-  const hasAnswered = answers[current] !== null;
-  const isCorrect = hasAnswered && answers[current] === q.correct;
+  const hasAnswered = followUpActive ? followUpAnswer !== null : answers[current] !== null;
+  const currentAnswer = followUpActive ? followUpAnswer : answers[current];
+  const isCorrect = hasAnswered && currentAnswer === q.correct;
 
   useEffect(() => {
     async function checkAuthAndSubscription() {
@@ -59,6 +69,11 @@ export default function ScenariosQuizPage() {
 
   const selectAnswer = (letter: "a" | "b" | "c" | "d") => {
     if (hasAnswered) return;
+    if (followUpActive) {
+      setFollowUpAnswer(letter);
+      setShowFollowUpExplanation(true);
+      return;
+    }
     const newAnswers = [...answers];
     newAnswers[current] = letter;
     setAnswers(newAnswers);
@@ -75,6 +90,18 @@ export default function ScenariosQuizPage() {
   };
 
   const handleNext = () => {
+    if (followUpActive) {
+      setFollowUpActive(null);
+      setFollowUpAnswer(null);
+      setShowFollowUpExplanation(false);
+      if (current < scenarioQuestions.length - 1) {
+        setCurrent(current + 1);
+        setShowExplanation(false);
+      } else {
+        setQuizComplete(true);
+      }
+      return;
+    }
     if (current < scenarioQuestions.length - 1) {
       setCurrent(current + 1);
       setShowExplanation(false);
@@ -84,10 +111,24 @@ export default function ScenariosQuizPage() {
   };
 
   const handlePrev = () => {
+    if (followUpActive) {
+      setFollowUpActive(null);
+      setFollowUpAnswer(null);
+      setShowFollowUpExplanation(false);
+      return;
+    }
     if (current > 0) {
       setCurrent(current - 1);
       setShowExplanation(answers[current - 1] !== null);
     }
+  };
+
+  const activateFollowUp = () => {
+    const fu = baseQ.followUpId ? scenarioById[baseQ.followUpId] : null;
+    if (!fu) return;
+    setFollowUpActive(fu);
+    setFollowUpAnswer(null);
+    setShowFollowUpExplanation(false);
   };
 
   if (loading) {
@@ -229,16 +270,17 @@ export default function ScenariosQuizPage() {
             let optionClass =
               "w-full text-left px-4 py-3 rounded-lg border-2 transition font-mono text-sm";
 
-            if (showExplanation) {
+            const showExp = followUpActive ? showFollowUpExplanation : showExplanation;
+            if (showExp) {
               if (letter === q.correct) {
                 optionClass += " border-correct bg-correct/20 text-correct";
-              } else if (letter === answers[current] && letter !== q.correct) {
+              } else if (letter === currentAnswer && letter !== q.correct) {
                 optionClass += " border-wrong bg-wrong/20 text-wrong";
               } else {
                 optionClass += " border-white/10 text-white/40";
               }
             } else {
-              if (answers[current] === letter) {
+              if (currentAnswer === letter) {
                 optionClass += " border-amber bg-amber/10 text-white";
               } else {
                 optionClass += " border-white/20 hover:border-amber text-white/80";
@@ -249,7 +291,7 @@ export default function ScenariosQuizPage() {
               <button
                 key={letter}
                 onClick={() => selectAnswer(letter)}
-                disabled={showExplanation}
+                disabled={followUpActive ? showFollowUpExplanation : showExplanation}
                 className={optionClass}
               >
                 <span className="inline-block w-6 h-6 rounded-full bg-white/10 text-center text-xs leading-6 mr-3 uppercase">
@@ -262,7 +304,7 @@ export default function ScenariosQuizPage() {
         </div>
 
         {/* Explanation */}
-        {showExplanation && (
+        {(followUpActive ? showFollowUpExplanation : showExplanation) && (
           <div
             className={`p-4 rounded-lg mb-6 ${
               isCorrect ? "bg-correct/20 border border-correct" : "bg-wrong/20 border border-wrong"
@@ -272,6 +314,37 @@ export default function ScenariosQuizPage() {
               {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
             </div>
             <div className="text-sm leading-relaxed text-white/80 mb-4">{q.explanation}</div>
+
+            {/* Branching consequences */}
+            {q.consequence && currentAnswer && (
+              <div style={{
+                marginTop: "1rem",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "10px",
+                padding: "1rem 1.25rem",
+              }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.75rem" }}>
+                  WHAT HAPPENS IF YOU CHOSE…
+                </p>
+                {(["a", "b", "c", "d"] as const).map(letter => (
+                  <div key={letter} style={{
+                    marginBottom: "0.6rem",
+                    padding: "0.5rem 0.75rem",
+                    borderRadius: "8px",
+                    background: letter === q.correct ? "rgba(34,197,94,0.08)" : letter === currentAnswer && letter !== q.correct ? "rgba(239,68,68,0.08)" : "transparent",
+                    border: `1px solid ${letter === q.correct ? "rgba(34,197,94,0.25)" : letter === currentAnswer && letter !== q.correct ? "rgba(239,68,68,0.25)" : "transparent"}`,
+                  }}>
+                    <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: letter === q.correct ? "#22c55e" : letter === currentAnswer && letter !== q.correct ? "#ef4444" : "rgba(255,255,255,0.35)", marginRight: "0.5rem", textTransform: "uppercase" }}>
+                      {letter}:
+                    </span>
+                    <span style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
+                      {q.consequence[letter]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Real World Note */}
             {q.realWorldNote && (
@@ -297,6 +370,29 @@ export default function ScenariosQuizPage() {
                 📖 {q.standardRef}
               </div>
             )}
+
+            {/* Follow-up scenario prompt */}
+            {!followUpActive && baseQ.followUpId && scenarioById[baseQ.followUpId] && (
+              <div style={{ marginTop: "1.25rem" }}>
+                <button
+                  onClick={activateFollowUp}
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 1rem",
+                    background: "rgba(232,160,32,0.15)",
+                    border: "1px solid rgba(232,160,32,0.4)",
+                    borderRadius: "10px",
+                    color: "#E8A020",
+                    fontFamily: "DM Mono, monospace",
+                    fontSize: "0.82rem",
+                    cursor: "pointer",
+                    textAlign: "left" as const,
+                  }}
+                >
+                  ↪ Follow-up: What happens next? →
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -311,10 +407,10 @@ export default function ScenariosQuizPage() {
           </button>
           <button
             onClick={handleNext}
-            disabled={!showExplanation}
+            disabled={followUpActive ? !showFollowUpExplanation : !showExplanation}
             className="px-6 py-3 bg-amber text-navy rounded-lg font-mono hover:bg-amber/90 disabled:opacity-50 transition"
           >
-            {current === scenarioQuestions.length - 1 ? "Finish" : "Next →"}
+            {!followUpActive && current === scenarioQuestions.length - 1 ? "Finish" : "Next →"}
           </button>
         </div>
       </div>

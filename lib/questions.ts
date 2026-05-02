@@ -6,6 +6,7 @@ export interface Question {
   domain: string
   difficulty: 'easy' | 'medium' | 'hard'
   explanation: string
+  image_url?: string
 }
 
 // 400 CRCST certification exam questions

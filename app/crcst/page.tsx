@@ -9,6 +9,7 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
 import { getDueTodayIds, getSrsStats, type SrsStats } from '@/lib/dal/srs'
 import { getRecentMistakeIds } from '@/lib/dal/mistakes'
+import { loadPausedSessions, saveSession, loadSession, deleteSession as deleteSessionDAL } from '@/lib/dal/sessions'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -183,14 +184,8 @@ export default function Home() {
         setStreak(currentStreak)
       }
 
-      // Always load paused sessions when stats refresh
-      const { data: sessions } = await supabase
-        .from('crcst_quiz_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_paused', true)
-
-      if (sessions) setPausedSessions(sessions)
+      const sessions = await loadPausedSessions(userId, 'crcst', getSupabase())
+      setPausedSessions(sessions)
 
     } catch (error) {
       console.error('Error loading stats:', error)
@@ -259,76 +254,41 @@ export default function Home() {
 
   const savePausedSession = async (sessionData: any) => {
     if (!user) return
-    try {
-      const { error } = await supabase.from('crcst_quiz_sessions').insert({
-        user_id: user.id,
-        quiz_mode: sessionData.mode,
-        question_ids: sessionData.questionIds,
-        answers: sessionData.answers,
-        current_question_index: sessionData.currentQuestionIndex,
-        selected_domains: selectedDomains,
-        difficulty,
-        elapsed_time_seconds: sessionData.elapsedTimeSeconds,
-        is_paused: true,
-      })
-
-      if (!error) {
-        // Refresh paused sessions list
-        const { data: sessions } = await supabase
-          .from('crcst_quiz_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('is_paused', true)
-        if (sessions) setPausedSessions(sessions)
-      }
-    } catch (error) {
-      console.error('Error saving paused session:', error)
-    }
+    await saveSession({
+      userId: user.id,
+      cert: 'crcst',
+      mode: sessionData.mode,
+      questionIds: sessionData.questionIds,
+      answers: sessionData.answers,
+      currentQuestionIndex: sessionData.currentQuestionIndex,
+      selectedDomains: selectedDomains ?? [],
+      difficulty: difficulty ?? 'all',
+      elapsedTimeSeconds: sessionData.elapsedTimeSeconds,
+    }, getSupabase())
+    const sessions = await loadPausedSessions(user.id, 'crcst', getSupabase())
+    setPausedSessions(sessions)
   }
 
   const resumeSession = async (sessionId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('crcst_quiz_sessions')
-        .select('*')
-        .eq('id', sessionId)
-        .single()
-
-      if (data && !error) {
-        // Get the original questions by ID
-        const questionIds = data.question_ids as string[]
-        const resumeQuestions = QUESTIONS.filter((q) => questionIds.includes(q.id))
-
-        setQuizData({
-          questions: resumeQuestions,
-          currentIndex: data.current_question_index || 0,
-          answers: data.answers || new Array(resumeQuestions.length).fill(null),
-          startTime: Date.now() - (data.elapsed_time_seconds * 1000), // Adjust for elapsed time
-        })
-        setMode(data.quiz_mode)
-        setScreen('quiz')
-
-        // Delete the session from DB
-        await supabase.from('crcst_quiz_sessions').delete().eq('id', sessionId)
-      }
-    } catch (error) {
-      console.error('Error resuming session:', error)
-    }
+    const data = await loadSession(sessionId, getSupabase())
+    if (!data) return
+    const resumeQuestions = QUESTIONS.filter((q) => data.question_ids.includes(q.id))
+    setQuizData({
+      questions: resumeQuestions,
+      currentIndex: data.current_question_index || 0,
+      answers: data.answers || new Array(resumeQuestions.length).fill(null),
+      startTime: Date.now() - (data.elapsed_time_seconds * 1000),
+    })
+    setMode(data.quiz_mode as any)
+    setScreen('quiz')
+    await deleteSessionDAL(sessionId, getSupabase())
   }
 
   const deleteSession = async (sessionId: string) => {
     if (!user) return
-    try {
-      await supabase.from('crcst_quiz_sessions').delete().eq('id', sessionId)
-      const { data: sessions } = await supabase
-        .from('crcst_quiz_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_paused', true)
-      if (sessions) setPausedSessions(sessions)
-    } catch (error) {
-      console.error('Error deleting session:', error)
-    }
+    await deleteSessionDAL(sessionId, getSupabase())
+    const sessions = await loadPausedSessions(user.id, 'crcst', getSupabase())
+    setPausedSessions(sessions)
   }
 
   const startQuiz = async (quizMode: QuizMode, domains?: string[], diff?: string, reviewIds?: string[]) => {

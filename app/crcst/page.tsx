@@ -40,6 +40,7 @@ export default function Home() {
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [srsStats, setSrsStats] = useState<SrsStats | null>(null)
+  const [chatPrefill, setChatPrefill] = useState('')
   const [allCaughtUp, setAllCaughtUp] = useState(false)
   const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
@@ -437,9 +438,10 @@ export default function Home() {
           onComplete={handleQuizComplete}
           onExit={handleReturnHome}
           onPause={savePausedSession}
+          onAskAI={(prompt) => setChatPrefill(prompt)}
           user={user}
         />
-        <ChatBot />
+        <ChatBot prefill={chatPrefill} />
       </div>
     )
   }

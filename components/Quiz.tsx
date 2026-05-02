@@ -20,10 +20,11 @@ interface QuizProps {
   onComplete: (results: any) => void
   onExit: () => void
   onPause?: (sessionData: any) => void
+  onAskAI?: (prompt: string) => void
   user?: any
 }
 
-export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExit, onPause, user }: QuizProps) {
+export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExit, onPause, onAskAI, user }: QuizProps) {
   const [current, setCurrent] = useState(quizData.currentIndex || 0)
   const [answers, setAnswers] = useState<(number | null)[]>(quizData.answers)
   const [showExplanation, setShowExplanation] = useState(false)
@@ -663,6 +664,17 @@ export default function Quiz({ quizData, mode, cert = 'crcst', onComplete, onExi
                 {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
               </div>
               <div className="text-sm leading-relaxed">{q.explanation}</div>
+              {onAskAI && (
+                <button
+                  onClick={() => onAskAI(`Explain this question to me: "${q.question}" — the correct answer is "${q.options[q.correct_answer]}". ${q.explanation}`)}
+                  className="mt-3 flex items-center gap-1.5 text-xs font-mono text-teal hover:text-teal-2 transition"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Ask AI to explain
+                </button>
+              )}
             </div>
 
             {/* Confidence picker */}

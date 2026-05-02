@@ -42,6 +42,7 @@ export default function CHLPage() {
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [srsStats, setSrsStats] = useState<SrsStats | null>(null)
+  const [chatPrefill, setChatPrefill] = useState('')
   const [allCaughtUp, setAllCaughtUp] = useState(false)
   const [showUpsellModal, setShowUpsellModal] = useState(false)
   
@@ -381,9 +382,10 @@ export default function CHLPage() {
           onComplete={handleQuizComplete}
           onExit={handleReturnHome}
           onPause={savePausedSession}
+          onAskAI={(prompt) => setChatPrefill(prompt)}
           user={user}
         />
-        <ChatBot />
+        <ChatBot prefill={chatPrefill} />
       </div>
     )
   }

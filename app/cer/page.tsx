@@ -302,6 +302,11 @@ export default function CERPage() {
     if (user?.id) getSrsStats(user.id, 'cer', getSupabase()).then(setSrsStats)
   }
 
+  const handleReturnHome = () => {
+    setScreen('home')
+    if (user?.id) getSrsStats(user.id, 'cer', getSupabase()).then(setSrsStats)
+  }
+
   const getDomains = () => {
     return Array.from(new Set(QUESTIONS.map((q) => q.domain)))
   }
@@ -358,7 +363,7 @@ export default function CERPage() {
           mode={mode}
           cert="cer"
           onComplete={handleQuizComplete}
-          onExit={() => setScreen('home')}
+          onExit={handleReturnHome}
           onPause={savePausedSession}
           user={user}
         />
@@ -374,7 +379,7 @@ export default function CERPage() {
         <Results
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
-          onHome={() => setScreen('home')}
+          onHome={handleReturnHome}
         />
         <ChatBot />
       </div>
@@ -394,7 +399,7 @@ export default function CERPage() {
           questionCount={customQuestionCount}
           setQuestionCount={setCustomQuestionCount}
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
-          onBack={() => setScreen('home')}
+          onBack={handleReturnHome}
         />
         <ChatBot />
       </div>

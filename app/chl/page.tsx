@@ -307,6 +307,11 @@ export default function CHLPage() {
     if (user?.id) getSrsStats(user.id, 'chl', getSupabase()).then(setSrsStats)
   }
 
+  const handleReturnHome = () => {
+    setScreen('home')
+    if (user?.id) getSrsStats(user.id, 'chl', getSupabase()).then(setSrsStats)
+  }
+
   const getDomains = () => {
     return Array.from(new Set(QUESTIONS.map((q) => q.domain)))
   }
@@ -365,7 +370,7 @@ export default function CHLPage() {
           mode={mode}
           cert="chl"
           onComplete={handleQuizComplete}
-          onExit={() => setScreen('home')}
+          onExit={handleReturnHome}
           onPause={savePausedSession}
           user={user}
         />
@@ -382,7 +387,7 @@ export default function CHLPage() {
         <Results
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
-          onHome={() => setScreen('home')}
+          onHome={handleReturnHome}
         />
         <ChatBot />
       </div>
@@ -403,7 +408,7 @@ export default function CHLPage() {
           questionCount={customQuestionCount}
           setQuestionCount={setCustomQuestionCount}
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
-          onBack={() => setScreen('home')}
+          onBack={handleReturnHome}
         />
         <ChatBot />
       </div>

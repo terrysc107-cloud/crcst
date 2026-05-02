@@ -399,7 +399,8 @@ export default function Home() {
 
   const handleReturnHome = () => {
     setScreen('home')
-    loadRateLimitInfo() // Refresh rate limit when returning home
+    loadRateLimitInfo()
+    if (user?.id) getSrsStats(user.id, 'crcst', getSupabase()).then(setSrsStats)
   }
 
   const getDomains = () => {

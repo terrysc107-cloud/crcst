@@ -7,6 +7,8 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { runGamificationAfterQuiz } from '@/lib/gamification-client'
+import { CelebrationBanner } from '@/components/Celebration'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -39,6 +41,7 @@ export default function Home() {
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [gamCelebration, setGamCelebration] = useState<{ type: 'level_up' | 'badge' | 'streak'; title: string; subtitle?: string } | null>(null)
 
   useEffect(() => {
     // Check if onboarding is complete (localStorage or database)
@@ -231,6 +234,22 @@ export default function Home() {
     } catch (error) {
       console.error('Error saving results:', error)
     }
+
+    // Fire gamification (XP + streak + badges) — non-blocking
+    const gam = await runGamificationAfterQuiz({
+      correct: quizResults.correct,
+      total: quizResults.total,
+      difficulty: quizResults.mode,
+      mode: quizResults.mode,
+      mockPassed: quizResults.mode === 'mock' && quizResults.percentage >= 70,
+    })
+    if (gam) {
+      if (gam.leveledUp) {
+        setGamCelebration({ type: 'level_up', title: `Level ${gam.current_level} reached!`, subtitle: gam.level_name })
+      } else if (gam.newBadges.length > 0) {
+        setGamCelebration({ type: 'badge', title: 'New badge earned!', subtitle: gam.newBadges[0].replace(/_/g, ' ') })
+      }
+    }
   }
 
   const savePausedSession = async (sessionData: any) => {
@@ -417,6 +436,14 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-cream">
         <Header user={user} streak={streak} />
+        {gamCelebration && (
+          <CelebrationBanner
+            type={gamCelebration.type}
+            title={gamCelebration.title}
+            subtitle={gamCelebration.subtitle}
+            onDone={() => setGamCelebration(null)}
+          />
+        )}
         <Results
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}

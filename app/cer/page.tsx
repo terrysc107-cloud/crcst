@@ -9,6 +9,8 @@ import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
+import { runGamificationAfterQuiz } from '@/lib/gamification-client'
+import { CelebrationBanner } from '@/components/Celebration'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -40,7 +42,8 @@ export default function CERPage() {
   const [streak, setStreak] = useState(0)
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [showUpsellModal, setShowUpsellModal] = useState(false)
-  
+  const [gamCelebration, setGamCelebration] = useState<{ type: 'level_up' | 'badge' | 'streak'; title: string; subtitle?: string } | null>(null)
+
   const sub = useSubscription()
 
   useEffect(() => {
@@ -172,6 +175,21 @@ export default function CERPage() {
       loadStats(user.id)
     } catch (error) {
       console.error('Error saving results:', error)
+    }
+
+    const gam = await runGamificationAfterQuiz({
+      correct: quizResults.correct,
+      total: quizResults.total,
+      difficulty: quizResults.mode,
+      mode: quizResults.mode,
+      mockPassed: quizResults.mode === 'mock' && quizResults.percentage >= 70,
+    })
+    if (gam) {
+      if (gam.leveledUp) {
+        setGamCelebration({ type: 'level_up', title: `Level ${gam.current_level} reached!`, subtitle: gam.level_name })
+      } else if (gam.newBadges.length > 0) {
+        setGamCelebration({ type: 'badge', title: 'New badge earned!', subtitle: gam.newBadges[0].replace(/_/g, ' ') })
+      }
     }
   }
 
@@ -349,6 +367,14 @@ export default function CERPage() {
     return (
       <div className="min-h-screen bg-cream">
         <Header user={user} streak={streak} />
+        {gamCelebration && (
+          <CelebrationBanner
+            type={gamCelebration.type}
+            title={gamCelebration.title}
+            subtitle={gamCelebration.subtitle}
+            onDone={() => setGamCelebration(null)}
+          />
+        )}
         <Results
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}

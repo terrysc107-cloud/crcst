@@ -592,7 +592,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
               <span className="text-xs font-mono text-amber">⚑ Flagged</span>
             ) : (
               <button
-                onClick={() => setFlagState((s: typeof flagState) => s === 'open' ? 'idle' : 'open')}
+                onClick={() => setFlagState(s => s === 'open' ? 'idle' : 'open')}
                 className="text-xs font-mono text-text-3 hover:text-amber transition"
                 title="Flag this question"
               >

@@ -339,7 +339,7 @@ export default function ScenariosQuizPage() {
                       {letter}:
                     </span>
                     <span style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
-                      {q.consequence[letter]}
+                      {q.consequence?.[letter]}
                     </span>
                   </div>
                 ))}

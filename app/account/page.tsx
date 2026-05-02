@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface StatusData {
   plan: 'free' | 'pro' | 'triple_crown'
@@ -139,8 +140,20 @@ export default function AccountPage() {
 
   if (!user || !statusData) {
     return (
-      <div style={{ minHeight: '100vh', background: '#021B3A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
-        Loading…
+      <div style={{ minHeight: '100vh', background: '#021B3A', color: '#fff', fontFamily: 'var(--font-body)' }}>
+        <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: 36, height: 36, background: '#14BDAC', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>SP</div>
+            <Skeleton className="h-5 w-36 bg-white/10" />
+          </div>
+          <Skeleton className="h-8 w-20 bg-white/10 rounded-lg" />
+        </nav>
+        <div style={{ maxWidth: 640, margin: '3rem auto', padding: '0 2rem' }}>
+          <Skeleton className="h-8 w-40 bg-white/10 mb-8 rounded-lg" />
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 w-full bg-white/10 rounded-2xl mb-4" />
+          ))}
+        </div>
       </div>
     )
   }
@@ -150,7 +163,7 @@ export default function AccountPage() {
   const isPaid = statusData.plan === 'pro' || statusData.plan === 'triple_crown'
 
   return (
-    <div style={{ minHeight: '100vh', background: '#021B3A', color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#021B3A', color: '#fff', fontFamily: 'var(--font-body)' }}>
       {/* Nav */}
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: '#fff' }}>

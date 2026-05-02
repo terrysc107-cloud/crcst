@@ -7,6 +7,8 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Heading, Numeric } from '@/components/ui/typography'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -39,6 +41,7 @@ export default function Home() {
   const [pausedSessions, setPausedSessions] = useState<any[]>([])
   const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     // Check if onboarding is complete (localStorage or database)
@@ -75,6 +78,7 @@ export default function Home() {
         loadStats(session.user.id)
         loadRateLimitInfo()
       }
+      setChecking(false)
     })
 
     // Listen for auth changes
@@ -389,6 +393,30 @@ export default function Home() {
     return Math.round((mastery.correct / mastery.total) * 100)
   }
 
+  // Session check in progress — show skeleton to avoid auth form flash for logged-in users
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <div className="bg-gradient-to-b from-navy to-navy-2 px-6 py-12">
+          <div className="max-w-2xl mx-auto">
+            <Skeleton className="h-3 w-24 mb-3 bg-white/10" />
+            <Skeleton className="h-10 w-3/4 mb-2 bg-white/10" />
+            <Skeleton className="h-4 w-1/2 mb-8 bg-white/10" />
+            <Skeleton className="h-20 w-full bg-white/10 rounded-lg" />
+          </div>
+        </div>
+        <div className="max-w-2xl mx-auto px-6 py-8">
+          <Skeleton className="h-4 w-32 mb-4 bg-accent" />
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-lg bg-accent" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Auth Screen
   if (screen === 'auth') {
     return <AuthScreen />
@@ -458,9 +486,9 @@ export default function Home() {
           <div className="text-xs tracking-widest text-teal-3 mb-3">
             STERILE PROCESSING CERTIFICATION
           </div>
-          <h1 className="font-serif text-4xl mb-2 text-balance">
+          <Heading as="h1" className="text-4xl mb-2 text-balance">
             Pass your <em className="text-amber">CRCST</em> exam with confidence.
-          </h1>
+          </Heading>
           <p className="text-sm text-teal-3 mb-8">
             {QUESTIONS.length} verified questions from your actual course materials
           </p>
@@ -471,7 +499,7 @@ export default function Home() {
               <div className="text-xs text-teal-3 tracking-widest mb-1">
                 EXAM READINESS SCORE
               </div>
-              <div className="font-serif text-lg text-white">
+              <Heading className="text-lg text-white">
                 {stats.accuracy >= 80
                   ? 'Exam Ready!'
                   : stats.accuracy >= 60
@@ -479,12 +507,12 @@ export default function Home() {
                   : stats.answered > 0
                   ? 'Developing'
                   : 'Not Started'}
-              </div>
+              </Heading>
             </div>
             <div className="text-right">
-              <div className="font-serif text-4xl text-amber">
+              <Numeric className="text-4xl text-amber">
                 {stats.accuracy}%
-              </div>
+              </Numeric>
               <div className="text-xs text-navy-3">
                 {stats.answered === 0 ? 'Not started' : `${stats.answered} questions`}
               </div>
@@ -494,19 +522,19 @@ export default function Home() {
           {/* Stats Row */}
           <div className="flex">
             <div className="flex-1 text-center py-2 bg-white/5 border-r border-white/10">
-              <div className="font-serif text-2xl text-amber">{QUESTIONS.length}</div>
+              <Numeric className="text-2xl text-amber">{QUESTIONS.length}</Numeric>
               <div className="text-xs text-navy-3 uppercase tracking-wider">
                 Questions
               </div>
             </div>
             <div className="flex-1 text-center py-2 bg-white/5 border-r border-white/10">
-              <div className="font-serif text-2xl text-amber">{stats.answered}</div>
+              <Numeric className="text-2xl text-amber">{stats.answered}</Numeric>
               <div className="text-xs text-navy-3 uppercase tracking-wider">
                 Answered
               </div>
             </div>
             <div className="flex-1 text-center py-2 bg-white/5">
-              <div className="font-serif text-2xl text-amber">{stats.accuracy}%</div>
+              <Numeric className="text-2xl text-amber">{stats.accuracy}%</Numeric>
               <div className="text-xs text-navy-3 uppercase tracking-wider">
                 Accuracy
               </div>
@@ -589,7 +617,7 @@ export default function Home() {
                 className="bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-teal hover:shadow-lg transition text-left"
               >
                 <div className="text-2xl mb-2">{icon}</div>
-                <div className="font-serif text-navy font-bold text-sm">{name}</div>
+                <Heading className="text-navy font-bold text-sm">{name}</Heading>
                 <div className="text-xs text-text-3 mt-1">{desc}</div>
               </button>
             ))}
@@ -613,7 +641,7 @@ export default function Home() {
                       className="bg-white border-2 border-amber rounded-lg p-4 flex justify-between items-center hover:shadow-md transition"
                     >
                       <div className="flex-1">
-                        <div className="font-serif text-navy font-bold mb-1">{mode}</div>
+                        <Heading className="text-navy font-bold mb-1">{mode}</Heading>
                         <div className="text-xs text-text-3 mb-2">
                           {session.current_question_index + 1} / {session.question_ids.length} questions
                         </div>
@@ -658,9 +686,9 @@ export default function Home() {
                   key={domain}
                   className="bg-white rounded-lg p-3 border border-cream-2"
                 >
-                  <div className="font-serif text-sm text-navy font-bold mb-2 truncate">
+                  <Heading className="text-sm text-navy font-bold mb-2 truncate">
                     {domain}
-                  </div>
+                  </Heading>
                   <div className="w-full h-1.5 bg-cream-2 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
@@ -686,9 +714,9 @@ export default function Home() {
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
             <div className="text-center mb-6">
               <div className="text-4xl mb-3">⏰</div>
-              <h2 className="font-serif text-2xl text-navy mb-2">
+              <Heading as="h2" className="text-2xl text-navy mb-2">
                 Hourly Limit Reached
-              </h2>
+              </Heading>
               <p className="text-sm text-text-3">
                 You&apos;ve used all {rateLimitInfo?.limit || 20} free questions this hour. Upgrade to Pro for unlimited access!
               </p>
@@ -804,9 +832,9 @@ function AuthScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy via-navy-2 to-navy flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
-        <h1 className="font-serif text-2xl text-navy mb-2 text-center">
+        <Heading as="h1" className="text-2xl text-navy mb-2 text-center">
           SPD Cert <em className="text-amber">Companion</em>
-        </h1>
+        </Heading>
         <p className="text-xs text-center text-text-3 tracking-widest mb-6">
           Master HSPA Certification
         </p>
@@ -921,7 +949,7 @@ function CustomQuizBuilder({
         ← Back to Home
       </button>
 
-      <h2 className="font-serif text-2xl text-navy mb-2">Build Your Quiz</h2>
+      <Heading as="h2" className="text-2xl text-navy mb-2">Build Your Quiz</Heading>
       <p className="text-sm text-text-3 mb-8">
         Select domains and difficulty to create a custom quiz
       </p>
@@ -1010,9 +1038,9 @@ function CustomQuizBuilder({
         <div className="text-xs tracking-widest text-text-3 mb-2">
           QUIZ PREVIEW
         </div>
-        <div className="font-serif text-2xl text-navy">
+        <Heading className="text-2xl text-navy">
           {Math.min(questionCount, availableQuestions)} Questions
-        </div>
+        </Heading>
         <p className="text-sm text-text-3">
           {availableQuestions} questions available with current filters
         </p>

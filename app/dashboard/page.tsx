@@ -1,11 +1,12 @@
 'use client'
 
-// Dashboard - certification selector
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Heading, Numeric } from '@/components/ui/typography'
 
 interface Certification {
   id: string
@@ -91,16 +92,18 @@ export default function DashboardPage() {
       <header className="bg-navy text-white px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal rounded-lg flex items-center justify-center font-serif text-xl font-bold">
+            <div className="w-10 h-10 bg-teal rounded-lg flex items-center justify-center font-mono text-xl font-bold">
               SP
             </div>
             <div>
-              <div className="font-serif text-lg font-bold">SPD Cert Companion</div>
+              <Heading className="text-lg font-bold">SPD Cert Companion</Heading>
               <div className="text-xs text-teal-3">Sterile Processing Certification Prep</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {!sub.loading && (
+            {sub.loading ? (
+              <Skeleton className="h-5 w-16 rounded-full bg-white/10" />
+            ) : (
               <span style={{
                 fontSize: '0.75rem',
                 padding: '0.25rem 0.7rem',
@@ -128,25 +131,25 @@ export default function DashboardPage() {
           <div className="text-xs tracking-widest text-teal-3 mb-4">
             STERILE PROCESSING DEPARTMENT
           </div>
-          <h1 className="font-serif text-4xl md:text-5xl mb-4 text-balance">
+          <Heading as="h1" className="text-4xl md:text-5xl mb-4 text-balance">
             Pass your <em className="text-amber">certification exam</em> with confidence.
-          </h1>
+          </Heading>
           <p className="text-teal-3 max-w-xl mx-auto mb-8">
             Comprehensive question banks, practice quizzes, and mock exams for CRCST, CHL, and CER certifications.
           </p>
           <div className="flex justify-center gap-8 text-center">
             <div>
-              <div className="font-serif text-3xl text-amber">
+              <Numeric className="text-3xl text-amber">
                 {totalQuestions}+
-              </div>
+              </Numeric>
               <div className="text-xs text-teal-3 uppercase tracking-wider">Questions</div>
             </div>
             <div>
-              <div className="font-serif text-3xl text-amber">3</div>
+              <Numeric className="text-3xl text-amber">3</Numeric>
               <div className="text-xs text-teal-3 uppercase tracking-wider">Certifications</div>
             </div>
             <div>
-              <div className="font-serif text-3xl text-amber">4</div>
+              <Numeric className="text-3xl text-amber">4</Numeric>
               <div className="text-xs text-teal-3 uppercase tracking-wider">Study Modes</div>
             </div>
           </div>
@@ -168,7 +171,7 @@ export default function DashboardPage() {
               color: "#14BDAC",
               fontSize: "0.68rem",
               letterSpacing: "0.1em",
-              fontFamily: "monospace",
+              fontFamily: "var(--font-mono)",
               marginBottom: "0.6rem",
             }}>
               YOUR CERTIFICATIONS
@@ -183,7 +186,7 @@ export default function DashboardPage() {
                   color: "#14BDAC",
                   fontSize: "0.82rem",
                   fontWeight: "700",
-                  fontFamily: "monospace",
+                  fontFamily: "var(--font-mono)",
                 }}>
                   {c.cert} ✓
                 </span>
@@ -207,7 +210,7 @@ export default function DashboardPage() {
               fontSize: "0.95rem",
               fontWeight: "700",
               cursor: "pointer",
-              fontFamily: "monospace",
+              fontFamily: "var(--font-mono)",
               letterSpacing: "0.02em",
               width: "100%",
               marginBottom: "1.5rem",
@@ -233,7 +236,7 @@ export default function DashboardPage() {
             gap: '0.75rem',
           }}>
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'var(--font-mono)' }}>
                 FREE TIER — HOURLY USAGE
               </div>
               <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
@@ -251,7 +254,7 @@ export default function DashboardPage() {
                 fontSize: '0.78rem',
                 fontWeight: 600,
                 whiteSpace: 'nowrap' as const,
-                fontFamily: 'monospace',
+                fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.04em',
                 textDecoration: 'none',
               }}
@@ -265,7 +268,23 @@ export default function DashboardPage() {
           SELECT YOUR CERTIFICATION
         </div>
         <div className="grid md:grid-cols-3 gap-6 mb-6">
-          {certifications.map((cert) => {
+          {sub.loading ? (
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white border-2 border-cream-2 rounded-xl overflow-hidden">
+                  <Skeleton className="h-24 w-full rounded-none" />
+                  <div className="p-6">
+                    <Skeleton className="h-3 w-full mb-2" />
+                    <Skeleton className="h-3 w-3/4 mb-4" />
+                    <div className="flex justify-end">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : null}
+          {!sub.loading && certifications.map((cert) => {
             // CHL and CER require Triple Crown access
             const requiresTripleCrown = cert.id === 'chl' || cert.id === 'cer'
             const isLocked = requiresTripleCrown && !sub.canAccessCHL
@@ -286,7 +305,7 @@ export default function DashboardPage() {
                   </div>
                   {/* Card Header */}
                   <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white grayscale`}>
-                    <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
+                    <Heading className="text-3xl font-bold mb-1">{cert.name}</Heading>
                     <div className="text-sm opacity-90">{cert.fullName}</div>
                   </div>
                   {/* Card Body */}
@@ -315,7 +334,7 @@ export default function DashboardPage() {
               >
                 {/* Card Header */}
                 <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white`}>
-                  <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
+                  <Heading className="text-3xl font-bold mb-1">{cert.name}</Heading>
                   <div className="text-sm opacity-90">{cert.fullName}</div>
                 </div>
                 {/* Card Body */}
@@ -335,13 +354,13 @@ export default function DashboardPage() {
             )
           })}
           {/* Situational Judgment Card */}
-          {sub.isPaid ? (
+          {!sub.loading && (sub.isPaid ? (
             <div
               onClick={() => router.push("/quiz/scenarios")}
               className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-amber hover:shadow-xl transition-all duration-300 cursor-pointer"
             >
               <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white">
-                <div className="font-serif text-3xl font-bold mb-1">SJT</div>
+                <Heading className="text-3xl font-bold mb-1">SJT</Heading>
                 <div className="text-sm opacity-90">Situational Judgment</div>
               </div>
               <div className="p-6">
@@ -370,7 +389,7 @@ export default function DashboardPage() {
                 Premium
               </div>
               <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white grayscale">
-                <div className="font-serif text-3xl font-bold mb-1">SJT</div>
+                <Heading className="text-3xl font-bold mb-1">SJT</Heading>
                 <div className="text-sm opacity-90">Situational Judgment</div>
               </div>
               <div className="p-6">
@@ -387,7 +406,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          )}
+          ))}
         </div>
       </div>
 
@@ -405,10 +424,10 @@ export default function DashboardPage() {
               { icon: '4', title: 'Custom Quiz', desc: 'Build your own by domain' },
             ].map((feature, i) => (
               <div key={i} className="text-center">
-                <div className="w-12 h-12 bg-teal/10 text-teal rounded-full flex items-center justify-center font-serif text-xl font-bold mx-auto mb-3">
+                <div className="w-12 h-12 bg-teal/10 text-teal rounded-full flex items-center justify-center font-mono tabular-nums text-xl font-bold mx-auto mb-3">
                   {feature.icon}
                 </div>
-                <div className="font-serif font-bold text-navy mb-1">{feature.title}</div>
+                <Heading className="font-bold text-navy mb-1">{feature.title}</Heading>
                 <div className="text-xs text-text-3">{feature.desc}</div>
               </div>
             ))}
@@ -424,7 +443,7 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4" style={{ borderLeftColor: '#14BDAC' }}>
             <div className="text-2xl flex-shrink-0">📄</div>
             <div className="flex-1 min-w-0">
-              <div className="font-serif font-bold text-navy text-sm mb-0.5">Turn your certification into your next opportunity</div>
+              <Heading className="font-bold text-navy text-sm mb-0.5">Turn your certification into your next opportunity</Heading>
               <div className="text-xs text-text-3">Expert-written, ATS-optimized resumes for healthcare professionals · 87% interview rate · Starting at $29</div>
             </div>
             <a
@@ -443,7 +462,7 @@ export default function DashboardPage() {
       {/* Footer */}
       <footer className="bg-navy text-white px-6 py-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="font-serif text-lg mb-2">SPD Cert Companion</div>
+          <Heading className="text-lg mb-2">SPD Cert Companion</Heading>
           <div className="text-xs text-teal-3">
             Helping sterile processing professionals pass their certification exams
           </div>

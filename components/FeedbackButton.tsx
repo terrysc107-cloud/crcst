@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Heading } from '@/components/ui/typography'
 
 type FeedbackType = 'bug' | 'feature' | 'question' | 'other'
 
@@ -106,7 +107,7 @@ export default function FeedbackButton() {
           >
             {/* Header */}
             <div className="bg-navy px-6 py-4 flex items-center justify-between">
-              <h2 className="font-serif text-lg text-white">Send Feedback</h2>
+              <Heading as="h2" className="text-lg text-white">Send Feedback</Heading>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-white/60 hover:text-white transition-colors"
@@ -126,7 +127,7 @@ export default function FeedbackButton() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="font-serif text-lg text-navy">Thank you!</p>
+                <Heading as="p" className="text-lg text-navy">Thank you!</Heading>
                 <p className="text-sm text-text-3 mt-1">Your feedback has been received.</p>
               </div>
             ) : (

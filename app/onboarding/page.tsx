@@ -193,7 +193,7 @@ function CertCard({
           )}
         </div>
         <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{cert.desc}</div>
-        <div style={{ fontSize: '0.72rem', color: cert.accent, marginTop: '0.4rem', fontFamily: 'monospace' }}>
+        <div style={{ fontSize: '0.72rem', color: cert.accent, marginTop: '0.4rem', fontFamily: 'var(--font-mono)' }}>
           {cert.questions} questions
         </div>
       </div>
@@ -334,7 +334,7 @@ export default function OnboardingPage() {
       minHeight: '100vh',
       background: '#021B3A',
       color: '#fff',
-      fontFamily: 'DM Mono, monospace',
+      fontFamily: 'var(--font-mono)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -374,7 +374,7 @@ export default function OnboardingPage() {
           <div>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>👋</div>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.75rem', lineHeight: 1.2, fontFamily: 'Libre Baskerville, serif' }}>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.75rem', lineHeight: 1.2, fontFamily: 'var(--font-serif)' }}>
                 Welcome to<br />
                 <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>SPD Cert Companion</em>
               </h1>
@@ -446,7 +446,7 @@ export default function OnboardingPage() {
         {/* ── STEP 1: Cert Goals ── */}
         {step === 1 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-serif)' }}>
               Which certification are you<br />
               <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>studying for?</em>
             </h2>
@@ -474,7 +474,7 @@ export default function OnboardingPage() {
         {/* ── STEP 2: Experience Level ── */}
         {step === 2 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-serif)' }}>
               How much SPD experience<br />
               <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>do you have?</em>
             </h2>
@@ -527,7 +527,7 @@ export default function OnboardingPage() {
         {/* ── STEP 3: Exam Date + Study Schedule ── */}
         {step === 3 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-serif)' }}>
               Plan your<br />
               <em style={{ color: '#e9c46a', fontStyle: 'italic' }}>study schedule</em>
             </h2>
@@ -620,7 +620,7 @@ export default function OnboardingPage() {
         {/* ── STEP 4: Feature Tour ── */}
         {step === 4 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-serif)' }}>
               Here&apos;s how to<br />
               <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>study effectively</em>
             </h2>

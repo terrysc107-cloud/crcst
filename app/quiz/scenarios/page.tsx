@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Heading, Numeric } from "@/components/ui/typography";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
 import { scenarioQuestions, type ScenarioQuestion } from "@/lib/questions-scenarios";
 
@@ -92,8 +94,17 @@ export default function ScenariosQuizPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
-        <div className="text-teal font-mono">Loading...</div>
+      <div className="min-h-screen bg-navy">
+        <div className="max-w-2xl mx-auto px-4 pt-8">
+          <Skeleton className="h-2 w-full mb-8 bg-white/10 rounded-full" />
+          <Skeleton className="h-6 w-1/3 mb-2 bg-white/10" />
+          <Skeleton className="h-8 w-3/4 mb-6 bg-white/10" />
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-14 w-full bg-white/10 rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -118,14 +129,14 @@ export default function ScenariosQuizPage() {
         <div className="max-w-2xl mx-auto px-6 py-12">
           <div className="bg-white rounded-2xl p-8 shadow-2xl text-center">
             <div className="text-6xl mb-4">🧠</div>
-            <h1 className="font-serif text-3xl text-navy mb-2">
+            <Heading as="h1" className="text-3xl text-navy mb-2">
               Scenarios Complete!
-            </h1>
+            </Heading>
             <p className="text-text-3 mb-6">
               You answered {correct} of {scenarioQuestions.length} scenarios correctly.
             </p>
 
-            <div className="text-5xl font-serif text-teal mb-2">{percentage}%</div>
+            <Numeric className="text-5xl text-teal mb-2">{percentage}%</Numeric>
             <div className="text-sm text-text-3 mb-8">Overall Score</div>
 
             <div className="flex gap-4 justify-center">
@@ -210,7 +221,7 @@ export default function ScenariosQuizPage() {
             lineHeight: 1.7,
             fontStyle: "italic",
           }}>
-            <span style={{ display: "block", color: "#E8A020", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.5rem", fontStyle: "normal" }}>
+            <span style={{ display: "block", color: "#E8A020", fontSize: "0.68rem", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", marginBottom: "0.5rem", fontStyle: "normal" }}>
               SCENARIO
             </span>
             {q.context}
@@ -218,9 +229,9 @@ export default function ScenariosQuizPage() {
         )}
 
         {/* Question text */}
-        <div className="font-serif text-xl text-white mb-6 leading-relaxed">
+        <Heading as="div" className="text-xl text-white mb-6 leading-relaxed">
           {q.question}
-        </div>
+        </Heading>
 
         {/* Options */}
         <div className="space-y-3 mb-8">
@@ -282,7 +293,7 @@ export default function ScenariosQuizPage() {
                 borderRadius: "10px",
                 padding: "1rem 1.25rem",
               }}>
-                <p style={{ color: "#E8A020", fontSize: "0.68rem", fontFamily: "DM Mono, monospace", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>
+                <p style={{ color: "#E8A020", fontSize: "0.68rem", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", marginBottom: "0.4rem" }}>
                   IN PRACTICE
                 </p>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.85rem", lineHeight: 1.65, fontStyle: "italic" }}>

@@ -394,6 +394,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── INSTITUTIONS ─────────────────────────────────────────────────────── */}
+      <section className="py-24 px-4 bg-white/[0.02] border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="font-mono text-amber text-[0.72rem] tracking-[0.12em] mb-3 uppercase">For Programs &amp; Institutions</p>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Get your entire staff certified.<br />
+              <span className="text-teal">We&apos;ll build the app around you.</span>
+            </h2>
+            <p className="text-white/55 text-base leading-relaxed mt-4 max-w-2xl mx-auto font-light">
+              Hospitals, SPD departments, vocational programs, and training centers can get a personalized version of this platform — branded for your organization, tailored to your curriculum, and deployed for your whole team.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-14">
+            {[
+              {
+                icon: "🏥",
+                title: "Hospital & Department Access",
+                desc: "Give every member of your SPD team access to structured exam prep with progress tracking across your department. Know who is ready and who needs more time before they sit for certification.",
+              },
+              {
+                icon: "🎓",
+                title: "Training Program Integration",
+                desc: "Running an SPD certification program? Embed our question bank and AI study tools directly into your curriculum. Custom domains, your branding, and content aligned to your schedule.",
+              },
+              {
+                icon: "📈",
+                title: "Team Dashboards & Reporting",
+                desc: "Managers and instructors get a live view of team progress by domain, difficulty, and readiness score — so you can intervene early and hit your certification targets.",
+              },
+            ].map((item, i) => (
+              <div key={i}
+                className="rounded-2xl p-7 border border-amber/15 bg-amber/[0.03] hover:-translate-y-1 hover:border-amber/30 transition-all duration-300">
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-base font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed font-light">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl border border-teal/20 bg-teal/[0.05] p-10 text-center">
+            <p className="font-mono text-teal text-[0.7rem] tracking-widest mb-3 uppercase">Ready to get started?</p>
+            <h3 className="text-[clamp(1.4rem,3vw,2rem)] font-black mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Let&apos;s build something together.
+            </h3>
+            <p className="text-white/55 text-sm leading-relaxed mb-8 max-w-lg mx-auto font-light">
+              Reach out to discuss pricing, custom features, and what a personalized deployment looks like for your organization.
+            </p>
+            <a href="mailto:terry@scottadvisory.net"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-[0.95rem] hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Contact terry@scottadvisory.net
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── ATS CALLOUT ──────────────────────────────────────────────────────── */}
       <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
         <div className="max-w-3xl mx-auto text-center">
@@ -410,7 +471,7 @@ export default function LandingPage() {
               style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
               Explore Training Programs at Aseptic Technical Solutions
             </a>
-            <a href="mailto:contact@aseptictechnicalsolutions.com"
+            <a href="mailto:terry@scottadvisory.net"
               className="inline-flex items-center px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal transition-all">
               Contact Us Directly
             </a>
@@ -503,7 +564,7 @@ export default function LandingPage() {
               Aseptic Technical Solutions
             </a>
             <span className="block text-white/45 text-sm mb-1.5">Scott Advisory Group</span>
-            <a href="mailto:support@spdcertprep.com"
+            <a href="mailto:terry@scottadvisory.net"
               className="block text-white/45 text-sm mb-1.5 hover:text-teal transition-colors">
               Contact Us
             </a>

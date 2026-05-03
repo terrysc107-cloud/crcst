@@ -118,66 +118,65 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     })
   }
 
+  const handleCheckAnswer = () => {
+    setShowExplanation(true)
+  }
+
   const selectAnswer = async (idx: number) => {
-    if (mode === 'mock' && hasAnswered) return // No changing answers in mock mode
-    if (hasAnswered) return // Don't count the same question twice
-    if (rateLimitReached) return // Don't allow more answers if limit reached
-    
+    if (rateLimitReached) return
+    // In practice mode, lock once explanation is showing
+    if (mode === 'practice' && showExplanation) return
+    // In mock/custom mode, allow changing answers freely but only track first answer
+    const isFirstAnswer = !hasAnswered
+
     const newAnswers = [...answers]
     newAnswers[current] = idx
     setAnswers(newAnswers)
 
-    // Silent question attempts tracking
-    supabase.from('question_attempts').insert({
-      user_id: user?.id ?? null,
-      question_id: q.id,
-      cert: 'crcst',
-      was_correct: idx === q.correct_answer,
-      selected_answer: String.fromCharCode(65 + idx).toLowerCase(),
-    }).then(() => {})
+    // Only track attempt and increment usage on the first answer for this question
+    if (isFirstAnswer) {
+      supabase.from('question_attempts').insert({
+        user_id: user?.id ?? null,
+        question_id: q.id,
+        cert: 'crcst',
+        was_correct: idx === q.correct_answer,
+        selected_answer: String.fromCharCode(65 + idx).toLowerCase(),
+      }).then(() => {})
 
-    // Increment daily usage count for rate limiting
-    if (user?.id) {
-      try {
-        const session = await supabase.auth.getSession()
-        const token = session.data.session?.access_token
-        const res = await fetch('/api/usage/increment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ field: 'questions_attempted' }),
-        })
-        
-        const data = await res.json()
-
-        if (res.status === 429 || data.error === 'limit_reached') {
-          // Rate limit reached - block further questions (only for free users)
-          if (!data.unlimited) {
-            setRateLimitReached(true)
-            setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
-          }
-        } else if (data.used !== undefined && !data.unlimited) {
-          // Update usage info (only for free users with limits)
-          setUsageInfo({ 
-            used: data.used, 
-            limit: data.limit || 20, 
-            remaining: data.remaining || 0 
+      if (user?.id) {
+        try {
+          const session = await supabase.auth.getSession()
+          const token = session.data.session?.access_token
+          const res = await fetch('/api/usage/increment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ field: 'questions_attempted' }),
           })
-          
-          // Check if we just hit the limit (free users only)
-          if (data.remaining !== null && data.remaining <= 0) {
-            setRateLimitReached(true)
-          }
-        }
-      } catch (err) {
-        console.error('[v0] Failed to increment usage:', err)
-      }
-    }
 
-    if (mode === 'practice') {
-      setShowExplanation(true)
+          const data = await res.json()
+
+          if (res.status === 429 || data.error === 'limit_reached') {
+            if (!data.unlimited) {
+              setRateLimitReached(true)
+              setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+            }
+          } else if (data.used !== undefined && !data.unlimited) {
+            setUsageInfo({
+              used: data.used,
+              limit: data.limit || 20,
+              remaining: data.remaining || 0,
+            })
+            if (data.remaining !== null && data.remaining <= 0) {
+              setRateLimitReached(true)
+            }
+          }
+        } catch (err) {
+          console.error('[v0] Failed to increment usage:', err)
+        }
+      }
     }
   }
 
@@ -558,6 +557,16 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           })}
         </div>
 
+        {/* Check Answer button (practice mode only, after selecting but before confirming) */}
+        {mode === 'practice' && hasAnswered && !showExplanation && (
+          <button
+            onClick={handleCheckAnswer}
+            className="w-full py-3 px-6 rounded-lg bg-navy text-white font-mono text-sm tracking-wider uppercase hover:bg-navy-2 transition mb-6"
+          >
+            Check Answer
+          </button>
+        )}
+
         {/* Explanation (practice mode only) */}
         {mode === 'practice' && showExplanation && (
           <div
@@ -583,7 +592,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           </button>
           <button
             onClick={handleNext}
-            disabled={mode === 'practice' && !showExplanation && !hasAnswered}
+            disabled={mode === 'practice' && !showExplanation}
             className="px-6 py-3 bg-teal text-white rounded-lg font-mono hover:bg-teal-2 disabled:opacity-50 transition"
           >
             {current === quizData.questions.length - 1 ? 'Finish' : 'Next →'}

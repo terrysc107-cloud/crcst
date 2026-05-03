@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
-import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type Question } from '@/lib/questions'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 
@@ -429,7 +428,6 @@ export default function Home() {
           onPause={savePausedSession}
           user={user}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -444,7 +442,6 @@ export default function Home() {
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
           onHome={handleReturnHome}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -465,7 +462,6 @@ export default function Home() {
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
           onBack={handleReturnHome}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -700,7 +696,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <ChatBot />
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (

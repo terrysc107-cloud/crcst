@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
-import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-cer'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -361,7 +360,6 @@ export default function CERPage() {
           onPause={savePausedSession}
           user={user}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -375,7 +373,6 @@ export default function CERPage() {
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
           onHome={() => setScreen('home')}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -395,7 +392,6 @@ export default function CERPage() {
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
           onBack={() => setScreen('home')}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -579,7 +575,6 @@ export default function CERPage() {
           </div>
         </div>
       </div>
-      <ChatBot />
     </div>
   )
 }

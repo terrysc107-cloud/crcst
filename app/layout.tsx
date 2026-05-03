@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Libre_Baskerville, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import FeedbackButton from '@/components/FeedbackButton'
+import HelpFAB from '@/components/HelpFAB'
 import './globals.css'
 
 const libreBaskerville = Libre_Baskerville({
@@ -178,7 +178,7 @@ export default function RootLayout({
       </head>
       <body className="font-mono antialiased bg-cream text-text">
         {children}
-        <FeedbackButton />
+        <HelpFAB />
         <Analytics />
       </body>
     </html>

@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
-import ChatBot from '@/components/ChatBot'
 import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -368,7 +367,6 @@ export default function CHLPage() {
           onPause={savePausedSession}
           user={user}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -383,7 +381,6 @@ export default function CHLPage() {
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
           onHome={() => setScreen('home')}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -404,7 +401,6 @@ export default function CHLPage() {
           onStart={() => startQuiz('custom', selectedDomains, difficulty)}
           onBack={() => setScreen('home')}
         />
-        <ChatBot />
       </div>
     )
   }
@@ -588,7 +584,6 @@ export default function CHLPage() {
           </div>
         </div>
       </div>
-      <ChatBot />
     </div>
   )
 }

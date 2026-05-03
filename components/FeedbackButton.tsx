@@ -19,6 +19,7 @@ export default function FeedbackButton() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -37,11 +38,18 @@ export default function FeedbackButton() {
     if (!message.trim()) return
 
     setIsSubmitting(true)
+    setSubmitError(null)
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+
       const res = await fetch('/api/feedback', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           type,
           message,
@@ -59,9 +67,17 @@ export default function FeedbackButton() {
           setIsOpen(false)
           setSubmitted(false)
         }, 2000)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        if (res.status === 401) {
+          setSubmitError('Please sign in to submit feedback.')
+        } else {
+          setSubmitError(data.error || 'Failed to submit. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Failed to submit feedback:', error)
+      setSubmitError('Network error. Please check your connection and try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -196,6 +212,10 @@ export default function FeedbackButton() {
                       className="w-full px-4 py-3 rounded-lg border-2 border-cream-2 bg-cream focus:border-teal focus:outline-none text-sm"
                     />
                   </div>
+                )}
+
+                {submitError && (
+                  <p className="text-xs text-wrong text-center">{submitError}</p>
                 )}
 
                 {/* Submit Button */}

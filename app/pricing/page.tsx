@@ -145,27 +145,25 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-navy text-white" style={{ fontFamily: "var(--font-dm-sans)" }}>
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <Link href="/" className="flex items-center gap-3 text-foreground no-underline">
-          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center font-bold text-primary-foreground">
-            SP
-          </div>
-          <span className="font-semibold">SPD Cert Companion</span>
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/7">
+        <Link href="/" className="flex items-center gap-2 text-white no-underline hover:text-teal transition-colors">
+          <span className="text-xl">⚙️</span>
+          <span className="font-semibold">SPD Cert <em className="not-italic text-teal">Prep</em></span>
         </Link>
-        <Link href="/dashboard" className="text-primary hover:underline text-sm">
+        <Link href="/dashboard" className="text-teal hover:underline text-sm">
           Back to Dashboard
         </Link>
       </nav>
 
       {/* Header */}
       <div className="text-center pt-16 pb-8 px-6">
-        <p className="text-xs tracking-widest text-primary mb-3 uppercase">Simple Pricing</p>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
+        <p className="font-mono text-teal text-xs tracking-[0.12em] mb-3 uppercase">Simple Pricing</p>
+        <h1 className="text-4xl md:text-5xl font-black mb-4 text-white text-balance" style={{ fontFamily: "var(--font-display)" }}>
           Invest in your certification
         </h1>
-        <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+        <p className="text-white/60 max-w-md mx-auto leading-relaxed">
           Choose the plan that fits your study style. One-time payment, 90-day access.
         </p>
       </div>
@@ -173,9 +171,9 @@ export default function PricingPage() {
       {/* Current Plan Indicator */}
       {currentPlan && currentPlan !== 'free' && tierExpiry && (
         <div className="max-w-md mx-auto mb-8 px-6">
-          <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary/10 border border-primary/20">
-            <Clock className="w-4 h-4 text-primary" />
-            <span className="text-sm text-foreground">
+          <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-teal/10 border border-teal/20">
+            <Clock className="w-4 h-4 text-teal" />
+            <span className="text-sm text-white">
               Your <span className="font-semibold capitalize">{currentPlan.replace('_', ' ')}</span> access expires {formatExpiry(tierExpiry)}
             </span>
           </div>
@@ -204,8 +202,8 @@ export default function PricingPage() {
                 plan.id === 'triple_crown'
                   ? 'bg-amber/5 border-amber/60 shadow-lg shadow-amber/10 scale-[1.02]'
                   : plan.highlight
-                  ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10'
-                  : 'bg-card border-border hover:border-primary/50'
+                  ? 'bg-teal/10 border-teal/40 shadow-lg shadow-teal/10'
+                  : 'bg-white/[0.03] border-white/8 hover:border-teal/40'
               }`}
             >
               {/* Badge */}
@@ -222,16 +220,16 @@ export default function PricingPage() {
               {/* Header */}
               <div className="mb-6 pt-2">
                 <div className="flex items-center gap-2 mb-2">
-                  {Icon && <Icon className="w-5 h-5 text-amber-500" />}
-                  <span className="text-sm text-muted-foreground uppercase tracking-wider">
+                  {Icon && <Icon className="w-5 h-5 text-amber" />}
+                  <span className="font-mono text-xs text-white/50 uppercase tracking-widest">
                     {plan.name}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  {plan.period && <span className="text-muted-foreground text-sm">/ {plan.period}</span>}
+                  <span className="text-4xl font-black text-white">{plan.price}</span>
+                  {plan.period && <span className="text-white/40 text-sm">/ {plan.period}</span>}
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
+                <p className="mt-2 text-sm text-white/55">{plan.description}</p>
               </div>
 
               {/* Features */}
@@ -239,9 +237,9 @@ export default function PricingPage() {
                 {plan.features.map((feat, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm">
                     <Check className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                      feat.included ? 'text-emerald-500' : 'text-muted-foreground/30'
+                      feat.included ? 'text-teal' : 'text-white/20'
                     }`} />
-                    <span className={feat.included ? 'text-foreground' : 'text-muted-foreground/50 line-through'}>
+                    <span className={feat.included ? 'text-white/80' : 'text-white/25 line-through'}>
                       {feat.text}
                     </span>
                   </li>
@@ -250,25 +248,30 @@ export default function PricingPage() {
 
               {/* CTA */}
               {isCurrentPlan ? (
-                <div className="text-center py-3 rounded-xl border border-border text-muted-foreground text-sm">
+                <div className="text-center py-3 rounded-xl border border-white/15 text-white/40 text-sm">
                   Current Plan
                 </div>
               ) : plan.tier ? (
                 <button
                   onClick={() => handleUpgrade(plan.tier as 'pro' | 'triple_crown')}
                   disabled={loading !== null}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-white hover:opacity-90 ${
                     plan.highlight
-                      ? 'bg-primary text-primary-foreground hover:opacity-90'
-                      : 'bg-amber-500 text-white hover:bg-amber-600'
+                      ? 'shadow-lg shadow-teal/25'
+                      : 'shadow-lg shadow-amber/25'
                   }`}
+                  style={{
+                    background: plan.highlight
+                      ? 'linear-gradient(135deg, var(--teal), var(--teal-2))'
+                      : 'linear-gradient(135deg, var(--amber), var(--amber-2))',
+                  }}
                 >
                   {loading === plan.tier ? 'Processing...' : plan.cta}
                 </button>
               ) : (
                 <Link
                   href={plan.href || '/crcst'}
-                  className="block text-center py-3 rounded-xl bg-muted text-foreground font-semibold hover:bg-muted/80 transition-colors"
+                  className="block text-center py-3 rounded-xl bg-white/10 text-white font-semibold hover:bg-white/15 transition-colors"
                 >
                   {plan.cta}
                 </Link>
@@ -280,66 +283,42 @@ export default function PricingPage() {
 
       {/* Already have CRCST section */}
       <div className="max-w-2xl mx-auto px-6 py-12 text-center">
-        <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 rounded-2xl border border-amber-500/20 p-8">
-          <Crown className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Already have your CRCST?</h2>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+        <div className="bg-amber/[0.06] rounded-2xl border border-amber/25 p-8">
+          <Crown className="w-12 h-12 text-amber mx-auto mb-4" />
+          <h2 className="text-2xl font-black mb-2 text-white" style={{ fontFamily: "var(--font-display)" }}>Already have your CRCST?</h2>
+          <p className="text-white/60 mb-6 max-w-md mx-auto">
             Level up your career with CHL and CER certifications. Get all three with Triple Crown access.
           </p>
           <button
             onClick={() => handleUpgrade('triple_crown')}
             disabled={loading !== null || currentPlan === 'triple_crown'}
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber/25 hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, var(--amber), var(--amber-2))' }}
           >
             <Sparkles className="w-5 h-5" />
-            {currentPlan === 'triple_crown' ? 'You have Triple Crown' : 'Upgrade to Triple Crown - $39'}
+            {currentPlan === 'triple_crown' ? 'You have Triple Crown' : 'Upgrade to Triple Crown — $39'}
           </button>
         </div>
       </div>
 
       {/* FAQ */}
       <div className="max-w-xl mx-auto px-6 pb-16">
-        <h2 className="text-center text-2xl font-bold mb-8">Questions?</h2>
+        <h2 className="text-center text-2xl font-black mb-8 text-white" style={{ fontFamily: "var(--font-display)" }}>Questions?</h2>
         <div className="space-y-3">
-          <details className="bg-card border border-border rounded-xl p-4 cursor-pointer group">
-            <summary className="font-semibold text-primary list-none flex items-center justify-between">
-              How long does my access last?
-              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-              Both Pro and Triple Crown give you 90 days of full access from the date of purchase. After that, you can renew at the same price.
-            </p>
-          </details>
-
-          <details className="bg-card border border-border rounded-xl p-4 cursor-pointer group">
-            <summary className="font-semibold text-primary list-none flex items-center justify-between">
-              Can I upgrade from Pro to Triple Crown?
-              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-              Yes! You can upgrade to Triple Crown anytime. Your new 90-day period starts from the upgrade date.
-            </p>
-          </details>
-
-          <details className="bg-card border border-border rounded-xl p-4 cursor-pointer group">
-            <summary className="font-semibold text-primary list-none flex items-center justify-between">
-              What payment methods do you accept?
-              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-              We accept all major credit cards and digital payment methods through Stripe, including Apple Pay and Google Pay.
-            </p>
-          </details>
-
-          <details className="bg-card border border-border rounded-xl p-4 cursor-pointer group">
-            <summary className="font-semibold text-primary list-none flex items-center justify-between">
-              Is there a refund policy?
-              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
-              All purchases are final. We do not offer refunds under any circumstances.
-            </p>
-          </details>
+          {[
+            { q: "How long does my access last?", a: "Both Pro and Triple Crown give you 90 days of full access from the date of purchase. After that, you can renew at the same price." },
+            { q: "Can I upgrade from Pro to Triple Crown?", a: "Yes! You can upgrade to Triple Crown anytime. Your new 90-day period starts from the upgrade date." },
+            { q: "What payment methods do you accept?", a: "We accept all major credit cards and digital payment methods through Stripe, including Apple Pay and Google Pay." },
+            { q: "Is there a refund policy?", a: "All purchases are final. We do not offer refunds under any circumstances." },
+          ].map(({ q, a }) => (
+            <details key={q} className="bg-white/[0.03] border border-white/8 rounded-xl p-4 cursor-pointer group">
+              <summary className="font-semibold text-teal list-none flex items-center justify-between">
+                {q}
+                <span className="text-white/40 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="mt-3 text-white/55 text-sm leading-relaxed">{a}</p>
+            </details>
+          ))}
         </div>
       </div>
     </div>

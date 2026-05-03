@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Libre_Baskerville, DM_Mono } from 'next/font/google'
+import { Libre_Baskerville, DM_Mono, Playfair_Display, DM_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import FeedbackButton from '@/components/FeedbackButton'
 import './globals.css'
@@ -15,6 +15,19 @@ const dmMono = DM_Mono({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   variable: '--font-mono',
+})
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['700', '800', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-dm-sans',
 })
 
 const SITE_URL = 'https://spdcertprep.com'
@@ -77,23 +90,6 @@ export const metadata: Metadata = {
     },
   },
   generator: 'Next.js',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
 }
 
 const jsonLd = {
@@ -169,7 +165,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable}`}>
+    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable} ${playfairDisplay.variable} ${dmSans.variable}`}>
       <head>
         <script
           type="application/ld+json"

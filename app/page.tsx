@@ -101,7 +101,7 @@ const PLANS = [
 
 export default function LandingPage() {
   return (
-    <div className="bg-navy text-white overflow-x-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="bg-navy text-white overflow-x-hidden" style={{ fontFamily: "var(--font-dm-sans)" }}>
 
       {/* ── NAV ─────────────────────────────────────────────────────────────── */}
       <NavBar />
@@ -115,57 +115,130 @@ export default function LandingPage() {
         <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full lp-pulse-b pointer-events-none"
           style={{ background: "radial-gradient(circle, rgba(233,196,106,0.10) 0%, transparent 70%)" }} />
 
-        {/* Floating cert badges */}
-        <div className="hidden md:block absolute left-[8%] top-[30%] lp-float-a">
-          <div className="bg-teal/20 border border-teal/40 rounded-xl px-4 py-2 backdrop-blur-sm">
-            <span className="font-mono text-teal text-xs font-semibold tracking-wider">CRCST ✓</span>
-          </div>
-        </div>
-        <div className="hidden md:block absolute right-[8%] top-[25%] lp-float-b">
-          <div className="bg-navy-3/25 border border-navy-3/50 rounded-xl px-4 py-2 backdrop-blur-sm">
-            <span className="font-mono text-teal-3 text-xs font-semibold tracking-wider">CHL ✓</span>
-          </div>
-        </div>
-        <div className="hidden md:block absolute right-[12%] bottom-[28%] lp-float-c">
-          <div className="bg-amber/10 border border-amber/30 rounded-xl px-4 py-2 backdrop-blur-sm">
-            <span className="font-mono text-amber text-xs font-semibold tracking-wider">CER ✓</span>
-          </div>
-        </div>
+        <div className="max-w-6xl mx-auto w-full relative z-10 grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
 
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          {/* Pill */}
-          <div className="lp-fade-in inline-flex items-center gap-2 bg-teal/10 border border-teal/30 rounded-full px-4 py-1.5 mb-7">
-            <span className="w-2 h-2 rounded-full bg-teal shadow-[0_0_8px_theme(colors.teal.DEFAULT)] inline-block" />
-            <span className="font-mono text-teal text-[0.72rem] font-semibold tracking-widest">
-              NOW COVERING CRCST · CHL · CER · SJT
-            </span>
+          {/* ── Left: Text ── */}
+          <div className="text-center lg:text-left">
+            {/* Pill */}
+            <div className="lp-fade-in inline-flex items-center gap-2 bg-teal/10 border border-teal/30 rounded-full px-4 py-1.5 mb-7">
+              <span className="w-2 h-2 rounded-full bg-teal shadow-[0_0_8px_theme(colors.teal.DEFAULT)] inline-block" />
+              <span className="font-mono text-teal text-[0.72rem] font-semibold tracking-widest">
+                NOW COVERING CRCST · CHL · CER · SJT
+              </span>
+            </div>
+
+            <h1 className="lp-fade-up-1 text-[clamp(2.4rem,5vw,3.8rem)] font-black leading-[1.08] mb-5" style={{ fontFamily: "var(--font-display)" }}>
+              Pass Your{" "}
+              <span className="lp-shimmer">CRCST / CBSPD Certification</span>
+              <br />The First Time.
+            </h1>
+
+            <p className="lp-fade-up-2 text-[1.1rem] text-white/60 leading-relaxed max-w-xl lg:max-w-none mb-10 font-light mx-auto lg:mx-0">
+              700+ exam-aligned questions, AI-powered study chat, and domain mastery tracking — built specifically for sterile processing professionals.
+            </p>
+
+            <div className="lp-fade-up-3 flex flex-wrap gap-4 justify-center lg:justify-start">
+              <Link href="/crcst"
+                className="inline-flex items-center px-8 py-4 rounded-xl font-semibold text-[1.05rem] text-white shadow-lg shadow-teal/30 hover:-translate-y-0.5 hover:shadow-teal/50 transition-all"
+                style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+                Start Studying Free
+              </Link>
+              <a href="#features"
+                className="inline-flex items-center px-7 py-4 rounded-xl text-[1.05rem] font-medium border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal hover:bg-teal/5 transition-all">
+                See How It Works
+              </a>
+            </div>
+
+            <p className="font-mono text-white/35 text-xs mt-5 tracking-wider text-center lg:text-left">
+              Free tier includes 20 questions/hour · No credit card required
+            </p>
+
+            {/* Social proof row */}
+            <div className="lp-fade-in mt-8 flex flex-wrap items-center gap-4 justify-center lg:justify-start">
+              {[
+                { cert: "CRCST", color: "text-teal", bg: "bg-teal/15 border-teal/30" },
+                { cert: "CHL",   color: "text-teal-3", bg: "bg-navy-3/20 border-navy-3/50" },
+                { cert: "CER",   color: "text-amber", bg: "bg-amber/10 border-amber/30" },
+              ].map((c) => (
+                <div key={c.cert} className={`${c.bg} border rounded-lg px-3 py-1.5 flex items-center gap-1.5`}>
+                  <span className={`font-mono text-xs font-semibold ${c.color}`}>{c.cert} ✓</span>
+                </div>
+              ))}
+              <span className="font-mono text-white/30 text-xs">787+ questions</span>
+            </div>
           </div>
 
-          <h1 className="lp-fade-up-1 text-[clamp(2.6rem,6vw,4.2rem)] font-black leading-[1.08] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Pass Your{" "}
-            <span className="lp-shimmer">CRCST / CBSPD Certification</span>
-            <br />The First Time.
-          </h1>
+          {/* ── Right: Product mockup ── */}
+          <div className="hidden lg:flex items-center justify-center lp-fade-up-2">
+            <div className="relative w-full max-w-md">
 
-          <p className="lp-fade-up-2 text-[1.15rem] text-white/60 leading-relaxed max-w-xl mx-auto mb-10 font-light">
-            700+ exam-aligned questions, AI-powered study chat, and domain mastery tracking — built specifically for sterile processing professionals.
-          </p>
+              {/* Glow behind card */}
+              <div className="absolute inset-0 rounded-3xl blur-3xl opacity-30 pointer-events-none"
+                style={{ background: "radial-gradient(circle at 50% 40%, rgba(42,157,143,0.6) 0%, transparent 70%)" }} />
 
-          <div className="lp-fade-up-3 flex flex-wrap gap-4 justify-center">
-            <Link href="/crcst"
-              className="inline-flex items-center px-8 py-4 rounded-xl font-semibold text-[1.05rem] text-white shadow-lg shadow-teal/30 hover:-translate-y-0.5 hover:shadow-teal/50 transition-all"
-              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
-              Start Studying Free
-            </Link>
-            <a href="#features"
-              className="inline-flex items-center px-7 py-4 rounded-xl text-[1.05rem] font-medium border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal hover:bg-teal/5 transition-all">
-              See How It Works
-            </a>
+              {/* Main quiz card */}
+              <div className="relative bg-navy-2/90 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+                {/* Card header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-teal" />
+                    <span className="font-mono text-teal text-[0.68rem] tracking-widest font-semibold">CRCST · CHAPTER 4</span>
+                  </div>
+                  <span className="font-mono text-white/25 text-[0.68rem]">Q 12 / 50</span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="h-1 bg-white/8 rounded-full mb-5">
+                  <div className="h-1 rounded-full" style={{ width: "24%", background: "linear-gradient(90deg, var(--teal), var(--teal-2))" }} />
+                </div>
+
+                {/* Question */}
+                <p className="text-white/90 text-sm leading-relaxed mb-5 font-medium">
+                  Which sterilization method is most appropriate for heat-sensitive flexible endoscopes?
+                </p>
+
+                {/* Answer options */}
+                {[
+                  { label: "A", text: "Steam autoclave at 134°C", selected: false },
+                  { label: "B", text: "Low-temperature H₂O₂ plasma", selected: true },
+                  { label: "C", text: "Dry heat at 160°C for 2 hours", selected: false },
+                  { label: "D", text: "Ethylene oxide (EtO) gas sterilization", selected: false },
+                ].map((opt) => (
+                  <div key={opt.label}
+                    className={`flex items-center gap-3 p-3 rounded-xl mb-2 last:mb-0 text-sm transition-all ${
+                      opt.selected
+                        ? "bg-teal/20 border border-teal/50"
+                        : "bg-white/[0.03] border border-white/7"
+                    }`}>
+                    <span className={`w-6 h-6 rounded-full border flex items-center justify-center text-[0.65rem] font-mono font-bold flex-shrink-0 ${
+                      opt.selected ? "border-teal bg-teal/30 text-teal" : "border-white/20 text-white/35"
+                    }`}>
+                      {opt.label}
+                    </span>
+                    <span className={opt.selected ? "text-teal font-semibold" : "text-white/55"}>{opt.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Floating AI chat bubble */}
+              <div className="absolute -bottom-5 -left-5 bg-navy-2 border border-teal/30 rounded-2xl p-3.5 shadow-xl max-w-[200px] lp-float-a">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal" style={{ boxShadow: "0 0 6px rgba(42,157,143,0.8)" }} />
+                  <span className="font-mono text-teal text-[0.62rem] tracking-widest font-semibold">AI STUDY CHAT</span>
+                </div>
+                <p className="text-white/60 text-[0.72rem] leading-snug">
+                  "H₂O₂ plasma works below 50°C — ideal for scopes and cameras."
+                </p>
+              </div>
+
+              {/* Floating domain badge */}
+              <div className="absolute -top-4 -right-4 bg-amber/10 border border-amber/30 rounded-xl px-3 py-1.5 lp-float-b">
+                <span className="font-mono text-amber text-[0.68rem] font-semibold tracking-wide">CER ✓ CERTIFIED</span>
+              </div>
+
+            </div>
           </div>
 
-          <p className="font-mono text-white/35 text-xs mt-5 tracking-wider">
-            Free tier includes 20 questions/hour · No credit card required
-          </p>
         </div>
       </section>
 
@@ -176,7 +249,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">What You Get</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "var(--font-display)" }}>
             Everything you need to pass.<br />
             <span className="text-teal">Nothing you don't.</span>
           </h2>
@@ -199,7 +272,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Exam Coverage</p>
-            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
               All Certifications Covered
             </h2>
             <p className="text-white/50 mt-3 text-base font-light">
@@ -230,7 +303,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">The Process</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
             From signup to certified<br />
             <span className="text-teal">in four steps.</span>
           </h2>
@@ -259,7 +332,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">From the Community</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
               Real techs. Real results.
             </h2>
           </div>
@@ -291,7 +364,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="font-mono text-teal text-[0.7rem] tracking-[0.12em] mb-3 uppercase">Career Services</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5" style={{ fontFamily: "var(--font-display)" }}>
               Your certification opens doors.<br />
               <span className="text-teal">A qualified resume gets you through them.</span>
             </h2>
@@ -328,7 +401,7 @@ export default function LandingPage() {
       <section id="pricing" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Plans</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
             Start free. Upgrade when<br />
             <span className="text-teal">you're ready to commit.</span>
           </h2>
@@ -398,7 +471,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
         <div className="max-w-3xl mx-auto text-center">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
-          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4" style={{ fontFamily: "var(--font-display)" }}>
             Do you need professional study assistance?
           </h2>
           <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
@@ -422,7 +495,7 @@ export default function LandingPage() {
       <section id="faq" className="py-24 px-4 max-w-2xl mx-auto">
         <div className="text-center mb-12">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">FAQ</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black" style={{ fontFamily: "var(--font-display)" }}>
             Common questions
           </h2>
         </div>
@@ -434,7 +507,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at center, rgba(42,157,143,0.15) 0%, transparent 70%)" }} />
         <div className="relative z-10 max-w-xl mx-auto">
-          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5" style={{ fontFamily: "var(--font-display)" }}>
             Your certification is<br />
             <span className="text-teal">closer than you think.</span>
           </h2>

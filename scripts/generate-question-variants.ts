@@ -57,7 +57,6 @@ async function generateVariants(
       {
         type: "text",
         text: SYSTEM_PROMPT,
-        // @ts-expect-error cache_control is valid at runtime
         cache_control: { type: "ephemeral" },
       },
     ],

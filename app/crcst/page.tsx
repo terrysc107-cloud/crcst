@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Quiz from '@/components/Quiz'
@@ -612,6 +613,21 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* Instrument ID card — links to dedicated photo-quiz page */}
+          <Link
+            href="/crcst/instruments"
+            className="flex items-center gap-4 bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-teal hover:shadow-lg transition mb-8"
+          >
+            <div className="text-3xl">🔬</div>
+            <div>
+              <div className="font-serif text-navy font-bold text-sm">Instrument ID</div>
+              <div className="text-xs text-text-3 mt-1">
+                Photo-based identification quiz
+              </div>
+            </div>
+            <div className="ml-auto text-teal text-sm">→</div>
+          </Link>
 
           {/* Resume Quiz Section */}
           {pausedSessions && pausedSessions.length > 0 && (

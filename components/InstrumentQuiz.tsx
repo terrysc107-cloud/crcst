@@ -108,7 +108,6 @@ export default function InstrumentQuiz({ domain }: Props) {
   if (!question) return null
 
   const correct = selected !== null && selected === question.correctIndex
-  const wrong = selected !== null && selected !== question.correctIndex
 
   return (
     <div className="space-y-6">

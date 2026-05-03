@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -15,6 +16,8 @@ const feedbackTypes: { value: FeedbackType; label: string; icon: string }[] = [
 ]
 
 export default function HelpFAB() {
+  const pathname = usePathname()
+
   // Menu state
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -124,6 +127,9 @@ export default function HelpFAB() {
 
   const openChat = () => { setMenuOpen(false); setChatOpen(true) }
   const openFeedback = () => { setMenuOpen(false); setFeedbackOpen(true) }
+
+  // Hide on the public landing page
+  if (pathname === '/') return null
 
   return (
     <>

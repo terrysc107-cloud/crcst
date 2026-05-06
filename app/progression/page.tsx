@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { PROGRESSION_LEVELS, BONUS_MODULES, PROGRESSION_BADGES, getXpTier, getNextXpTier } from '@/lib/progression-config'
+import { useSubscription } from '@/hooks/useSubscription'
 
 type LevelStatus = 'locked' | 'unlocked' | 'completed'
 
@@ -20,6 +21,7 @@ interface BonusUnlock {
 
 export default function ProgressionPage() {
   const router = useRouter()
+  const sub = useSubscription()
   const [levelStatus, setLevelStatus] = useState<Record<number, LevelStatus>>({})
   const [bestScores, setBestScores] = useState<Record<number, number | null>>({})
   const [unlockedBonuses, setUnlockedBonuses] = useState<Set<string>>(new Set())
@@ -133,7 +135,7 @@ export default function ProgressionPage() {
     (l) => levelStatus[l.id] === 'completed'
   ).length
 
-  if (loading) {
+  if (loading || sub.loading) {
     return (
       <div
         style={{
@@ -155,6 +157,35 @@ export default function ProgressionPage() {
           }}
         />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  if (!sub.isPaid) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0D1B2A', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, background: 'rgba(20,189,172,0.1)', border: '1px solid rgba(20,189,172,0.3)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24" style={{ color: '#14BDAC' }}>
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+          </svg>
+        </div>
+        <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: '#14BDAC', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+          Pro Feature
+        </div>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', fontWeight: 700, color: '#F5F0E8', lineHeight: 1.2, marginBottom: '1rem', maxWidth: 420 }}>
+          Progression Mode requires a Pro subscription
+        </h1>
+        <p style={{ fontSize: '0.92rem', color: 'rgba(245,240,232,0.5)', lineHeight: 1.65, maxWidth: 380, marginBottom: '2rem' }}>
+          Unlock the full Unlock Challenge — five sequential levels, XP rewards, badges, and bonus content — with a Pro or Triple Crown plan.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', maxWidth: 320 }}>
+          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'linear-gradient(135deg, #14BDAC, #0D7377)', color: '#0D1B2A', borderRadius: 10, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem', letterSpacing: '0.04em', textDecoration: 'none' }}>
+            Upgrade to Pro →
+          </Link>
+          <Link href="/dashboard" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'transparent', color: 'rgba(245,240,232,0.4)', border: '1px solid rgba(245,240,232,0.1)', borderRadius: 10, fontSize: '0.85rem', fontFamily: 'monospace', textDecoration: 'none' }}>
+            Back to Dashboard
+          </Link>
+        </div>
       </div>
     )
   }

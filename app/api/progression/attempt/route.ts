@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { QUESTIONS } from '@/lib/questions'
 import { PROGRESSION_LEVELS, XP_RULES, XpBreakdown, LEVEL_BADGE_MAP } from '@/lib/progression-config'
+import { getPlan } from '@/lib/subscription'
 
 export async function POST(req: NextRequest) {
   // Lazy-initialize clients inside handler so env vars are available at runtime
@@ -25,6 +26,12 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await supabaseUser.auth.getUser()
   if (authError || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Progression is Pro+ only
+  const plan = await getPlan(user.id)
+  if (plan === 'free') {
+    return NextResponse.json({ error: 'Pro subscription required' }, { status: 403 })
   }
 
   const body = await req.json()

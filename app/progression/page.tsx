@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { PROGRESSION_LEVELS, BONUS_MODULES } from '@/lib/progression-config'
+import { PROGRESSION_LEVELS, BONUS_MODULES, getXpTier, getNextXpTier } from '@/lib/progression-config'
 
 type LevelStatus = 'locked' | 'unlocked' | 'completed'
 
@@ -23,6 +23,7 @@ export default function ProgressionPage() {
   const [levelStatus, setLevelStatus] = useState<Record<number, LevelStatus>>({})
   const [bestScores, setBestScores] = useState<Record<number, number | null>>({})
   const [unlockedBonuses, setUnlockedBonuses] = useState<Set<string>>(new Set())
+  const [totalXp, setTotalXp] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [lockedClickMessage, setLockedClickMessage] = useState<Record<number, boolean>>({})
 
@@ -74,6 +75,15 @@ export default function ProgressionPage() {
       if (bonusData) {
         setUnlockedBonuses(new Set((bonusData as BonusUnlock[]).map((b) => b.module_id)))
       }
+
+      // Fetch user XP
+      const { data: xpData } = await supabase
+        .from('user_xp')
+        .select('total_xp')
+        .eq('user_id', user.id)
+        .single()
+
+      if (xpData) setTotalXp(xpData.total_xp ?? 0)
 
       setLoading(false)
     }
@@ -252,6 +262,39 @@ export default function ProgressionPage() {
                 }}
               />
             </div>
+
+            {/* XP display */}
+            {(() => {
+              const tier = getXpTier(totalXp)
+              const next = getNextXpTier(totalXp)
+              return (
+                <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      letterSpacing: '0.12em',
+                      fontFamily: 'monospace',
+                      color: tier.color,
+                      textTransform: 'uppercase',
+                      border: `1px solid ${tier.color}`,
+                      borderRadius: 100,
+                      padding: '0.15rem 0.6rem',
+                      opacity: 0.9,
+                    }}>
+                      {tier.label}
+                    </span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1rem', color: tier.color }}>
+                      {totalXp} XP
+                    </span>
+                  </div>
+                  {next && (
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace' }}>
+                      {next.minXp - totalXp} XP to {next.label}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
           </div>
         </div>
       </div>

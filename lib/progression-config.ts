@@ -151,3 +151,48 @@ export function getLevelById(id: number): ProgressionLevel | undefined {
 export function getBonusById(id: string): BonusModule | undefined {
   return BONUS_MODULES.find(b => b.id === id)
 }
+
+// ─── XP System ───────────────────────────────────────────────────────────────
+
+export const XP_RULES = {
+  attempt: 10,       // any attempt, pass or fail
+  pass: 100,         // pass the level
+  firstPass: 25,     // first-ever pass of this level (no prior pass on record)
+  precision: 50,     // score 90%+
+} as const
+
+export interface XpTier {
+  label: string
+  minXp: number
+  color: string
+}
+
+export const XP_TIERS: XpTier[] = [
+  { label: 'Novice',     minXp: 0,    color: 'rgba(245,240,232,0.5)' },
+  { label: 'Apprentice', minXp: 100,  color: '#14BDAC' },
+  { label: 'Technician', minXp: 300,  color: '#4a9eff' },
+  { label: 'Specialist', minXp: 600,  color: '#DAA520' },
+  { label: 'Expert',     minXp: 1000, color: '#f472b6' },
+]
+
+export function getXpTier(totalXp: number): XpTier {
+  for (let i = XP_TIERS.length - 1; i >= 0; i--) {
+    if (totalXp >= XP_TIERS[i].minXp) return XP_TIERS[i]
+  }
+  return XP_TIERS[0]
+}
+
+export function getNextXpTier(totalXp: number): XpTier | null {
+  for (const tier of XP_TIERS) {
+    if (totalXp < tier.minXp) return tier
+  }
+  return null
+}
+
+export interface XpBreakdown {
+  attempt: number
+  pass: number
+  firstPass: number
+  precision: number
+  total: number
+}

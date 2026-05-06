@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { QUESTIONS, Question } from '@/lib/questions'
-import { getLevelById, ProgressionLevel } from '@/lib/progression-config'
+import { getLevelById, ProgressionLevel, XpBreakdown, getXpTier } from '@/lib/progression-config'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +28,8 @@ interface AttemptResult {
   incorrectItems: IncorrectItem[]
   bonusUnlocked: string[]
   nextLevelUnlocked: number | null
+  xpBreakdown: XpBreakdown
+  totalXp: number
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -42,6 +44,15 @@ function fisherYates<T>(arr: T[]): T[] {
 }
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
+
+function XpRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+      <span style={{ color: 'rgba(245,240,232,0.45)', fontFamily: 'monospace' }}>{label}</span>
+      <span style={{ color: '#DAA520', fontFamily: 'monospace', fontWeight: 600 }}>+{value}</span>
+    </div>
+  )
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -630,6 +641,71 @@ export default function LevelPage({ params }: { params: { levelId: string } }) {
               </div>
             )}
           </>
+        )}
+
+        {/* XP earned block */}
+        {result.xpBreakdown && (
+          <div style={{
+            marginBottom: '1rem',
+            padding: '1rem 1.25rem',
+            borderRadius: '10px',
+            background: 'rgba(218,165,32,0.06)',
+            border: '1px solid rgba(218,165,32,0.25)',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '0.6rem',
+            }}>
+              <div style={{
+                fontSize: '0.68rem',
+                letterSpacing: '0.12em',
+                color: '#DAA520',
+                fontFamily: 'monospace',
+                textTransform: 'uppercase',
+              }}>
+                XP Earned
+              </div>
+              <div style={{
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                color: '#DAA520',
+                fontFamily: 'monospace',
+              }}>
+                +{result.xpBreakdown.total}
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              {result.xpBreakdown.attempt > 0 && (
+                <XpRow label="Attempted" value={result.xpBreakdown.attempt} />
+              )}
+              {result.xpBreakdown.pass > 0 && (
+                <XpRow label="Level passed" value={result.xpBreakdown.pass} />
+              )}
+              {result.xpBreakdown.firstPass > 0 && (
+                <XpRow label="First pass bonus" value={result.xpBreakdown.firstPass} />
+              )}
+              {result.xpBreakdown.precision > 0 && (
+                <XpRow label="Precision bonus (90%+)" value={result.xpBreakdown.precision} />
+              )}
+            </div>
+            <div style={{
+              marginTop: '0.75rem',
+              paddingTop: '0.6rem',
+              borderTop: '1px solid rgba(218,165,32,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(245,240,232,0.4)', fontFamily: 'monospace' }}>
+                Total XP
+              </span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: getXpTier(result.totalXp).color, fontFamily: 'monospace' }}>
+                {result.totalXp} · {getXpTier(result.totalXp).label}
+              </span>
+            </div>
+          </div>
         )}
 
         {/* FAIL retry button */}

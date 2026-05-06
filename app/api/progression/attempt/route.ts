@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { QUESTIONS } from '@/lib/questions'
-import { PROGRESSION_LEVELS } from '@/lib/progression-config'
+import { PROGRESSION_LEVELS, XP_RULES, XpBreakdown } from '@/lib/progression-config'
 
 export async function POST(req: NextRequest) {
   // Lazy-initialize clients inside handler so env vars are available at runtime
@@ -166,6 +166,44 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // ─── XP Calculation ───────────────────────────────────────────────────────
+
+  // Was this the first-ever pass of this level?
+  const { count: priorPassCount } = await supabaseAdmin
+    .from('progression_attempts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('level_id', levelId)
+    .eq('passed', true)
+
+  const isFirstPass = passed && (priorPassCount ?? 0) === 1 // current attempt was just inserted
+
+  const xpBreakdown: XpBreakdown = {
+    attempt: XP_RULES.attempt,
+    pass: passed ? XP_RULES.pass : 0,
+    firstPass: isFirstPass ? XP_RULES.firstPass : 0,
+    precision: passed && score >= 90 ? XP_RULES.precision : 0,
+    total: 0,
+  }
+  xpBreakdown.total = xpBreakdown.attempt + xpBreakdown.pass + xpBreakdown.firstPass + xpBreakdown.precision
+
+  // Upsert user_xp — increment atomically
+  const { data: xpRow } = await supabaseAdmin
+    .from('user_xp')
+    .select('total_xp')
+    .eq('user_id', user.id)
+    .single()
+
+  const newTotal = (xpRow?.total_xp ?? 0) + xpBreakdown.total
+
+  await supabaseAdmin
+    .from('user_xp')
+    .upsert({
+      user_id: user.id,
+      total_xp: newTotal,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' })
+
   return NextResponse.json({
     passed,
     score,
@@ -174,5 +212,7 @@ export async function POST(req: NextRequest) {
     incorrectItems,
     bonusUnlocked,
     nextLevelUnlocked: passed && levelId < 5 ? levelId + 1 : null,
+    xpBreakdown,
+    totalXp: newTotal,
   })
 }

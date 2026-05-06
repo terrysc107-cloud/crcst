@@ -389,6 +389,104 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Progression Mode Card */}
+        <div style={{
+          background: '#0B1F3A',
+          border: '1px solid rgba(20,189,172,0.25)',
+          borderLeft: '4px solid #14BDAC',
+          borderRadius: '14px',
+          padding: '1.5rem 1.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1.5rem',
+          flexWrap: 'wrap',
+          marginTop: '0.5rem',
+        }}>
+          {/* Left: icon + text */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.1rem', flex: 1, minWidth: 0 }}>
+            {/* Lock/Unlock icon */}
+            <div style={{
+              flexShrink: 0,
+              width: '2.75rem',
+              height: '2.75rem',
+              background: 'rgba(20,189,172,0.12)',
+              border: '1px solid rgba(20,189,172,0.3)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 11V7a4 4 0 0 1 7.938-.857" stroke="#14BDAC" strokeWidth="1.8" strokeLinecap="round"/>
+                <rect x="3" y="11" width="18" height="11" rx="2.5" fill="rgba(20,189,172,0.15)" stroke="#14BDAC" strokeWidth="1.8"/>
+                <circle cx="12" cy="16.5" r="1.5" fill="#14BDAC"/>
+                <path d="M12 16.5v2" stroke="#14BDAC" strokeWidth="1.6" strokeLinecap="round"/>
+              </svg>
+            </div>
+            {/* Text */}
+            <div style={{ minWidth: 0 }}>
+              <div style={{
+                fontSize: '0.62rem',
+                fontFamily: 'monospace',
+                letterSpacing: '0.12em',
+                color: '#14BDAC',
+                fontWeight: 700,
+                marginBottom: '0.35rem',
+                textTransform: 'uppercase' as const,
+              }}>
+                New · Progression Mode
+              </div>
+              <div style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: '1.15rem',
+                fontWeight: 700,
+                color: '#F5F0E8',
+                marginBottom: '0.3rem',
+                lineHeight: 1.25,
+              }}>
+                Unlock Challenge
+              </div>
+              <div style={{
+                fontSize: '0.82rem',
+                color: 'rgba(245,240,232,0.55)',
+                marginBottom: '0.55rem',
+                lineHeight: 1.45,
+              }}>
+                Earn your way through 5 levels. Knowledge is earned, not accessed.
+              </div>
+              <div style={{
+                fontSize: '0.68rem',
+                fontFamily: 'monospace',
+                color: 'rgba(20,189,172,0.7)',
+                letterSpacing: '0.06em',
+              }}>
+                5 levels · 15 questions each · 80% to advance
+              </div>
+            </div>
+          </div>
+          {/* Right: CTA button */}
+          <Link
+            href="/progression"
+            style={{
+              flexShrink: 0,
+              background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
+              color: '#fff',
+              padding: '0.65rem 1.35rem',
+              borderRadius: '9px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              fontFamily: 'monospace',
+              letterSpacing: '0.05em',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap' as const,
+              boxShadow: '0 2px 12px rgba(20,189,172,0.25)',
+            }}
+          >
+            Start →
+          </Link>
+        </div>
       </div>
 
       {/* Features Section */}

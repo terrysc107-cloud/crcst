@@ -32,13 +32,15 @@ export default function ProgressionPage() {
   useEffect(() => {
     async function load() {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
 
-      if (!user) {
+      if (!session?.user) {
         router.push('/crcst')
         return
       }
+
+      const user = session.user
 
       // Fetch user_levels
       const { data: userLevels } = await supabase

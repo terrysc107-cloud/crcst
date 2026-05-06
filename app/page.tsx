@@ -53,6 +53,7 @@ const FEATURES = [
   { icon: "🔥", title: "Streak Tracking", desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
   { icon: "📋", title: "Exam Readiness Score", desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
   { icon: "🏅", title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
+  { icon: "🔓", title: "Progression Mode", desc: "Five sequential levels, XP rewards, and locked doors. Earn your way through the full CRCST domain — knowledge is earned, not accessed." },
 ];
 
 const TESTIMONIALS = [
@@ -191,6 +192,112 @@ export default function LandingPage() {
               <p className="text-white/55 text-sm leading-relaxed font-light">{f.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── PROGRESSION SPOTLIGHT ────────────────────────────────────────────── */}
+      <section className="py-20 px-4 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="font-mono text-amber text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Featured · New Mode</p>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Knowledge is <em className="text-amber not-italic">earned</em>, not accessed.
+            </h2>
+            <p className="text-white/50 mt-3 text-base font-light max-w-xl mx-auto">
+              The Unlock Challenge puts five sequential levels between you and mastery. Pass each to advance. Earn XP, collect badges, and prove you know this material.
+            </p>
+          </div>
+
+          <div className="rounded-2xl overflow-hidden border border-teal/20" style={{ background: 'linear-gradient(135deg, #0B1F38 0%, #0D2A22 100%)' }}>
+            <div className="grid md:grid-cols-2">
+
+              {/* Left: levels visual */}
+              <div className="p-8 md:p-10 border-b md:border-b-0 md:border-r border-white/8">
+                <p className="font-mono text-teal text-[0.68rem] tracking-[0.12em] uppercase mb-6">5 Sequential Levels</p>
+                <div className="flex flex-col gap-3">
+                  {[
+                    { n: 1, label: 'Foundations & Basic Science', xp: '+125 XP', state: 'done' },
+                    { n: 2, label: 'Decontamination', xp: '+125 XP', state: 'active' },
+                    { n: 3, label: 'Sterilization Methods', xp: '+125 XP', state: 'locked' },
+                    { n: 4, label: 'Sterile Storage & Distribution', xp: '+125 XP', state: 'locked' },
+                    { n: 5, label: 'Advanced Mastery', xp: '+135 XP', state: 'locked' },
+                  ].map((level) => (
+                    <div key={level.n} className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold flex-shrink-0 transition-all ${
+                        level.state === 'done' ? 'bg-teal text-navy' :
+                        level.state === 'active' ? 'border-2 border-teal text-teal' :
+                        'border border-white/15 text-white/20'
+                      }`}>
+                        {level.state === 'done' ? '✓' : level.n}
+                      </div>
+                      <div className={`flex-1 text-sm font-medium ${
+                        level.state === 'done' ? 'text-teal' :
+                        level.state === 'active' ? 'text-white' :
+                        'text-white/28'
+                      }`}>
+                        {level.label}
+                      </div>
+                      <span className={`text-[0.65rem] font-mono ${level.state === 'locked' ? 'text-white/15' : 'text-amber/70'}`}>
+                        {level.xp}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 pt-5 border-t border-white/8 flex items-center gap-4">
+                  <div>
+                    <div className="font-mono text-2xl font-black text-amber">125 XP</div>
+                    <div className="text-xs text-white/40 font-mono mt-0.5">Apprentice Tier</div>
+                  </div>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {['🥇', '⚡', '🎯'].map((b, i) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-amber/10 border border-amber/30 flex items-center justify-center text-sm">
+                        {b}
+                      </div>
+                    ))}
+                    <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                      <span className="text-white/25 text-xs font-mono">+2</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: hook copy + CTA */}
+              <div className="p-8 md:p-10 flex flex-col justify-center">
+                <div className="inline-flex items-center gap-2 bg-teal/10 border border-teal/25 rounded-full px-3 py-1 mb-6 w-fit">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal inline-block" />
+                  <span className="font-mono text-teal text-[0.68rem] tracking-widest">FREE TO PLAY</span>
+                </div>
+                <h3 className="text-[clamp(1.3rem,3vw,1.9rem)] font-black leading-snug mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Structured challenge.<br />
+                  <span className="text-teal">Real accountability.</span>
+                </h3>
+                <p className="text-white/55 text-[0.9rem] leading-relaxed mb-4">
+                  Practice quizzes are a warmup. Progression Mode is the real test — timed challenges, 80% pass threshold, and a locked door until you prove you're ready.
+                </p>
+                <ul className="space-y-2 mb-8">
+                  {[
+                    'Five levels covering the full CRCST domain',
+                    'Earn XP and tier badges as you advance',
+                    'Bonus content unlocks for high performers',
+                    'Weak-spot analysis after every attempt',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-white/65 font-light">
+                      <span className="text-teal mt-0.5 flex-shrink-0 text-xs">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/crcst"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-[0.95rem] text-navy hover:opacity-90 transition-all w-fit"
+                  style={{ background: 'linear-gradient(135deg, #14BDAC, #0D7377)', boxShadow: '0 4px 20px rgba(20,189,172,0.3)' }}>
+                  Start the Unlock Challenge →
+                </Link>
+                <p className="font-mono text-white/25 text-[0.7rem] mt-3 tracking-wider">
+                  Included free · No upgrade required
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

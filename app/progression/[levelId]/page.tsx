@@ -97,11 +97,12 @@ export default function LevelPage() {
     }
 
     async function checkAccess() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
         router.push('/progression')
         return
       }
+      const user = session.user
 
       const { data } = await supabase
         .from('user_levels')

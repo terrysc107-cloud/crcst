@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { QUESTIONS, Question } from '@/lib/questions'
 import { getLevelById, ProgressionLevel, XpBreakdown, getXpTier, getBadgeById } from '@/lib/progression-config'
@@ -57,9 +57,10 @@ function XpRow({ label, value }: { label: string; value: number }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function LevelPage({ params }: { params: { levelId: string } }) {
+export default function LevelPage() {
   const router = useRouter()
-  const levelId = parseInt(params.levelId)
+  const { levelId: levelIdStr } = useParams<{ levelId: string }>()
+  const levelId = parseInt(levelIdStr)
   const level: ProgressionLevel | undefined = getLevelById(levelId)
 
   // Screen state

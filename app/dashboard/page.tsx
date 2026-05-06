@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
+import { getXpTier } from '@/lib/progression-config'
 
 interface Certification {
   id: string
@@ -56,6 +57,10 @@ const totalQuestions = 400 + 240 + 147
 export default function DashboardPage() {
   const router = useRouter()
   const [earnedCerts, setEarnedCerts] = useState<{cert: string}[]>([])
+  const [progXp, setProgXp] = useState<number>(0)
+  const [progBadgeCount, setProgBadgeCount] = useState<number>(0)
+  const [progLevelsCompleted, setProgLevelsCompleted] = useState<number>(0)
+  const [progLoaded, setProgLoaded] = useState(false)
   const sub = useSubscription()
 
   useEffect(() => {
@@ -81,9 +86,23 @@ export default function DashboardPage() {
         .eq("user_id", user.id)
         .order("claimed_at", { ascending: true })
       if (data) setEarnedCerts(data)
+
+      const [xpRes, badgeRes, levelsRes] = await Promise.all([
+        supabase.from('user_xp').select('total_xp').eq('user_id', user.id).single(),
+        supabase.from('progression_badges').select('badge_id').eq('user_id', user.id),
+        supabase.from('user_levels').select('status').eq('user_id', user.id),
+      ])
+      setProgXp(xpRes.data?.total_xp ?? 0)
+      setProgBadgeCount(badgeRes.data?.length ?? 0)
+      setProgLevelsCompleted(
+        levelsRes.data?.filter((l: { status: string }) => l.status === 'completed').length ?? 0
+      )
+      setProgLoaded(true)
     }
     loadCerts()
   }, [router])
+
+  const tier = getXpTier(progXp)
 
   return (
     <div className="min-h-screen bg-cream">
@@ -389,6 +408,50 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Progression Widget — live user stats */}
+        {progLoaded && (
+          <div style={{
+            background: 'rgba(20,189,172,0.04)',
+            border: '1px solid rgba(20,189,172,0.2)',
+            borderRadius: 12,
+            padding: '1rem 1.25rem',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+          }}>
+            <div>
+              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
+                YOUR PROGRESSION
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                <span>XP: <strong>{progXp}</strong> &middot; <span style={{ color: tier.color, fontWeight: 600 }}>{tier.label}</span></span>
+                <span>Badges: <strong>{progBadgeCount}</strong></span>
+                <span>Levels: <strong>{progLevelsCompleted} / 5</strong></span>
+              </div>
+            </div>
+            <Link
+              href="/progression"
+              style={{
+                background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
+                color: '#fff',
+                padding: '0.5rem 1.1rem',
+                borderRadius: 8,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                whiteSpace: 'nowrap' as const,
+                fontFamily: 'monospace',
+                letterSpacing: '0.04em',
+                textDecoration: 'none',
+              }}
+            >
+              View Progression →
+            </Link>
+          </div>
+        )}
 
         {/* Progression Mode Card */}
         <div style={{

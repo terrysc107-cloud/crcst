@@ -65,13 +65,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadCerts() {
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const { data: { session } } = await supabase.auth.getSession()
+
       // Redirect to sign-in if not authenticated
-      if (!user) {
+      if (!session?.user) {
         router.push('/crcst')
         return
       }
+
+      const user = session.user
 
       // Redirect new users to onboarding if they haven't completed it
       const onboardingDone = localStorage.getItem(`onboarding_complete_${user.id}`)

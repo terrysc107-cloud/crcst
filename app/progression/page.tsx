@@ -97,28 +97,21 @@ export default function ProgressionPage() {
         setEarnedBadgeIds(new Set(badgeData.map((b: { badge_id: string }) => b.badge_id)))
       }
 
-      // Aggregate domain mastery from quiz history for weak-spot analysis
-      const { data: quizResults } = await supabase
-        .from('crcst_quiz_results')
-        .select('domains')
+      // Weak-spot analysis from pre-aggregated domain mastery table
+      const { data: domainData } = await supabase
+        .from('crcst_domain_mastery')
+        .select('domain_name, questions_answered, mastery_percentage')
         .eq('user_id', user.id)
+        .gte('questions_answered', 5)
+        .order('mastery_percentage', { ascending: true })
+        .limit(3)
 
-      if (quizResults && quizResults.length > 0) {
-        const totals: Record<string, { correct: number; total: number }> = {}
-        quizResults.forEach((row: { domains: { name: string; correct: number; total: number }[] }) => {
-          if (!Array.isArray(row.domains)) return
-          row.domains.forEach(d => {
-            if (!totals[d.name]) totals[d.name] = { correct: 0, total: 0 }
-            totals[d.name].correct += d.correct || 0
-            totals[d.name].total += d.total || 0
-          })
-        })
-        const spots = Object.entries(totals)
-          .filter(([, s]) => s.total >= 5)
-          .map(([name, s]) => ({ name, accuracy: Math.round((s.correct / s.total) * 100), total: s.total }))
-          .sort((a, b) => a.accuracy - b.accuracy)
-          .slice(0, 3)
-        setWeakSpots(spots)
+      if (domainData && domainData.length > 0) {
+        setWeakSpots(domainData.map(d => ({
+          name: d.domain_name,
+          accuracy: Math.round(Number(d.mastery_percentage)),
+          total: d.questions_answered,
+        })))
       }
 
       setLoading(false)

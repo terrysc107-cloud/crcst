@@ -7,6 +7,7 @@ import Quiz from '@/components/Quiz'
 import Results from '@/components/Results'
 import { QUESTIONS, type Question } from '@/lib/questions'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
+import { getXpTier } from '@/lib/progression-config'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -40,6 +41,7 @@ export default function Home() {
   const [rateLimitInfo, setRateLimitInfo] = useState<{ allowed: boolean; used: number; limit: number; remaining: number } | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({})
+  const [progXp, setProgXp] = useState(0)
 
   useEffect(() => {
     // Check if onboarding is complete (localStorage or database)
@@ -76,6 +78,7 @@ export default function Home() {
         loadStats(session.user.id)
         loadRateLimitInfo()
         loadCorrectCounts(session.user.id)
+        loadProgression(session.user.id)
       }
     })
 
@@ -92,6 +95,7 @@ export default function Home() {
         loadStats(session.user.id)
         loadRateLimitInfo()
         loadCorrectCounts(session.user.id)
+        loadProgression(session.user.id)
       } else {
         setUser(null)
         setScreen('auth')
@@ -185,6 +189,19 @@ export default function Home() {
       if (data) setCorrectCounts(buildCorrectCountMap(data))
     } catch {
       // non-critical: quiz works fine without variant data
+    }
+  }
+
+  const loadProgression = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('user_xp')
+        .select('total_xp')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (data) setProgXp(data.total_xp ?? 0)
+    } catch {
+      // non-critical
     }
   }
 
@@ -494,28 +511,46 @@ export default function Home() {
           </p>
 
           {/* Readiness Card */}
-          <div className="bg-white/10 border border-teal-3/20 rounded-lg p-4 mb-6 flex justify-between items-center">
-            <div>
-              <div className="text-xs text-teal-3 tracking-widest mb-1">
-                EXAM READINESS SCORE
+          <div className="bg-white/10 border border-teal-3/20 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="text-xs text-teal-3 tracking-widest mb-1">
+                  EXAM READINESS SCORE
+                </div>
+                <div className="font-serif text-lg text-white">
+                  {stats.accuracy >= 80
+                    ? 'Exam Ready!'
+                    : stats.accuracy >= 60
+                    ? 'Almost There'
+                    : stats.answered > 0
+                    ? 'Developing'
+                    : 'Not Started'}
+                </div>
               </div>
-              <div className="font-serif text-lg text-white">
-                {stats.accuracy >= 80
-                  ? 'Exam Ready!'
-                  : stats.accuracy >= 60
-                  ? 'Almost There'
-                  : stats.answered > 0
-                  ? 'Developing'
-                  : 'Not Started'}
+              <div className="text-right">
+                <div className="font-serif text-4xl text-amber">
+                  {stats.accuracy}%
+                </div>
+                <div className="text-xs text-navy-3">
+                  {stats.answered === 0 ? 'Not started' : `${stats.answered} questions`}
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="font-serif text-4xl text-amber">
-                {stats.accuracy}%
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '0.75rem', paddingTop: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' }}>
+                  Progression XP
+                </span>
+                <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.82rem', color: '#14BDAC' }}>
+                  {progXp} XP
+                </span>
+                <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: getXpTier(progXp).color, border: `1px solid ${getXpTier(progXp).color}50`, borderRadius: 100, padding: '0.1rem 0.45rem' }}>
+                  {getXpTier(progXp).label}
+                </span>
               </div>
-              <div className="text-xs text-navy-3">
-                {stats.answered === 0 ? 'Not started' : `${stats.answered} questions`}
-              </div>
+              <a href="/progression" style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: '#14BDAC', textDecoration: 'none', letterSpacing: '0.04em' }}>
+                View →
+              </a>
             </div>
           </div>
 
@@ -575,6 +610,54 @@ export default function Home() {
 
         {/* Study Modes */}
         <div className="px-6 py-8">
+
+          {/* Progression Challenge — featured entry point */}
+          <a href="/progression" style={{ display: 'block', marginBottom: '1.25rem', textDecoration: 'none' }}>
+            <div style={{
+              background: '#0D1B2A',
+              border: '2px solid #14BDAC',
+              borderRadius: 14,
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.75rem',
+              boxShadow: '0 0 0 4px rgba(20,189,172,0.08)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{
+                  width: 42, height: 42,
+                  background: 'rgba(20,189,172,0.15)',
+                  border: '1px solid rgba(20,189,172,0.4)',
+                  borderRadius: 10,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.2rem', flexShrink: 0,
+                }}>🔓</div>
+                <div>
+                  <div style={{ fontSize: '0.58rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: '#14BDAC', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
+                    The Unlock Challenge
+                  </div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontWeight: 700, color: '#F5F0E8', fontSize: '1rem', lineHeight: 1.2 }}>
+                    Progression Mode
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: 'rgba(245,240,232,0.4)', marginTop: '0.2rem', fontFamily: 'monospace' }}>
+                    5 levels · earn XP · unlock bonus content
+                  </div>
+                </div>
+              </div>
+              <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                {progXp > 0 ? (
+                  <>
+                    <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#14BDAC', fontSize: '0.9rem' }}>{progXp} XP</div>
+                    <div style={{ fontSize: '0.65rem', color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace' }}>{getXpTier(progXp).label}</div>
+                  </>
+                ) : (
+                  <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#14BDAC', fontSize: '0.9rem' }}>Start →</div>
+                )}
+              </div>
+            </div>
+          </a>
+
           <div className="text-xs tracking-widest text-text-3 mb-4">
             CHOOSE A STUDY MODE
           </div>

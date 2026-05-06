@@ -8,6 +8,7 @@ import Results from '@/components/Results'
 import { QUESTIONS, type Question } from '@/lib/questions'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 import { getXpTier } from '@/lib/progression-config'
+import { useSubscription } from '@/hooks/useSubscription'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
 type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
@@ -42,6 +43,7 @@ export default function Home() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [correctCounts, setCorrectCounts] = useState<Record<string, number>>({})
   const [progXp, setProgXp] = useState(0)
+  const sub = useSubscription()
 
   useEffect(() => {
     // Check if onboarding is complete (localStorage or database)
@@ -612,17 +614,21 @@ export default function Home() {
         <div className="px-6 py-8">
 
           {/* Progression Challenge — featured entry point */}
-          <a href="/progression" style={{ display: 'block', marginBottom: '1.25rem', textDecoration: 'none' }}>
+          <a
+            href={sub.isPaid ? '/progression' : '/pricing'}
+            style={{ display: 'block', marginBottom: '1.25rem', textDecoration: 'none' }}
+          >
             <div style={{
               background: '#0D1B2A',
-              border: '2px solid #14BDAC',
+              border: `2px solid ${sub.isPaid ? '#14BDAC' : 'rgba(20,189,172,0.3)'}`,
               borderRadius: 14,
               padding: '1rem 1.25rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '0.75rem',
-              boxShadow: '0 0 0 4px rgba(20,189,172,0.08)',
+              boxShadow: sub.isPaid ? '0 0 0 4px rgba(20,189,172,0.08)' : 'none',
+              opacity: sub.isPaid ? 1 : 0.75,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                 <div style={{
@@ -632,7 +638,9 @@ export default function Home() {
                   borderRadius: 10,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '1.2rem', flexShrink: 0,
-                }}>🔓</div>
+                }}>
+                  {sub.isPaid ? '🔓' : '🔒'}
+                </div>
                 <div>
                   <div style={{ fontSize: '0.58rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: '#14BDAC', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
                     The Unlock Challenge
@@ -646,7 +654,11 @@ export default function Home() {
                 </div>
               </div>
               <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                {progXp > 0 ? (
+                {!sub.isPaid ? (
+                  <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', fontWeight: 700, color: '#DAA520', border: '1px solid rgba(218,165,32,0.4)', borderRadius: 100, padding: '0.2rem 0.6rem', letterSpacing: '0.06em' }}>
+                    PRO
+                  </span>
+                ) : progXp > 0 ? (
                   <>
                     <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#14BDAC', fontSize: '0.9rem' }}>{progXp} XP</div>
                     <div style={{ fontSize: '0.65rem', color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace' }}>{getXpTier(progXp).label}</div>

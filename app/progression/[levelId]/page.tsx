@@ -104,6 +104,23 @@ export default function LevelPage() {
       }
       const user = session.user
 
+      // Check subscription — progression is Pro+ only
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tier, tier_expires_at')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      const tier = profile?.tier ?? 'free'
+      const expiresAt = profile?.tier_expires_at
+      const isPaid = (tier === 'pro' || tier === 'triple_crown') &&
+        (!expiresAt || new Date(expiresAt) > new Date())
+
+      if (!isPaid) {
+        router.push('/pricing')
+        return
+      }
+
       const { data } = await supabase
         .from('user_levels')
         .select('status')

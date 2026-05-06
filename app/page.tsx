@@ -53,7 +53,7 @@ const FEATURES = [
   { icon: "🔥", title: "Streak Tracking", desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
   { icon: "📋", title: "Exam Readiness Score", desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
   { icon: "🏅", title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
-  { icon: "🔓", title: "Progression Mode", desc: "Five sequential levels, XP rewards, and locked doors. Earn your way through the full CRCST domain — knowledge is earned, not accessed." },
+  { icon: "🔓", title: "Progression Mode", desc: "Five sequential levels, XP rewards, and locked doors. Earn your way through the full CRCST domain — knowledge is earned, not accessed. Pro &amp; Triple Crown." },
 ];
 
 const TESTIMONIALS = [
@@ -263,9 +263,9 @@ export default function LandingPage() {
 
               {/* Right: hook copy + CTA */}
               <div className="p-8 md:p-10 flex flex-col justify-center">
-                <div className="inline-flex items-center gap-2 bg-teal/10 border border-teal/25 rounded-full px-3 py-1 mb-6 w-fit">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal inline-block" />
-                  <span className="font-mono text-teal text-[0.68rem] tracking-widest">FREE TO PLAY</span>
+                <div className="inline-flex items-center gap-2 bg-amber/10 border border-amber/30 rounded-full px-3 py-1 mb-6 w-fit">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber inline-block" />
+                  <span className="font-mono text-amber text-[0.68rem] tracking-widest">PRO &amp; TRIPLE CROWN</span>
                 </div>
                 <h3 className="text-[clamp(1.3rem,3vw,1.9rem)] font-black leading-snug mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Structured challenge.<br />
@@ -293,7 +293,7 @@ export default function LandingPage() {
                   Start the Unlock Challenge →
                 </Link>
                 <p className="font-mono text-white/25 text-[0.7rem] mt-3 tracking-wider">
-                  Included free · No upgrade required
+                  Included with Pro &amp; Triple Crown plans
                 </p>
               </div>
             </div>

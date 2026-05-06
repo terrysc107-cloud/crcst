@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { QUESTIONS, Question } from '@/lib/questions'
-import { getLevelById, ProgressionLevel, XpBreakdown, getXpTier } from '@/lib/progression-config'
+import { getLevelById, ProgressionLevel, XpBreakdown, getXpTier, getBadgeById } from '@/lib/progression-config'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -30,6 +30,7 @@ interface AttemptResult {
   nextLevelUnlocked: number | null
   xpBreakdown: XpBreakdown
   totalXp: number
+  badgesEarned: string[]
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -641,6 +642,54 @@ export default function LevelPage({ params }: { params: { levelId: string } }) {
               </div>
             )}
           </>
+        )}
+
+        {/* Badges earned */}
+        {result.badgesEarned?.length > 0 && (
+          <div style={{
+            marginBottom: '1rem',
+            padding: '1rem 1.25rem',
+            borderRadius: '10px',
+            background: 'rgba(20,189,172,0.06)',
+            border: '1px solid rgba(20,189,172,0.3)',
+          }}>
+            <div style={{
+              fontSize: '0.68rem',
+              letterSpacing: '0.12em',
+              color: '#14BDAC',
+              fontFamily: 'monospace',
+              textTransform: 'uppercase',
+              marginBottom: '0.75rem',
+            }}>
+              {result.badgesEarned.length === 1 ? 'Badge Unlocked' : 'Badges Unlocked'}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {result.badgesEarned.map(id => {
+                const badge = getBadgeById(id)
+                if (!badge) return null
+                return (
+                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: `${badge.color}20`,
+                      border: `1px solid ${badge.color}60`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.1rem',
+                      flexShrink: 0,
+                    }}>{badge.icon}</span>
+                    <div>
+                      <div style={{ color: '#F5F0E8', fontSize: '0.88rem', fontWeight: 600 }}>{badge.name}</div>
+                      <div style={{ color: 'rgba(245,240,232,0.45)', fontSize: '0.75rem' }}>{badge.description}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         )}
 
         {/* XP earned block */}

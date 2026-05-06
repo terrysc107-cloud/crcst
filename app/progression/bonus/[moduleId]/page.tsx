@@ -34,7 +34,7 @@ export default function BonusModulePage() {
       .select('module_id')
       .eq('user_id', user.id)
       .eq('module_id', moduleId)
-      .single()
+      .maybeSingle()
 
     setHasAccess(!!data)
     setLoading(false)

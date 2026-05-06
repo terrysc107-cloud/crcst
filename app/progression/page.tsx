@@ -25,6 +25,7 @@ export default function ProgressionPage() {
   const [unlockedBonuses, setUnlockedBonuses] = useState<Set<string>>(new Set())
   const [totalXp, setTotalXp] = useState<number>(0)
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set())
+  const [weakSpots, setWeakSpots] = useState<{ name: string; accuracy: number; total: number }[]>([])
   const [loading, setLoading] = useState(true)
   const [lockedClickMessage, setLockedClickMessage] = useState<Record<number, boolean>>({})
 
@@ -82,7 +83,7 @@ export default function ProgressionPage() {
         .from('user_xp')
         .select('total_xp')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (xpData) setTotalXp(xpData.total_xp ?? 0)
 
@@ -94,6 +95,23 @@ export default function ProgressionPage() {
 
       if (badgeData) {
         setEarnedBadgeIds(new Set(badgeData.map((b: { badge_id: string }) => b.badge_id)))
+      }
+
+      // Weak-spot analysis from pre-aggregated domain mastery table
+      const { data: domainData } = await supabase
+        .from('crcst_domain_mastery')
+        .select('domain_name, questions_answered, mastery_percentage')
+        .eq('user_id', user.id)
+        .gte('questions_answered', 5)
+        .order('mastery_percentage', { ascending: true })
+        .limit(3)
+
+      if (domainData && domainData.length > 0) {
+        setWeakSpots(domainData.map(d => ({
+          name: d.domain_name,
+          accuracy: Math.round(Number(d.mastery_percentage)),
+          total: d.questions_answered,
+        })))
       }
 
       setLoading(false)
@@ -560,6 +578,98 @@ export default function ProgressionPage() {
             )
           })}
         </div>
+
+        {/* Weak Spots */}
+        {weakSpots.length > 0 && (
+          <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{
+              fontSize: '0.68rem',
+              letterSpacing: '0.12em',
+              color: 'rgba(13,27,42,0.45)',
+              textTransform: 'uppercase',
+              marginBottom: '1.25rem',
+              fontFamily: 'monospace',
+            }}>
+              Your Weak Spots
+            </div>
+            <div style={{
+              background: '#fff',
+              borderRadius: 14,
+              border: '1px solid rgba(13,27,42,0.1)',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                padding: '0.85rem 1.5rem',
+                borderBottom: '1px solid rgba(13,27,42,0.07)',
+                fontSize: '0.78rem',
+                color: 'rgba(13,27,42,0.45)',
+                fontFamily: 'monospace',
+                letterSpacing: '0.02em',
+              }}>
+                Domains where you score lowest — based on your quiz history
+              </div>
+              {weakSpots.map((spot, i) => {
+                const color = spot.accuracy < 50 ? '#EF4444' : spot.accuracy < 70 ? '#DAA520' : '#14BDAC'
+                return (
+                  <div key={spot.name} style={{
+                    padding: '1rem 1.5rem',
+                    borderTop: i === 0 ? 'none' : '1px solid rgba(13,27,42,0.07)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        flexShrink: 0,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 10,
+                        background: `${color}12`,
+                        border: `1px solid ${color}40`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        color,
+                      }}>
+                        {spot.accuracy}%
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0D1B2A', marginBottom: '0.15rem' }}>
+                          {spot.name}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'rgba(13,27,42,0.4)', fontFamily: 'monospace' }}>
+                          {spot.total} questions answered
+                        </div>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/crcst?domain=${encodeURIComponent(spot.name)}`}
+                      style={{
+                        flexShrink: 0,
+                        fontSize: '0.75rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        color: '#14BDAC',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap' as const,
+                        padding: '0.4rem 0.9rem',
+                        borderRadius: 7,
+                        border: '1px solid rgba(20,189,172,0.3)',
+                        background: 'rgba(20,189,172,0.06)',
+                      }}
+                    >
+                      Practice →
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Bonus modules */}
         <div

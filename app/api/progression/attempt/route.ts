@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     .select('best_score, status')
     .eq('user_id', user.id)
     .eq('level_id', levelId)
-    .single()
+    .maybeSingle()
 
   const newBestScore = existing?.best_score
     ? Math.max(Number(existing.best_score), score)
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
     .from('user_xp')
     .select('total_xp')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   const newTotal = (xpRow?.total_xp ?? 0) + xpBreakdown.total
 

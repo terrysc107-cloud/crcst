@@ -84,6 +84,9 @@ export default function LevelPage({ params }: { params: { levelId: string } }) {
   // Accordion: expanded explanation ids
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
+  // Study guide toggle
+  const [showGuide, setShowGuide] = useState(false)
+
   // ─── Access check on mount ────────────────────────────────────────────────
 
   useEffect(() => {
@@ -104,7 +107,7 @@ export default function LevelPage({ params }: { params: { levelId: string } }) {
         .select('status')
         .eq('user_id', user.id)
         .eq('level_id', levelId)
-        .single()
+        .maybeSingle()
 
       if (!data || data.status === 'locked') {
         router.push('/progression')
@@ -322,10 +325,77 @@ export default function LevelPage({ params }: { params: { levelId: string } }) {
           <div style={{
             color: 'rgba(245,240,232,0.4)',
             fontSize: '0.8rem',
-            marginBottom: '2rem',
+            marginBottom: '1.5rem',
             letterSpacing: '0.02em',
           }}>
             15 questions · Pass with 80% to unlock the next level
+          </div>
+
+          {/* Study Guide */}
+          <div style={{
+            border: '1px solid rgba(20,189,172,0.2)',
+            borderRadius: '10px',
+            marginBottom: '1.75rem',
+            overflow: 'hidden',
+          }}>
+            <button
+              onClick={() => setShowGuide(v => !v)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.75rem 1rem',
+                background: 'rgba(20,189,172,0.07)',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#14BDAC',
+                fontFamily: 'monospace',
+                fontSize: '0.72rem',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              <span>Key Concepts — Study Before You Begin</span>
+              <span style={{ fontSize: '0.9rem', transition: 'transform 0.2s', transform: showGuide ? 'rotate(180deg)' : 'none' }}>▾</span>
+            </button>
+            {showGuide && (
+              <div style={{ padding: '0.25rem 0 0.5rem' }}>
+                {level.studyGuide.keyConcepts.map((concept, i) => (
+                  <div key={i} style={{
+                    padding: '0.75rem 1rem',
+                    borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                  }}>
+                    <div style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: '#DAA520',
+                      marginBottom: '0.25rem',
+                    }}>
+                      {concept.term}
+                    </div>
+                    <div style={{
+                      fontSize: '0.82rem',
+                      color: 'rgba(245,240,232,0.6)',
+                      lineHeight: 1.55,
+                    }}>
+                      {concept.definition}
+                    </div>
+                  </div>
+                ))}
+                <div style={{
+                  margin: '0.5rem 1rem 0.25rem',
+                  padding: '0.65rem 0.85rem',
+                  background: 'rgba(20,189,172,0.06)',
+                  borderLeft: '3px solid #14BDAC',
+                  borderRadius: '0 6px 6px 0',
+                }}>
+                  <div style={{ fontSize: '0.65rem', fontFamily: 'monospace', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.2rem' }}>FOCUS TIP</div>
+                  <div style={{ fontSize: '0.8rem', color: 'rgba(245,240,232,0.55)', lineHeight: 1.55 }}>{level.studyGuide.focusTip}</div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Begin button */}

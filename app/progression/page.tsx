@@ -82,7 +82,7 @@ export default function ProgressionPage() {
         .from('user_xp')
         .select('total_xp')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (xpData) setTotalXp(xpData.total_xp ?? 0)
 

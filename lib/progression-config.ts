@@ -1,3 +1,8 @@
+export interface StudyConcept {
+  term: string
+  definition: string
+}
+
 export interface ProgressionLevel {
   id: number
   name: string
@@ -5,6 +10,10 @@ export interface ProgressionLevel {
   domains: string[]
   questionCount: number
   passingScore: number
+  studyGuide: {
+    keyConcepts: StudyConcept[]
+    focusTip: string
+  }
 }
 
 export interface BonusModule {
@@ -26,6 +35,16 @@ export const PROGRESSION_LEVELS: ProgressionLevel[] = [
     domains: ['Safety', 'Microbiology', 'SPD Overview'],
     questionCount: 15,
     passingScore: 80,
+    studyGuide: {
+      keyConcepts: [
+        { term: 'Spaulding Classification', definition: 'Divides items into Critical (enter sterile tissue → sterilization required), Semi-Critical (contact mucous membranes → HLD minimum), and Non-Critical (touch intact skin → low-level disinfection).' },
+        { term: 'Sterility Assurance Level (SAL)', definition: 'Probability of a viable microorganism remaining on a processed item. The accepted standard is 10⁻⁶ — one chance in one million.' },
+        { term: 'Chain of Infection', definition: '6 links: infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host. Break any single link to prevent infection.' },
+        { term: 'Standard Precautions', definition: 'Treat all blood, body fluids, non-intact skin, and mucous membranes as potentially infectious — regardless of known diagnosis.' },
+        { term: 'Prion Resistance', definition: 'Prions (e.g., Creutzfeldt-Jakob disease) resist standard sterilization. Require special decontamination protocols per AAMI ST79 and manufacturer IFU.' },
+      ],
+      focusTip: 'The Spaulding Classification appears throughout the exam. When a question mentions an item type, immediately classify it — the classification dictates the minimum required reprocessing method.',
+    },
   },
   {
     id: 2,
@@ -34,6 +53,16 @@ export const PROGRESSION_LEVELS: ProgressionLevel[] = [
     domains: ['Decontamination', 'Infection Prevention'],
     questionCount: 15,
     passingScore: 80,
+    studyGuide: {
+      keyConcepts: [
+        { term: 'Point-of-Use Treatment', definition: 'Immediate pre-cleaning at the point of use — remove gross soil before transport. Dried bioburden bonds to surfaces and is significantly harder to remove.' },
+        { term: 'IFU (Instructions for Use)', definition: 'Manufacturer\'s validated reprocessing instructions. IFU compliance is legally and clinically required — always supersedes general guidelines when there is a conflict.' },
+        { term: 'Enzymatic Cleaner', definition: 'Uses enzymes to break down proteins, fats, and carbohydrates. Requires correct dilution, water temperature, and contact time. Solutions are single-use — do not reuse.' },
+        { term: 'Ultrasonic Cleaner', definition: 'Uses cavitation (rapid bubble formation and collapse) to dislodge debris from crevices. Must be degassed before the first use each day — trapped air reduces cavitation effectiveness.' },
+        { term: 'pH of Cleaning Solutions', definition: 'Near-neutral pH (6.0–8.0) is recommended for most metal instruments to prevent corrosion. Alkaline cleaners are most common; acid cleaners target mineral deposits.' },
+      ],
+      focusTip: 'Most decontamination failures involve shortcuts: wrong dilution, temperature, contact time, or skipped steps. The exam tests IFU compliance heavily — when in doubt, always follow the manufacturer\'s instructions.',
+    },
   },
   {
     id: 3,
@@ -42,6 +71,16 @@ export const PROGRESSION_LEVELS: ProgressionLevel[] = [
     domains: ['Disinfection', 'Packaging', 'Instrumentation'],
     questionCount: 15,
     passingScore: 80,
+    studyGuide: {
+      keyConcepts: [
+        { term: 'High-Level Disinfection (HLD)', definition: 'Kills all microorganisms except large numbers of bacterial spores. Required for semi-critical items (e.g., endoscopes contacting mucous membranes). Not a substitute for sterilization on critical items.' },
+        { term: 'Event-Related Sterility', definition: 'A package is sterile until an event compromises it — tear, moisture, puncture, or improper opening. Not based on calendar date. This is the current AAMI/AORN standard.' },
+        { term: 'Peel Pack Integrity', definition: 'Heat seal must be complete — no channels, gaps, or bubbles. Paper side should face up in gravity/steam sterilizers. Any seal compromise = non-sterile; reprocess.' },
+        { term: 'Instrument Set Weight Limit', definition: 'AAMI ST79 recommends a maximum of 25 lbs for wrapped instrument sets. Heavier sets impede steam penetration and frequently produce wet packs.' },
+        { term: 'Inspection Before Packaging', definition: 'Every instrument must be inspected for cleanliness, function (hinges, locks, tips), and integrity before packaging. Packaging a visibly soiled instrument is a critical error.' },
+      ],
+      focusTip: 'Event-related sterility is among the most tested packaging concepts. Packages don\'t expire by date — they\'re compromised by events. Know all disqualifying events: moisture, tears, dropped, opened incorrectly.',
+    },
   },
   {
     id: 4,
@@ -50,6 +89,16 @@ export const PROGRESSION_LEVELS: ProgressionLevel[] = [
     domains: ['Sterilization', 'Equipment'],
     questionCount: 15,
     passingScore: 80,
+    studyGuide: {
+      keyConcepts: [
+        { term: 'Biological Indicator (BI)', definition: 'Most reliable sterilization monitor. Contains live spores: Geobacillus stearothermophilus (steam/H₂O₂) or Bacillus atrophaeus (EO). A killed BI is the only confirmation sterilization conditions were lethal.' },
+        { term: 'Bowie-Dick Test', definition: 'Air-removal test for pre-vacuum steam sterilizers. Detects air pockets that prevent steam penetration. Run daily before the first patient load — this is not a sterilization efficacy test.' },
+        { term: 'IUSS (Immediate-Use Steam Sterilization)', definition: 'Flash sterilization for urgently needed or dropped instruments only. No wrapping; no storage. Never use for implants without a BI — and the BI must incubate before the implant is released.' },
+        { term: 'Wet Pack', definition: 'Visible moisture after sterilization renders the package non-sterile. Must be reprocessed. OR schedule pressure is never a valid justification to release a wet pack.' },
+        { term: 'Monitoring Hierarchy', definition: 'Biological indicator > Chemical indicator > Mechanical indicator (printout/gauge). Only BIs confirm actual killing of target microorganisms. Chemical indicators confirm conditions — not sterility.' },
+      ],
+      focusTip: 'Know the three monitoring types and their hierarchy cold. The exam tests scenarios where chemical indicators passed but sterility wasn\'t confirmed — the BI is always the final authority.',
+    },
   },
   {
     id: 5,
@@ -58,6 +107,16 @@ export const PROGRESSION_LEVELS: ProgressionLevel[] = [
     domains: ['Sterile Storage', 'Quality & Regulatory', 'Inventory & Distribution'],
     questionCount: 15,
     passingScore: 80,
+    studyGuide: {
+      keyConcepts: [
+        { term: 'FIFO (First In, First Out)', definition: 'Rotate stock so the oldest items are used first. Prevents indefinite shelf storage — critical for maintaining event-related sterility over time.' },
+        { term: 'Loaner Instrument Protocol', definition: 'Loaner instruments must be decontaminated before first use — regardless of how they were packaged or shipped. This is non-negotiable and heavily tested on the exam.' },
+        { term: 'Recall Procedure', definition: 'When a sterilization failure is confirmed, quarantine and recall all items processed since the last passing BI. Notify affected parties and document the full response.' },
+        { term: 'Regulatory Standards Hierarchy', definition: 'OSHA (legally enforceable) > CDC guidelines > AAMI standards > AORN recommendations > facility policy. Know which is law versus best practice versus guidance.' },
+        { term: 'Sterile Storage Conditions', definition: 'Temperature 65–75°F, humidity 35–70%, positive air pressure, away from floor/walls/ceilings. Solid shelving preferred over wire in high-dust areas.' },
+      ],
+      focusTip: 'Loaner instruments appear on nearly every CRCST exam. The answer is always the same: decontaminate on arrival regardless of packaging. Never assume a loaner is ready to use.',
+    },
   },
 ]
 

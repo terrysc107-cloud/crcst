@@ -88,7 +88,7 @@ export default function DashboardPage() {
       if (data) setEarnedCerts(data)
 
       const [xpRes, badgeRes, levelsRes] = await Promise.all([
-        supabase.from('user_xp').select('total_xp').eq('user_id', user.id).single(),
+        supabase.from('user_xp').select('total_xp').eq('user_id', user.id).maybeSingle(),
         supabase.from('progression_badges').select('badge_id').eq('user_id', user.id),
         supabase.from('user_levels').select('status').eq('user_id', user.id),
       ])

@@ -196,3 +196,94 @@ export interface XpBreakdown {
   precision: number
   total: number
 }
+
+// ─── Badge Locker ─────────────────────────────────────────────────────────────
+
+export interface ProgressionBadge {
+  id: string
+  name: string
+  description: string
+  icon: string           // emoji or short symbol
+  color: string          // accent color when earned
+  triggerLabel: string   // shown when locked
+}
+
+export const PROGRESSION_BADGES: ProgressionBadge[] = [
+  {
+    id: 'domain-foundation',
+    name: 'Foundation',
+    description: 'Passed Level 1 — Safety, Microbiology & SPD Overview.',
+    icon: '🏛',
+    color: '#14BDAC',
+    triggerLabel: 'Pass Level 1',
+  },
+  {
+    id: 'domain-contamination-control',
+    name: 'Contamination Control',
+    description: 'Passed Level 2 — Decontamination & Infection Prevention.',
+    icon: '🧪',
+    color: '#14BDAC',
+    triggerLabel: 'Pass Level 2',
+  },
+  {
+    id: 'domain-processing-workflow',
+    name: 'Processing Workflow',
+    description: 'Passed Level 3 — Disinfection, Packaging & Instrumentation.',
+    icon: '⚙️',
+    color: '#14BDAC',
+    triggerLabel: 'Pass Level 3',
+  },
+  {
+    id: 'domain-sterilization',
+    name: 'Sterilization',
+    description: 'Passed Level 4 — Sterilization & Equipment.',
+    icon: '🔬',
+    color: '#14BDAC',
+    triggerLabel: 'Pass Level 4',
+  },
+  {
+    id: 'domain-systems-compliance',
+    name: 'Systems & Compliance',
+    description: 'Passed Level 5 — Storage, Quality & Distribution.',
+    icon: '📋',
+    color: '#14BDAC',
+    triggerLabel: 'Pass Level 5',
+  },
+  {
+    id: 'full-circuit',
+    name: 'Full Circuit',
+    description: 'Completed all five progression levels.',
+    icon: '🎯',
+    color: '#DAA520',
+    triggerLabel: 'Complete all 5 levels',
+  },
+  {
+    id: 'precision',
+    name: 'Precision',
+    description: 'Scored 90% or higher on any level.',
+    icon: '⚡',
+    color: '#4a9eff',
+    triggerLabel: 'Score 90%+ on any level',
+  },
+  {
+    id: 'perfect-round',
+    name: 'Perfect Round',
+    description: 'Scored 100% on any level.',
+    icon: '💎',
+    color: '#f472b6',
+    triggerLabel: 'Score 100% on any level',
+  },
+]
+
+// Map level id → domain badge id
+export const LEVEL_BADGE_MAP: Record<number, string> = {
+  1: 'domain-foundation',
+  2: 'domain-contamination-control',
+  3: 'domain-processing-workflow',
+  4: 'domain-sterilization',
+  5: 'domain-systems-compliance',
+}
+
+export function getBadgeById(id: string): ProgressionBadge | undefined {
+  return PROGRESSION_BADGES.find(b => b.id === id)
+}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { PROGRESSION_LEVELS, BONUS_MODULES, getXpTier, getNextXpTier } from '@/lib/progression-config'
+import { PROGRESSION_LEVELS, BONUS_MODULES, PROGRESSION_BADGES, getXpTier, getNextXpTier } from '@/lib/progression-config'
 
 type LevelStatus = 'locked' | 'unlocked' | 'completed'
 
@@ -24,6 +24,7 @@ export default function ProgressionPage() {
   const [bestScores, setBestScores] = useState<Record<number, number | null>>({})
   const [unlockedBonuses, setUnlockedBonuses] = useState<Set<string>>(new Set())
   const [totalXp, setTotalXp] = useState<number>(0)
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [lockedClickMessage, setLockedClickMessage] = useState<Record<number, boolean>>({})
 
@@ -84,6 +85,16 @@ export default function ProgressionPage() {
         .single()
 
       if (xpData) setTotalXp(xpData.total_xp ?? 0)
+
+      // Fetch earned progression badges
+      const { data: badgeData } = await supabase
+        .from('progression_badges')
+        .select('badge_id')
+        .eq('user_id', user.id)
+
+      if (badgeData) {
+        setEarnedBadgeIds(new Set(badgeData.map((b: { badge_id: string }) => b.badge_id)))
+      }
 
       setLoading(false)
     }
@@ -679,6 +690,85 @@ export default function ProgressionPage() {
                       </Link>
                     )}
                   </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Badge Locker */}
+      <div style={{ maxWidth: 768, margin: '0 auto', padding: '0 1.5rem 2.5rem' }}>
+        <div
+          style={{
+            fontSize: '0.68rem',
+            letterSpacing: '0.12em',
+            color: 'rgba(13,27,42,0.45)',
+            textTransform: 'uppercase',
+            marginBottom: '1.25rem',
+            fontFamily: 'monospace',
+          }}
+        >
+          Badge Locker
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+          gap: '0.85rem',
+        }}>
+          {PROGRESSION_BADGES.map((badge) => {
+            const earned = earnedBadgeIds.has(badge.id)
+            return (
+              <div
+                key={badge.id}
+                style={{
+                  background: '#fff',
+                  borderRadius: 14,
+                  padding: '1.1rem 1rem',
+                  textAlign: 'center',
+                  border: earned
+                    ? `2px solid ${badge.color}60`
+                    : '1px solid rgba(13,27,42,0.09)',
+                  boxShadow: earned
+                    ? `0 0 0 4px ${badge.color}12`
+                    : '0 1px 4px rgba(0,0,0,0.04)',
+                  opacity: earned ? 1 : 0.5,
+                  filter: earned ? 'none' : 'grayscale(1)',
+                  transition: 'box-shadow 0.2s',
+                }}
+              >
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: earned ? `${badge.color}18` : 'rgba(13,27,42,0.06)',
+                  border: earned ? `1px solid ${badge.color}50` : '1px solid rgba(13,27,42,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.4rem',
+                  margin: '0 auto 0.6rem',
+                }}>
+                  {badge.icon}
+                </div>
+                <div style={{
+                  fontFamily: 'serif',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  color: earned ? '#0D1B2A' : 'rgba(13,27,42,0.5)',
+                  marginBottom: '0.3rem',
+                  lineHeight: 1.3,
+                }}>
+                  {badge.name}
+                </div>
+                <div style={{
+                  fontSize: '0.68rem',
+                  fontFamily: 'monospace',
+                  color: earned ? badge.color : 'rgba(13,27,42,0.35)',
+                  letterSpacing: '0.03em',
+                }}>
+                  {earned ? 'Earned' : badge.triggerLabel}
                 </div>
               </div>
             )

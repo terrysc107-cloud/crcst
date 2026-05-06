@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { QUESTIONS } from '@/lib/questions'
-import { PROGRESSION_LEVELS, XP_RULES, XpBreakdown } from '@/lib/progression-config'
+import { PROGRESSION_LEVELS, XP_RULES, XpBreakdown, LEVEL_BADGE_MAP } from '@/lib/progression-config'
 
 export async function POST(req: NextRequest) {
   // Lazy-initialize clients inside handler so env vars are available at runtime
@@ -204,6 +204,37 @@ export async function POST(req: NextRequest) {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id' })
 
+  // ─── Badge Awarding ───────────────────────────────────────────────────────
+
+  const badgesEarned: string[] = []
+
+  async function awardBadge(badgeId: string) {
+    const { error } = await supabaseAdmin
+      .from('progression_badges')
+      .upsert({ user_id: user.id, badge_id: badgeId }, { onConflict: 'user_id,badge_id', ignoreDuplicates: true })
+    if (!error) badgesEarned.push(badgeId)
+  }
+
+  if (passed) {
+    // Domain Mastered badge for this level
+    const domainBadge = LEVEL_BADGE_MAP[levelId]
+    if (domainBadge) await awardBadge(domainBadge)
+
+    // Full Circuit — all 5 levels completed
+    const { data: completedLevels } = await supabaseAdmin
+      .from('user_levels')
+      .select('level_id')
+      .eq('user_id', user.id)
+      .eq('status', 'completed')
+    if ((completedLevels?.length ?? 0) >= 5) await awardBadge('full-circuit')
+
+    // Precision — 90%+ on any level
+    if (score >= 90) await awardBadge('precision')
+
+    // Perfect Round — 100%
+    if (score === 100) await awardBadge('perfect-round')
+  }
+
   return NextResponse.json({
     passed,
     score,
@@ -214,5 +245,6 @@ export async function POST(req: NextRequest) {
     nextLevelUnlocked: passed && levelId < 5 ? levelId + 1 : null,
     xpBreakdown,
     totalXp: newTotal,
+    badgesEarned,
   })
 }

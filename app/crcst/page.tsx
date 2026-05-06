@@ -387,6 +387,16 @@ export default function Home() {
     setScreen('quiz')
   }
 
+  // Auto-start a custom quiz for a specific domain when ?domain= is in the URL
+  useEffect(() => {
+    if (screen !== 'home' || !user) return
+    const domain = new URLSearchParams(window.location.search).get('domain')
+    if (!domain) return
+    window.history.replaceState({}, '', window.location.pathname)
+    startQuiz('custom', [domain])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, user])
+
   const handleQuizComplete = (quizResults: any) => {
     setResults(quizResults)
     setScreen('results')

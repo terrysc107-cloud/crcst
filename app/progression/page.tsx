@@ -654,7 +654,7 @@ export default function ProgressionPage() {
                       </div>
                     </div>
                     <Link
-                      href="/crcst"
+                      href={`/crcst?domain=${encodeURIComponent(spot.name)}`}
                       style={{
                         flexShrink: 0,
                         fontSize: '0.75rem',

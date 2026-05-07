@@ -10,8 +10,8 @@ import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant
 import { getXpTier } from '@/lib/progression-config'
 import { useSubscription } from '@/hooks/useSubscription'
 
-type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom'
-type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom'
+type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'homework'
+type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom' | 'quiz' | 'test' | 'homework'
 
 interface QuizData {
   questions: Question[]
@@ -386,7 +386,10 @@ export default function Home() {
     // Select number of questions based on mode
     let selected = questions
     if (quizMode === 'practice') selected = questions.slice(0, 20)
+    if (quizMode === 'homework') selected = questions.slice(0, 20)
+    if (quizMode === 'quiz') selected = questions.slice(0, 25)
     if (quizMode === 'mock') selected = questions.slice(0, 50)
+    if (quizMode === 'test') selected = questions.slice(0, 100)
     if (quizMode === 'flashcards') selected = questions.slice(0, 25)
     if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
 
@@ -470,6 +473,21 @@ export default function Home() {
           results={results}
           onRetry={() => startQuiz(mode, selectedDomains, difficulty)}
           onHome={handleReturnHome}
+        />
+      </div>
+    )
+  }
+
+  // Homework Builder Screen
+  if (screen === 'homework') {
+    return (
+      <div className="min-h-screen bg-cream">
+        <Header user={user} streak={streak} />
+        <HomeworkBuilder
+          domains={getDomains()}
+          domainMastery={domainMastery}
+          onStart={(domain) => startQuiz('homework', [domain])}
+          onBack={handleReturnHome}
         />
       </div>
     )
@@ -673,41 +691,51 @@ export default function Home() {
           <div className="text-xs tracking-widest text-text-3 mb-4">
             CHOOSE A STUDY MODE
           </div>
-          <div className="grid grid-cols-2 gap-3 mb-8">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             {[
               {
                 icon: '📚',
-                name: 'Practice Quiz',
-                desc: '20 questions with instant feedback',
+                name: 'Practice',
+                desc: '20 questions · instant feedback',
                 mode: 'practice' as QuizMode,
+              },
+              {
+                icon: '📝',
+                name: 'Homework',
+                desc: 'Study by chapter',
+                mode: 'homework' as QuizMode,
               },
               {
                 icon: '⚡',
                 name: 'Flashcards',
-                desc: 'Flip through 25 cards',
+                desc: '25 flip cards',
                 mode: 'flashcards' as QuizMode,
+              },
+              {
+                icon: '🏆',
+                name: 'Quiz',
+                desc: '25 questions · 30 min',
+                mode: 'quiz' as QuizMode,
               },
               {
                 icon: '🎯',
                 name: 'Mock Exam',
-                desc: 'Timed 50-question simulation',
+                desc: '50 questions · 50 min',
                 mode: 'mock' as QuizMode,
               },
               {
-                icon: '⚙️',
-                name: 'Custom Quiz',
-                desc: 'Build your own quiz',
-                mode: 'custom' as QuizMode,
+                icon: '📋',
+                name: 'Full Test',
+                desc: '100 questions · 2.5 hr',
+                mode: 'test' as QuizMode,
               },
             ].map(({ icon, name, desc, mode: m }) => (
               <button
                 key={m}
                 onClick={() => {
-                  if (m === 'custom') {
-                    setScreen('custom')
-                  } else {
-                    startQuiz(m)
-                  }
+                  if (m === 'custom') setScreen('custom')
+                  else if (m === 'homework') setScreen('homework')
+                  else startQuiz(m)
                 }}
                 className="bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-teal hover:shadow-lg transition text-left"
               >
@@ -717,6 +745,16 @@ export default function Home() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setScreen('custom')}
+            className="w-full bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-teal hover:shadow-lg transition text-left mb-8 flex items-center gap-3"
+          >
+            <span className="text-2xl">⚙️</span>
+            <div>
+              <div className="font-serif text-navy font-bold text-sm">Custom Quiz</div>
+              <div className="text-xs text-text-3">Build your own · pick domains & difficulty</div>
+            </div>
+          </button>
 
           {/* Resume Quiz Section */}
           {pausedSessions && pausedSessions.length > 0 && (
@@ -1148,6 +1186,73 @@ function CustomQuizBuilder({
       >
         START CUSTOM QUIZ
       </button>
+    </div>
+  )
+}
+
+// Homework Builder Component
+function HomeworkBuilder({
+  domains,
+  domainMastery,
+  onStart,
+  onBack,
+}: {
+  domains: string[]
+  domainMastery: Record<string, { correct: number; total: number }>
+  onStart: (domain: string) => void
+  onBack: () => void
+}) {
+  return (
+    <div className="max-w-2xl mx-auto px-6 py-8">
+      <button
+        onClick={onBack}
+        className="text-teal text-sm mb-6 hover:text-teal-2 transition"
+      >
+        ← Back to Home
+      </button>
+
+      <h2 className="font-serif text-2xl text-navy mb-2">Homework</h2>
+      <p className="text-sm text-text-3 mb-8">
+        Pick a chapter to study. You&apos;ll get 20 questions with instant feedback and explanations.
+      </p>
+
+      <div className="grid grid-cols-1 gap-3">
+        {domains.map((domain) => {
+          const mastery = domainMastery[domain]
+          const pct = mastery && mastery.total > 0 ? Math.round((mastery.correct / mastery.total) * 100) : null
+          return (
+            <button
+              key={domain}
+              onClick={() => onStart(domain)}
+              className="bg-white border-2 border-cream-2 rounded-lg p-4 hover:border-teal hover:shadow-md transition text-left flex items-center justify-between"
+            >
+              <div>
+                <div className="font-serif text-navy font-bold text-sm">{domain}</div>
+                {mastery && mastery.total > 0 ? (
+                  <div className="text-xs text-text-3 mt-1">{mastery.total} attempted</div>
+                ) : (
+                  <div className="text-xs text-text-3 mt-1">Not yet studied</div>
+                )}
+              </div>
+              {pct !== null ? (
+                <div className="flex items-center gap-3 ml-4">
+                  <div className="w-20 h-1.5 bg-cream-2 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${pct >= 70 ? 'bg-correct' : pct >= 40 ? 'bg-amber' : 'bg-teal'}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className={`text-xs font-mono font-bold ${pct >= 70 ? 'text-correct' : pct >= 40 ? 'text-amber' : 'text-teal'}`}>
+                    {pct}%
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs font-mono text-text-3 ml-4">Start →</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

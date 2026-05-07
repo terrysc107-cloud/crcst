@@ -18,8 +18,6 @@ export async function POST(request: NextRequest) {
     const { error: tableError } = await supabase.from('quiz_sessions').select('id').limit(1)
 
     if (tableError && tableError.message.includes('does not exist')) {
-      console.log('[v0] Creating quiz_sessions table')
-
       // Use raw SQL through Supabase
       const sqlStatements = `
         CREATE TABLE IF NOT EXISTS public.quiz_sessions (

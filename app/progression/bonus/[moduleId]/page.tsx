@@ -3,8 +3,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { BONUS_MODULES, PROGRESSION_LEVELS, getBonusById } from '@/lib/progression-config'
+import { getBonusById } from '@/lib/progression-config'
 import { QUESTIONS, type Question } from '@/lib/questions'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/typography'
+import { cn } from '@/lib/utils'
 
 export default function BonusModulePage() {
   const router = useRouter()
@@ -14,11 +17,10 @@ export default function BonusModulePage() {
   const [loading, setLoading] = useState(true)
   const [hasAccess, setHasAccess] = useState(false)
 
-  // Speed round state
   const [speedQuestions, setSpeedQuestions] = useState<Question[]>([])
   const [speedIndex, setSpeedIndex] = useState(0)
   const [speedAnswers, setSpeedAnswers] = useState<Record<string, number>>({})
-  const [timeLeft, setTimeLeft] = useState(240) // 4 minutes
+  const [timeLeft, setTimeLeft] = useState(240)
   const [speedStarted, setSpeedStarted] = useState(false)
   const [speedDone, setSpeedDone] = useState(false)
   const [speedScore, setSpeedScore] = useState(0)
@@ -42,7 +44,6 @@ export default function BonusModulePage() {
 
   useEffect(() => { checkAccess() }, [checkAccess])
 
-  // Speed round timer
   useEffect(() => {
     if (!speedStarted || speedDone) return
     if (timeLeft <= 0) { finishSpeedRound(); return }
@@ -51,7 +52,6 @@ export default function BonusModulePage() {
   }, [speedStarted, speedDone, timeLeft])
 
   function startSpeedRound() {
-    // Pull 15 questions across all domains
     const pool = [...QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 15)
     setSpeedQuestions(pool)
     setSpeedStarted(true)
@@ -83,10 +83,15 @@ export default function BonusModulePage() {
 
   if (!module) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D1B2A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '1rem' }}>Module not found</div>
-          <button onClick={() => router.push('/progression')} style={{ color: '#14BDAC', background: 'none', border: 'none', cursor: 'pointer' }}>← Back to Progression</button>
+      <div className="min-h-screen bg-navy text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-white/40 mb-4">Module not found</div>
+          <button
+            onClick={() => router.push('/progression')}
+            className="text-teal bg-transparent border-none cursor-pointer"
+          >
+            ← Back to Progression
+          </button>
         </div>
       </div>
     )
@@ -94,42 +99,46 @@ export default function BonusModulePage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D1B2A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '3px solid rgba(20,189,172,0.3)', borderTopColor: '#14BDAC', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div className="min-h-screen bg-navy flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-[3px] border-teal/30 border-t-teal animate-spin" />
       </div>
     )
   }
 
   if (!hasAccess) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D1B2A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div style={{ textAlign: 'center', maxWidth: 420 }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-          <h1 style={{ fontFamily: 'serif', fontSize: '1.5rem', marginBottom: '0.75rem' }}>{module.title}</h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1.5rem', lineHeight: 1.6 }}>{module.lockedLabel}</p>
-          <button onClick={() => router.push('/progression')} style={{ background: 'linear-gradient(135deg,#0D7377,#14BDAC)', color: '#fff', padding: '0.75rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+      <div className="min-h-screen bg-navy text-white flex items-center justify-center p-8">
+        <div className="text-center max-w-[420px]">
+          <div className="text-5xl mb-4">🔒</div>
+          <h1 className="font-serif text-2xl mb-3">{module.title}</h1>
+          <p className="text-white/50 mb-6 leading-relaxed">{module.lockedLabel}</p>
+          <Button variant="gradient" onClick={() => router.push('/progression')}>
             Return to Progression
-          </button>
+          </Button>
         </div>
       </div>
     )
   }
 
-  // Speed round module
   if (moduleId === 'speed-round') {
     if (!speedStarted) {
       return (
-        <div style={{ minHeight: '100vh', background: '#0D1B2A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div style={{ textAlign: 'center', maxWidth: 480 }}>
-            <div style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#14BDAC', fontFamily: 'monospace', marginBottom: '1rem' }}>BONUS MODULE</div>
-            <h1 style={{ fontFamily: 'serif', fontSize: '2rem', marginBottom: '0.75rem' }}>Speed Round Challenge</h1>
-            <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>{module.earnedMessage}</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginBottom: '2rem' }}>15 questions · 4 minutes · no pause</p>
-            <button onClick={startSpeedRound} style={{ background: 'linear-gradient(135deg,#0D7377,#14BDAC)', color: '#fff', padding: '0.875rem 2rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}>
+        <div className="min-h-screen bg-navy text-white flex items-center justify-center p-8">
+          <div className="text-center max-w-[480px]">
+            <Label color="teal" className="mb-4">Bonus Module</Label>
+            <h1 className="font-serif text-[2rem] mb-3">Speed Round Challenge</h1>
+            <p className="text-white/60 mb-2">{module.earnedMessage}</p>
+            <p className="text-white/40 text-[0.85rem] mb-8">15 questions · 4 minutes · no pause</p>
+            <Button variant="gradient" size="lg" onClick={startSpeedRound}>
               Start Speed Round
-            </button>
-            <div style={{ marginTop: '1rem' }}>
-              <button onClick={() => router.push('/progression')} style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}>← Back</button>
+            </Button>
+            <div className="mt-4">
+              <button
+                onClick={() => router.push('/progression')}
+                className="text-white/35 bg-transparent border-none cursor-pointer text-[0.85rem]"
+              >
+                ← Back
+              </button>
             </div>
           </div>
         </div>
@@ -138,21 +147,37 @@ export default function BonusModulePage() {
 
     if (speedDone) {
       return (
-        <div style={{ minHeight: '100vh', background: '#0D1B2A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div style={{ textAlign: 'center', maxWidth: 480 }}>
-            <div style={{ fontFamily: 'serif', fontSize: '4rem', color: speedScore >= 80 ? '#14BDAC' : '#DAA520', marginBottom: '0.5rem' }}>{speedScore}%</div>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', marginBottom: '2rem' }}>
-              {speedScore >= 80 ? 'Impressive — you know this material fast.' : 'Speed revealed a gap. Use it as a guide.'}
+        <div className="min-h-screen bg-navy text-white flex items-center justify-center p-8">
+          <div className="text-center max-w-[480px]">
+            <div
+              className={cn('font-serif text-[4rem] mb-2', speedScore >= 80 ? 'text-teal' : 'text-amber')}
+            >
+              {speedScore}%
             </div>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => { setSpeedStarted(false); setSpeedDone(false); setSpeedAnswers({}); setSpeedIndex(0) }}
-                style={{ background: 'linear-gradient(135deg,#0D7377,#14BDAC)', color: '#fff', padding: '0.75rem 1.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            <div className="text-[0.9rem] text-white/50 mb-8">
+              {speedScore >= 80
+                ? 'Impressive — you know this material fast.'
+                : 'Speed revealed a gap. Use it as a guide.'}
+            </div>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <Button
+                variant="gradient"
+                onClick={() => {
+                  setSpeedStarted(false)
+                  setSpeedDone(false)
+                  setSpeedAnswers({})
+                  setSpeedIndex(0)
+                }}
+              >
                 Try Again
-              </button>
-              <button onClick={() => router.push('/progression')}
-                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', padding: '0.75rem 1.5rem', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>
+              </Button>
+              <Button
+                variant="outline"
+                className="border-white/15 text-white/70 hover:bg-white/8"
+                onClick={() => router.push('/progression')}
+              >
                 Return to Dashboard
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -165,28 +190,26 @@ export default function BonusModulePage() {
     const timerColor = timeLeft < 30 ? '#EF4444' : timeLeft < 60 ? '#DAA520' : '#14BDAC'
 
     return (
-      <div style={{ minHeight: '100vh', background: '#0D1B2A', color: '#fff', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.4)' }}>
+      <div className="min-h-screen bg-navy text-white flex flex-col">
+        <div className="px-6 py-4 flex items-center justify-between border-b border-white/[8%]">
+          <div className="text-xs font-mono text-white/40">
             Question {speedIndex + 1} of {speedQuestions.length}
           </div>
-          <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1.1rem', color: timerColor }}>
+          <div className="font-mono font-bold text-[1.1rem]" style={{ color: timerColor }}>
             {mins}:{secs.toString().padStart(2, '0')}
           </div>
         </div>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem' }}>
-          <div style={{ maxWidth: 600, width: '100%' }}>
-            <p style={{ fontSize: '1.15rem', lineHeight: 1.6, marginBottom: '2rem' }}>{q.question}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="flex-1 flex items-center justify-center px-6 py-8">
+          <div className="max-w-[600px] w-full">
+            <p className="text-[1.15rem] leading-relaxed mb-8">{q.question}</p>
+            <div className="flex flex-col gap-3">
               {q.options.map((opt, i) => (
-                <button key={i} onClick={() => answerSpeed(q.id, i)} style={{
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 8, padding: '0.875rem 1rem', color: '#fff', cursor: 'pointer',
-                  textAlign: 'left', fontSize: '0.95rem', transition: 'background 0.15s',
-                }}>
-                  <span style={{ color: '#14BDAC', fontFamily: 'monospace', marginRight: '0.75rem' }}>
-                    {String.fromCharCode(65 + i)}
-                  </span>
+                <button
+                  key={i}
+                  onClick={() => answerSpeed(q.id, i)}
+                  className="bg-white/[5%] border border-white/[12%] rounded-lg px-4 py-[0.875rem] text-white cursor-pointer text-left text-[0.95rem] hover:bg-white/[10%] transition-colors"
+                >
+                  <span className="text-teal font-mono mr-3">{String.fromCharCode(65 + i)}</span>
                   {opt}
                 </button>
               ))}
@@ -199,38 +222,43 @@ export default function BonusModulePage() {
 
   // Content modules (real-case-breakdown, critical-mistakes-vault)
   return (
-    <div style={{ minHeight: '100vh', background: '#0D1B2A', color: '#fff' }}>
-      <header style={{ background: '#0D1B2A', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button onClick={() => router.push('/progression')} style={{ color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+    <div className="min-h-screen bg-navy text-white">
+      <header className="border-b border-white/[8%] px-6 py-4 flex items-center gap-4">
+        <button
+          onClick={() => router.push('/progression')}
+          className="text-white/50 bg-transparent border-none cursor-pointer text-[0.85rem] flex items-center gap-[0.4rem] hover:text-white/80 transition-colors"
+        >
           ← Progression
         </button>
-        <div style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#14BDAC', fontFamily: 'monospace' }}>BONUS MODULE</div>
+        <Label color="teal">Bonus Module</Label>
       </header>
 
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '3rem 1.5rem' }}>
-        <div style={{ marginBottom: '0.5rem', fontSize: '0.7rem', letterSpacing: '0.12em', color: '#DAA520', fontFamily: 'monospace' }}>EARNED</div>
-        <h1 style={{ fontFamily: 'serif', fontSize: '2rem', marginBottom: '0.75rem' }}>{module.title}</h1>
-        <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem', lineHeight: 1.6, fontStyle: 'italic' }}>{module.earnedMessage}</p>
-        <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '2rem 0' }} />
+      <div className="max-w-[720px] mx-auto px-6 py-12">
+        <Label color="amber" className="mb-2">Earned</Label>
+        <h1 className="font-serif text-[2rem] mb-3">{module.title}</h1>
+        <p className="text-white/50 mb-2 leading-relaxed italic">{module.earnedMessage}</p>
+        <hr className="border-0 border-t border-white/10 my-8" />
 
-        {/* Render markdown-lite content */}
-        <div style={{ lineHeight: 1.8 }}>
+        <div className="leading-relaxed">
           {module.content.split('\n').map((line, i) => {
-            if (line.startsWith('## ')) return <h2 key={i} style={{ fontFamily: 'serif', fontSize: '1.3rem', color: '#14BDAC', margin: '2rem 0 0.75rem' }}>{line.slice(3)}</h2>
-            if (line.startsWith('### ')) return <h3 key={i} style={{ fontFamily: 'serif', fontSize: '1.1rem', color: '#DAA520', margin: '1.5rem 0 0.5rem' }}>{line.slice(4)}</h3>
-            if (line.startsWith('**') && line.endsWith('**')) return <p key={i} style={{ fontWeight: 700, color: 'rgba(255,255,255,0.9)', margin: '0.75rem 0' }}>{line.slice(2, -2)}</p>
-            if (line.trim() === '') return <div key={i} style={{ height: '0.5rem' }} />
-            if (line.startsWith('1. ') || line.startsWith('2. ') || line.startsWith('3. ')) {
-              return <p key={i} style={{ color: 'rgba(255,255,255,0.75)', paddingLeft: '1.5rem', margin: '0.35rem 0' }}>{line}</p>
-            }
-            return <p key={i} style={{ color: 'rgba(255,255,255,0.75)', margin: '0.35rem 0' }}>{line}</p>
+            if (line.startsWith('## '))
+              return <h2 key={i} className="font-serif text-[1.3rem] text-teal mt-8 mb-3">{line.slice(3)}</h2>
+            if (line.startsWith('### '))
+              return <h3 key={i} className="font-serif text-[1.1rem] text-amber mt-6 mb-2">{line.slice(4)}</h3>
+            if (line.startsWith('**') && line.endsWith('**'))
+              return <p key={i} className="font-bold text-white/90 my-3">{line.slice(2, -2)}</p>
+            if (line.trim() === '')
+              return <div key={i} className="h-2" />
+            if (line.startsWith('1. ') || line.startsWith('2. ') || line.startsWith('3. '))
+              return <p key={i} className="text-white/75 pl-6 my-[0.35rem]">{line}</p>
+            return <p key={i} className="text-white/75 my-[0.35rem]">{line}</p>
           })}
         </div>
 
-        <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <button onClick={() => router.push('/progression')} style={{ background: 'linear-gradient(135deg,#0D7377,#14BDAC)', color: '#fff', padding: '0.875rem 1.75rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+        <div className="mt-12 pt-8 border-t border-white/10">
+          <Button variant="gradient" size="lg" onClick={() => router.push('/progression')}>
             Return to Progression Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

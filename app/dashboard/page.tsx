@@ -6,14 +6,15 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
 import { getXpTier } from '@/lib/progression-config'
-import { BookOpen, Layers, Clock, Sliders, FileText } from 'lucide-react'
+import { BookOpen, Layers, Clock, Sliders, FileText, LockOpen, ChevronRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Certification {
   id: string
   name: string
   fullName: string
   description: string
-  questionCount: number
   color: string
   bgGradient: string
   href: string
@@ -25,7 +26,6 @@ const certifications: Certification[] = [
     name: 'CRCST',
     fullName: 'Certified Registered Central Service Technician',
     description: 'Master sterile processing fundamentals, decontamination, sterilization, and instrument handling',
-    questionCount: 400,
     color: 'text-teal',
     bgGradient: 'from-teal to-teal-2',
     href: '/crcst',
@@ -35,7 +35,6 @@ const certifications: Certification[] = [
     name: 'CHL',
     fullName: 'Certified Healthcare Leader',
     description: 'Master leadership, management, communication, and human resources in sterile processing',
-    questionCount: 240,
     color: 'text-amber',
     bgGradient: 'from-amber to-yellow-500',
     href: '/chl',
@@ -45,7 +44,6 @@ const certifications: Certification[] = [
     name: 'CER',
     fullName: 'Certified Endoscope Reprocessor',
     description: 'Master endoscope anatomy, reprocessing procedures, microbiology, and quality assurance',
-    questionCount: 147,
     color: 'text-blue-500',
     bgGradient: 'from-blue-500 to-blue-600',
     href: '/cer',
@@ -56,18 +54,18 @@ const totalQuestions = 400 + 240 + 147
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [earnedCerts, setEarnedCerts] = useState<{cert: string}[]>([])
+  const [earnedCerts, setEarnedCerts] = useState<{ cert: string }[]>([])
   const [progXp, setProgXp] = useState<number>(0)
   const [progBadgeCount, setProgBadgeCount] = useState<number>(0)
   const [progLevelsCompleted, setProgLevelsCompleted] = useState<number>(0)
   const [progLoaded, setProgLoaded] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const sub = useSubscription()
 
   useEffect(() => {
     async function loadCerts() {
       const { data: { session } } = await supabase.auth.getSession()
 
-      // Redirect to sign-in if not authenticated
       if (!session?.user) {
         router.push('/crcst')
         return
@@ -75,7 +73,6 @@ export default function DashboardPage() {
 
       const user = session.user
 
-      // Redirect new users to onboarding if they haven't completed it
       const onboardingDone = localStorage.getItem(`onboarding_complete_${user.id}`)
       if (!onboardingDone) {
         router.push('/onboarding')
@@ -83,10 +80,10 @@ export default function DashboardPage() {
       }
 
       const { data } = await supabase
-        .from("certified_users")
-        .select("cert")
-        .eq("user_id", user.id)
-        .order("claimed_at", { ascending: true })
+        .from('certified_users')
+        .select('cert')
+        .eq('user_id', user.id)
+        .order('claimed_at', { ascending: true })
       if (data) setEarnedCerts(data)
 
       const [xpRes, badgeRes, levelsRes] = await Promise.all([
@@ -100,43 +97,35 @@ export default function DashboardPage() {
         levelsRes.data?.filter((l: { status: string }) => l.status === 'completed').length ?? 0
       )
       setProgLoaded(true)
+      setPageLoading(false)
     }
     loadCerts()
   }, [router])
 
   const tier = getXpTier(progXp)
 
+  const planVariant = sub.plan === 'triple_crown' ? 'triple-crown' : sub.plan === 'pro' ? 'pro' : 'free'
+  const planLabel = sub.plan === 'triple_crown' ? 'Triple Crown' : sub.plan === 'pro' ? 'Pro' : 'Free'
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
-      <header className="bg-navy text-white px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal rounded-lg flex items-center justify-center font-serif text-xl font-bold">
+      <header className="bg-navy text-white px-4 sm:px-6 py-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 bg-teal rounded-lg flex items-center justify-center font-serif text-xl font-bold flex-shrink-0">
               SP
             </div>
-            <div>
-              <div className="font-serif text-lg font-bold">SPD Cert Companion</div>
-              <div className="text-xs text-teal-3">Sterile Processing Certification Prep</div>
+            <div className="min-w-0">
+              <div className="font-serif text-lg font-bold truncate">SPD Cert Companion</div>
+              <div className="text-xs text-teal-3 hidden sm:block">Sterile Processing Certification Prep</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {!sub.loading && (
-              <span style={{
-                fontSize: '0.75rem',
-                padding: '0.25rem 0.7rem',
-                borderRadius: '100px',
-                background: sub.plan === 'triple_crown' ? 'rgba(218,165,32,0.2)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.2)' : 'rgba(255,255,255,0.08)',
-                color: sub.plan === 'triple_crown' ? '#DAA520' : sub.plan === 'pro' ? '#14BDAC' : 'rgba(255,255,255,0.5)',
-                border: `1px solid ${sub.plan === 'triple_crown' ? 'rgba(218,165,32,0.4)' : sub.plan === 'pro' ? 'rgba(20,189,172,0.4)' : 'rgba(255,255,255,0.15)'}`,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase' as const,
-              }}>
-                {sub.plan === 'triple_crown' ? 'Triple Crown' : sub.plan === 'pro' ? 'Pro' : 'Free'}
-              </span>
+              <Badge variant={planVariant}>{planLabel}</Badge>
             )}
-            <Link href="/account" style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>
+            <Link href="/account" className="text-sm text-white/50 hover:text-white transition-colors">
               Account
             </Link>
           </div>
@@ -144,22 +133,20 @@ export default function DashboardPage() {
       </header>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-navy to-navy-2 text-white px-6 py-16">
+      <div className="bg-gradient-to-b from-navy to-navy-2 text-white px-4 sm:px-6 py-12 sm:py-16">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="text-xs tracking-widest text-teal-3 mb-4">
-            STERILE PROCESSING DEPARTMENT
-          </div>
+          <p className="text-xs tracking-widest text-teal-3 mb-4 uppercase">
+            Sterile Processing Department
+          </p>
           <h1 className="font-serif text-4xl md:text-5xl mb-4 text-balance">
             Pass your <em className="text-amber">certification exam</em> with confidence.
           </h1>
-          <p className="text-teal-3 max-w-xl mx-auto mb-8">
+          <p className="text-teal-3 max-w-xl mx-auto mb-8 text-sm sm:text-base">
             Comprehensive question banks, practice quizzes, and mock exams for CRCST, CHL, and CER certifications.
           </p>
           <div className="flex justify-center gap-8 text-center">
             <div>
-              <div className="font-serif text-3xl text-amber">
-                {totalQuestions}+
-              </div>
+              <div className="font-serif text-3xl text-amber">{totalQuestions}+</div>
               <div className="text-xs text-teal-3 uppercase tracking-wider">Questions</div>
             </div>
             <div>
@@ -174,281 +161,190 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Certification Cards */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      {/* Main content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+
         {/* Earned Certifications */}
         {earnedCerts.length > 0 && (
-          <div style={{
-            background: "rgba(20,189,172,0.06)",
-            border: "1px solid rgba(20,189,172,0.2)",
-            borderRadius: "12px",
-            padding: "1rem 1.25rem",
-            marginBottom: "1rem",
-          }}>
-            <p style={{
-              color: "#14BDAC",
-              fontSize: "0.68rem",
-              letterSpacing: "0.1em",
-              fontFamily: "monospace",
-              marginBottom: "0.6rem",
-            }}>
-              YOUR CERTIFICATIONS
+          <div className="bg-teal/6 border border-teal/20 rounded-xl px-5 py-4 mb-4">
+            <p className="font-mono text-teal text-[0.68rem] tracking-[0.1em] uppercase mb-2.5">
+              Your Certifications
             </p>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div className="flex gap-2 flex-wrap">
               {earnedCerts.map((c, i) => (
-                <span key={i} style={{
-                  background: "rgba(20,189,172,0.12)",
-                  border: "1px solid #14BDAC",
-                  borderRadius: "100px",
-                  padding: "0.25rem 0.75rem",
-                  color: "#14BDAC",
-                  fontSize: "0.82rem",
-                  fontWeight: "700",
-                  fontFamily: "monospace",
-                }}>
-                  {c.cert} ✓
-                </span>
+                <Badge key={i} variant="teal">{c.cert} ✓</Badge>
               ))}
             </div>
           </div>
         )}
 
         {/* I Passed Button */}
-        <Link href="/passed">
-          <button
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.6rem",
-              padding: "0.85rem 1.4rem",
-              borderRadius: "12px",
-              border: "2px solid #DAA520",
-              background: "rgba(218,165,32,0.08)",
-              color: "#DAA520",
-              fontSize: "0.95rem",
-              fontWeight: "700",
-              cursor: "pointer",
-              fontFamily: "monospace",
-              letterSpacing: "0.02em",
-              width: "100%",
-              marginBottom: "1.5rem",
-              justifyContent: "center",
-            }}
-          >
-            I Passed My Exam - Claim Your Badge
-          </button>
+        <Link
+          href="/passed"
+          className="flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-xl border-2 border-amber bg-amber/8 text-amber font-mono font-bold tracking-wide hover:bg-amber/15 transition-colors mb-6"
+        >
+          I Passed My Exam — Claim Your Badge
         </Link>
 
-        {/* Free tier usage + upgrade prompt */}
+        {/* Free tier usage */}
         {!sub.loading && sub.plan === 'free' && (
-          <div style={{
-            background: 'rgba(20,189,172,0.04)',
-            border: '1px solid rgba(20,189,172,0.2)',
-            borderRadius: 12,
-            padding: '1rem 1.25rem',
-            marginBottom: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-          }}>
+          <div className="flex items-center justify-between flex-wrap gap-3 bg-teal/4 border border-teal/20 rounded-xl px-5 py-4 mb-5">
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
-                FREE TIER — HOURLY USAGE
-              </div>
-              <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <p className="font-mono text-teal text-[0.72rem] tracking-[0.1em] uppercase mb-1">
+                Free Tier — Hourly Usage
+              </p>
+              <p className="text-sm text-text-2 flex gap-5 flex-wrap">
                 <span>Questions: <strong>{sub.usage?.questionsThisHour ?? 0} / {sub.usage?.questionsLimit ?? 20}</strong></span>
                 <span>AI Chat: <strong>{sub.usage?.aiChatsToday ?? 0} / {sub.usage?.aiChatsLimit ?? 5}</strong></span>
-              </div>
+              </p>
             </div>
-            <Link 
+            <Link
               href="/pricing"
-              style={{
-                background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-                color: '#fff',
-                padding: '0.5rem 1.1rem',
-                borderRadius: 8,
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                whiteSpace: 'nowrap' as const,
-                fontFamily: 'monospace',
-                letterSpacing: '0.04em',
-                textDecoration: 'none',
-              }}
+              className="font-mono text-xs tracking-wide text-white bg-gradient-to-r from-teal-dark to-teal px-4 py-2 rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               Upgrade to Pro — $19
             </Link>
           </div>
         )}
 
-        <div className="text-xs tracking-widest text-text-3 mb-6 text-center">
-          SELECT YOUR CERTIFICATION
-        </div>
-        <div className="grid md:grid-cols-3 gap-6 mb-6">
-          {certifications.map((cert) => {
-            // CHL and CER require Triple Crown access
-            const requiresTripleCrown = cert.id === 'chl' || cert.id === 'cer'
-            const isLocked = requiresTripleCrown && !sub.canAccessCHL
+        <p className="font-mono text-xs tracking-widest text-text-3 mb-6 text-center uppercase">
+          Select Your Certification
+        </p>
 
-            if (isLocked) {
-              return (
-                <div
-                  key={cert.id}
-                  onClick={() => router.push('/pricing')}
-                  className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
-                >
-                  {/* Lock Badge */}
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-amber-600 text-white text-xs font-mono px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 11h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V12z"/>
-                    </svg>
-                    Triple Crown
-                  </div>
-                  {/* Card Header */}
-                  <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white grayscale`}>
-                    <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
-                    <div className="text-sm opacity-90">{cert.fullName}</div>
-                  </div>
-                  {/* Card Body */}
-                  <div className="p-6">
-                    <p className="text-sm text-text-3 mb-4 leading-relaxed">
-                      {cert.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-navy/50">Triple Crown only</span>
-                      <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-text-3" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-                        </svg>
+        {/* Cert cards with skeleton */}
+        {pageLoading ? (
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="bg-white border-2 border-cream-2 rounded-xl overflow-hidden">
+                <Skeleton className="h-28 w-full rounded-none" />
+                <div className="p-6 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
+            {certifications.map((cert) => {
+              const requiresTripleCrown = cert.id === 'chl' || cert.id === 'cer'
+              const isLocked = requiresTripleCrown && !sub.canAccessCHL
+
+              if (isLocked) {
+                return (
+                  <div
+                    key={cert.id}
+                    onClick={() => router.push('/pricing')}
+                    className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
+                  >
+                    <div className="absolute top-3 right-3 z-10">
+                      <Badge variant="triple-crown">Triple Crown</Badge>
+                    </div>
+                    <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white grayscale`}>
+                      <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
+                      <div className="text-sm opacity-90">{cert.fullName}</div>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-sm text-text-3 mb-4 leading-relaxed">{cert.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono text-navy/50">Triple Crown only</span>
+                        <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
+                          <ChevronRight className="w-5 h-5 text-text-3" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            }
+                )
+              }
 
-            return (
-              <Link
-                key={cert.id}
-                href={cert.href}
-                className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-teal hover:shadow-xl transition-all duration-300"
+              return (
+                <Link
+                  key={cert.id}
+                  href={cert.href}
+                  className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-teal hover:shadow-xl transition-all duration-300"
+                >
+                  <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white`}>
+                    <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
+                    <div className="text-sm opacity-90">{cert.fullName}</div>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm text-text-3 mb-4 leading-relaxed">{cert.description}</p>
+                    <div className="flex items-center justify-end">
+                      <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-teal group-hover:text-white transition-colors">
+                        <ChevronRight className="w-5 h-5" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+
+            {/* SJT card */}
+            {sub.isPaid ? (
+              <div
+                onClick={() => router.push('/quiz/scenarios')}
+                className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-amber hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
-                {/* Card Header */}
-                <div className={`bg-gradient-to-r ${cert.bgGradient} p-6 text-white`}>
-                  <div className="font-serif text-3xl font-bold mb-1">{cert.name}</div>
-                  <div className="text-sm opacity-90">{cert.fullName}</div>
+                <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white">
+                  <div className="font-serif text-3xl font-bold mb-1">SJT</div>
+                  <div className="text-sm opacity-90">Situational Judgment</div>
                 </div>
-                {/* Card Body */}
                 <div className="p-6">
                   <p className="text-sm text-text-3 mb-4 leading-relaxed">
-                    {cert.description}
+                    Real-world scenarios. Build decision-making skills beyond the exam.
                   </p>
                   <div className="flex items-center justify-end">
-                    <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-teal group-hover:text-white transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                    <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-amber group-hover:text-white transition-colors">
+                      <ChevronRight className="w-5 h-5" />
                     </div>
                   </div>
                 </div>
-              </Link>
-            )
-          })}
-          {/* Situational Judgment Card */}
-          {sub.isPaid ? (
-            <div
-              onClick={() => router.push("/quiz/scenarios")}
-              className="group bg-white border-2 border-cream-2 rounded-xl overflow-hidden hover:border-amber hover:shadow-xl transition-all duration-300 cursor-pointer"
-            >
-              <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white">
-                <div className="font-serif text-3xl font-bold mb-1">SJT</div>
-                <div className="text-sm opacity-90">Situational Judgment</div>
               </div>
-              <div className="p-6">
-                <p className="text-sm text-text-3 mb-4 leading-relaxed">
-                  Real-world scenarios. Build decision-making skills beyond the exam.
-                </p>
-                <div className="flex items-center justify-end">
-                  <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center group-hover:bg-amber group-hover:text-white transition-colors">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+            ) : (
+              <div
+                onClick={() => router.push('/pricing')}
+                className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
+              >
+                <div className="absolute top-3 right-3 z-10">
+                  <Badge variant="locked">Premium</Badge>
+                </div>
+                <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white grayscale">
+                  <div className="font-serif text-3xl font-bold mb-1">SJT</div>
+                  <div className="text-sm opacity-90">Situational Judgment</div>
+                </div>
+                <div className="p-6">
+                  <p className="text-sm text-text-3 mb-4 leading-relaxed">
+                    Real-world scenarios. Build decision-making skills beyond the exam.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-navy/50">Upgrade to unlock</span>
+                    <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
+                      <ChevronRight className="w-5 h-5 text-text-3" />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div
-              onClick={() => router.push('/pricing')}
-              className="group relative bg-white border-2 border-cream-2 rounded-xl overflow-hidden cursor-pointer opacity-60 hover:opacity-75 transition-all duration-300"
-            >
-              {/* Lock Badge */}
-              <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-navy text-white text-xs font-mono px-2 py-1 rounded-full">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-                </svg>
-                Premium
-              </div>
-              <div className="bg-gradient-to-r from-amber to-yellow-500 p-6 text-white grayscale">
-                <div className="font-serif text-3xl font-bold mb-1">SJT</div>
-                <div className="text-sm opacity-90">Situational Judgment</div>
-              </div>
-              <div className="p-6">
-                <p className="text-sm text-text-3 mb-4 leading-relaxed">
-                  Real-world scenarios. Build decision-making skills beyond the exam.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-navy/50">Upgrade to unlock</span>
-                  <div className="w-10 h-10 rounded-full bg-cream-2 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-text-3" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
-        {/* Progression Widget — live user stats */}
+        {/* Progression Widget */}
         {progLoaded && (
-          <div style={{
-            background: 'rgba(20,189,172,0.04)',
-            border: '1px solid rgba(20,189,172,0.2)',
-            borderRadius: 12,
-            padding: '1rem 1.25rem',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-          }}>
+          <div className="flex items-center justify-between flex-wrap gap-3 bg-teal/4 border border-teal/20 rounded-xl px-5 py-4 mb-3">
             <div>
-              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
-                YOUR PROGRESSION
-              </div>
-              <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-                <span>XP: <strong>{progXp}</strong> &middot; <span style={{ color: tier.color, fontWeight: 600 }}>{tier.label}</span></span>
+              <p className="font-mono text-teal text-[0.72rem] tracking-[0.1em] uppercase mb-1">
+                Your Progression
+              </p>
+              <p className="text-sm text-text-2 flex gap-5 flex-wrap">
+                <span>XP: <strong>{progXp}</strong> · <span className="font-semibold" style={{ color: tier.color }}>{tier.label}</span></span>
                 <span>Badges: <strong>{progBadgeCount}</strong></span>
                 <span>Levels: <strong>{progLevelsCompleted} / 5</strong></span>
-              </div>
+              </p>
             </div>
             <Link
               href="/progression"
-              style={{
-                background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-                color: '#fff',
-                padding: '0.5rem 1.1rem',
-                borderRadius: 8,
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                whiteSpace: 'nowrap' as const,
-                fontFamily: 'monospace',
-                letterSpacing: '0.04em',
-                textDecoration: 'none',
-              }}
+              className="font-mono text-xs tracking-wide text-white bg-gradient-to-r from-teal-dark to-teal px-4 py-2 rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               View Progression →
             </Link>
@@ -456,98 +352,29 @@ export default function DashboardPage() {
         )}
 
         {/* Progression Mode Card */}
-        <div style={{
-          background: '#0B1F3A',
-          border: '1px solid rgba(20,189,172,0.25)',
-          borderLeft: '4px solid #14BDAC',
-          borderRadius: '14px',
-          padding: '1.5rem 1.75rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1.5rem',
-          flexWrap: 'wrap',
-          marginTop: '0.5rem',
-        }}>
-          {/* Left: icon + text */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.1rem', flex: 1, minWidth: 0 }}>
-            {/* Lock/Unlock icon */}
-            <div style={{
-              flexShrink: 0,
-              width: '2.75rem',
-              height: '2.75rem',
-              background: 'rgba(20,189,172,0.12)',
-              border: '1px solid rgba(20,189,172,0.3)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 11V7a4 4 0 0 1 7.938-.857" stroke="#14BDAC" strokeWidth="1.8" strokeLinecap="round"/>
-                <rect x="3" y="11" width="18" height="11" rx="2.5" fill="rgba(20,189,172,0.15)" stroke="#14BDAC" strokeWidth="1.8"/>
-                <circle cx="12" cy="16.5" r="1.5" fill="#14BDAC"/>
-                <path d="M12 16.5v2" stroke="#14BDAC" strokeWidth="1.6" strokeLinecap="round"/>
-              </svg>
+        <div className="flex items-center justify-between flex-wrap gap-6 bg-[#0B1F3A] border border-teal/25 border-l-4 border-l-teal rounded-2xl px-6 py-6 mt-2">
+          <div className="flex items-start gap-4 flex-1 min-w-0">
+            <div className="flex-shrink-0 w-11 h-11 bg-teal/12 border border-teal/30 rounded-[10px] flex items-center justify-center">
+              <LockOpen className="w-5 h-5 text-teal" />
             </div>
-            {/* Text */}
-            <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontSize: '0.62rem',
-                fontFamily: 'monospace',
-                letterSpacing: '0.12em',
-                color: '#14BDAC',
-                fontWeight: 700,
-                marginBottom: '0.35rem',
-                textTransform: 'uppercase' as const,
-              }}>
+            <div className="min-w-0">
+              <p className="font-mono text-[0.62rem] tracking-[0.12em] text-teal uppercase font-bold mb-1">
                 New · Progression Mode
-              </div>
-              <div style={{
-                fontFamily: 'Georgia, serif',
-                fontSize: '1.15rem',
-                fontWeight: 700,
-                color: '#F5F0E8',
-                marginBottom: '0.3rem',
-                lineHeight: 1.25,
-              }}>
+              </p>
+              <p className="font-serif text-[1.15rem] font-bold text-[#F5F0E8] leading-snug mb-1">
                 Unlock Challenge
-              </div>
-              <div style={{
-                fontSize: '0.82rem',
-                color: 'rgba(245,240,232,0.55)',
-                marginBottom: '0.55rem',
-                lineHeight: 1.45,
-              }}>
+              </p>
+              <p className="text-sm text-[#F5F0E8]/55 leading-snug mb-1.5">
                 Earn your way through 5 levels. Knowledge is earned, not accessed.
-              </div>
-              <div style={{
-                fontSize: '0.68rem',
-                fontFamily: 'monospace',
-                color: 'rgba(20,189,172,0.7)',
-                letterSpacing: '0.06em',
-              }}>
+              </p>
+              <p className="font-mono text-[0.68rem] text-teal/70 tracking-[0.06em]">
                 5 levels · 15 questions each · 80% to advance
-              </div>
+              </p>
             </div>
           </div>
-          {/* Right: CTA button */}
           <Link
             href="/progression"
-            style={{
-              flexShrink: 0,
-              background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-              color: '#fff',
-              padding: '0.65rem 1.35rem',
-              borderRadius: '9px',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              fontFamily: 'monospace',
-              letterSpacing: '0.05em',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap' as const,
-              boxShadow: '0 2px 12px rgba(20,189,172,0.25)',
-            }}
+            className="flex-shrink-0 font-mono text-sm font-bold text-white bg-gradient-to-r from-teal-dark to-teal px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-[0_2px_12px_rgba(20,189,172,0.25)]"
           >
             Start →
           </Link>
@@ -555,12 +382,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Features Section */}
-      <div className="bg-white border-t border-cream-2 px-6 py-12">
+      <div className="bg-white border-t border-cream-2 px-4 sm:px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="text-xs tracking-widest text-text-3 mb-6 text-center">
-            STUDY FEATURES
-          </div>
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
+          <p className="font-mono text-xs tracking-widest text-text-3 mb-6 text-center uppercase">
+            Study Features
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { Icon: BookOpen, title: 'Practice Quiz', desc: 'Instant feedback on 20 questions' },
               { Icon: Layers, title: 'Flashcards', desc: 'Flip through cards to memorize' },
@@ -576,26 +403,27 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-
-
         </div>
       </div>
 
       {/* Resume Service Card */}
-      <div className="px-6 py-6 border-t border-cream-2">
+      <div className="px-4 sm:px-6 py-6 border-t border-cream-2">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4" style={{ borderLeftColor: 'var(--teal)' }}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4 border-l-teal">
             <FileText className="w-7 h-7 flex-shrink-0 text-teal" />
             <div className="flex-1 min-w-0">
-              <div className="font-serif font-bold text-navy text-sm mb-0.5">Turn your certification into your next opportunity</div>
-              <div className="text-xs text-text-3">Expert-written, ATS-optimized resumes for healthcare professionals · 87% interview rate · Starting at $29</div>
+              <p className="font-serif font-bold text-navy text-sm mb-0.5">
+                Turn your certification into your next opportunity
+              </p>
+              <p className="text-xs text-text-3">
+                Expert-written, ATS-optimized resumes for healthcare professionals · 87% interview rate · Starting at $29
+              </p>
             </div>
             <a
               href="https://www.myqualifiedresume.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 text-xs font-mono tracking-widest px-4 py-2.5 rounded-lg text-white transition hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #0D7377, #14BDAC)' }}
+              className="flex-shrink-0 font-mono text-xs tracking-widest text-white bg-gradient-to-r from-teal-dark to-teal px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
             >
               GET YOUR RESUME →
             </a>
@@ -604,7 +432,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-navy text-white px-6 py-8">
+      <footer className="bg-navy text-white px-4 sm:px-6 py-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="font-serif text-lg mb-2">SPD Cert Companion</div>
           <div className="text-xs text-teal-3">

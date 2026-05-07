@@ -1,8 +1,21 @@
 import type { Metadata } from 'next'
-import { Libre_Baskerville, DM_Mono } from 'next/font/google'
+import { Playfair_Display, DM_Sans, Libre_Baskerville, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import HelpFAB from '@/components/HelpFAB'
 import './globals.css'
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
+})
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ['latin'],
@@ -169,7 +182,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable}`}>
+    <html lang="en" className={`${playfairDisplay.variable} ${dmSans.variable} ${libreBaskerville.variable} ${dmMono.variable}`}>
       <head>
         <script
           type="application/ld+json"

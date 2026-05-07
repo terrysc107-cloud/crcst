@@ -16,12 +16,13 @@ const config: Config = {
           3: '#3a5068',
         },
         teal: {
-          DEFAULT: '#2a9d8f',
+          DEFAULT: '#14bdac',
+          dark: '#0d7377',
           2: '#3bbfb0',
           3: '#a8e6df',
         },
         amber: {
-          DEFAULT: '#e9c46a',
+          DEFAULT: '#daa520',
           2: '#f4a261',
         },
         cream: {
@@ -76,6 +77,8 @@ const config: Config = {
         },
       },
       fontFamily: {
+        display: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['DM Sans', 'sans-serif'],
         serif: ['Libre Baskerville', 'Georgia', 'serif'],
         mono: ['DM Mono', 'monospace'],
       },

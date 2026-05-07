@@ -31,3 +31,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 package-lock.json
+
+# generation script checkpoints
+data/additional-questions-progress.json
+data/question-variants-progress.json

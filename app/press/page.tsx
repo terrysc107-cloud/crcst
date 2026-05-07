@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PressPage() {
   return (
-    <div className="min-h-screen bg-navy text-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-navy text-white">
 
       {/* Nav */}
       <nav className="px-6 py-4 border-b border-white/7 flex items-center justify-between">
@@ -19,8 +19,7 @@ export default function PressPage() {
           SPD Cert <em className="not-italic text-teal">Prep</em>
         </Link>
         <Link href="mailto:support@spdcertprep.com"
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+          className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-br from-teal to-teal-2">
           Press Inquiry
         </Link>
       </nav>
@@ -31,7 +30,7 @@ export default function PressPage() {
           <span className="font-mono text-teal text-[0.7rem] font-semibold tracking-widest">PRESS KIT</span>
         </div>
 
-        <h1 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-tight mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="font-display text-[clamp(2rem,5vw,3.2rem)] font-black leading-tight mb-4">
           Press Resources
         </h1>
         <p className="text-white/55 text-lg leading-relaxed">
@@ -44,7 +43,7 @@ export default function PressPage() {
       <section className="max-w-3xl mx-auto px-4 pb-12">
         <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-8 mb-8">
           <h2 className="font-mono text-teal text-xs tracking-[0.12em] uppercase mb-4">Product</h2>
-          <h3 className="text-xl font-bold mb-3 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="font-display text-xl font-bold mb-3 text-white">
             About SPD Cert Prep
           </h3>
           <p className="text-white/65 leading-relaxed">

@@ -3,6 +3,12 @@ import NavBar from "@/components/landing/NavBar";
 import FaqAccordion from "@/components/landing/FaqAccordion";
 import StatsBar from "@/components/landing/StatsBar";
 import type { Metadata } from "next";
+import {
+  Settings, Award, Microscope,
+  Brain, BarChart2, Zap, Flame, ClipboardList, Medal, LockOpen,
+  Building2, GraduationCap, TrendingUp,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   alternates: { canonical: "https://spdcertprep.com" },
@@ -10,11 +16,16 @@ export const metadata: Metadata = {
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
-const CERTS = [
+interface Cert {
+  code: string; name: string; Icon: LucideIcon; questions: number; desc: string;
+  borderColor: string; labelColor: string; badgeBg: string; badgeBorder: string;
+}
+
+const CERTS: Cert[] = [
   {
     code: "CRCST",
     name: "Central Service Technician",
-    icon: "⚙️",
+    Icon: Settings,
     questions: 400,
     desc: "The foundational certification. Master sterilization, decontamination, and instrument processing.",
     borderColor: "border-teal/20",
@@ -25,7 +36,7 @@ const CERTS = [
   {
     code: "CHL",
     name: "Healthcare Leader",
-    icon: "🎖️",
+    Icon: Award,
     questions: 240,
     desc: "Lead with authority. Demonstrate management, quality, and regulatory expertise.",
     borderColor: "border-navy-3/40",
@@ -36,7 +47,7 @@ const CERTS = [
   {
     code: "CER",
     name: "Endoscope Reprocessor",
-    icon: "🔬",
+    Icon: Microscope,
     questions: 147,
     desc: "The specialist cert. Master flexible and rigid endoscope reprocessing protocols.",
     borderColor: "border-amber/20",
@@ -46,14 +57,14 @@ const CERTS = [
   },
 ];
 
-const FEATURES = [
-  { icon: "🧠", title: "AI Study Chat", desc: "Ask anything. Get expert answers about sterile processing, instruments, and exam concepts — powered by Claude." },
-  { icon: "📊", title: "Domain Mastery Tracking", desc: "See exactly which chapters need work. Color-coded progress bars show your weak spots before they cost you on exam day." },
-  { icon: "⚡", title: "Custom Quiz Mode", desc: "Filter by domain, difficulty, or chapter. Build targeted practice sessions around your specific gaps." },
-  { icon: "🔥", title: "Streak Tracking", desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
-  { icon: "📋", title: "Exam Readiness Score", desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
-  { icon: "🏅", title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
-  { icon: "🔓", title: "Progression Mode", desc: "Five sequential levels, XP rewards, and locked doors. Earn your way through the full CRCST domain — knowledge is earned, not accessed. Pro &amp; Triple Crown." },
+const FEATURES: { Icon: LucideIcon; title: string; desc: string }[] = [
+  { Icon: Brain, title: "AI Study Chat", desc: "Ask anything. Get expert answers about sterile processing, instruments, and exam concepts — powered by Claude." },
+  { Icon: BarChart2, title: "Domain Mastery Tracking", desc: "See exactly which chapters need work. Color-coded progress bars show your weak spots before they cost you on exam day." },
+  { Icon: Zap, title: "Custom Quiz Mode", desc: "Filter by domain, difficulty, or chapter. Build targeted practice sessions around your specific gaps." },
+  { Icon: Flame, title: "Streak Tracking", desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
+  { Icon: ClipboardList, title: "Exam Readiness Score", desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
+  { Icon: Medal, title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
+  { Icon: LockOpen, title: "Progression Mode", desc: "Five sequential levels, XP rewards, and locked doors. Earn your way through the full CRCST domain — knowledge is earned, not accessed. Pro & Triple Crown." },
 ];
 
 const TESTIMONIALS = [
@@ -102,7 +113,7 @@ const PLANS = [
 
 export default function LandingPage() {
   return (
-    <div className="bg-navy text-white overflow-x-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="bg-navy text-white overflow-x-hidden font-sans">
 
       {/* ── NAV ─────────────────────────────────────────────────────────────── */}
       <NavBar />
@@ -142,7 +153,7 @@ export default function LandingPage() {
             </span>
           </div>
 
-          <h1 className="lp-fade-up-1 text-[clamp(2.6rem,6vw,4.2rem)] font-black leading-[1.08] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="lp-fade-up-1 text-[clamp(2.6rem,6vw,4.2rem)] font-black leading-[1.08] mb-5 font-display">
             Pass Your{" "}
             <span className="lp-shimmer">CRCST / CBSPD Certification</span>
             <br />The First Time.
@@ -177,7 +188,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">What You Get</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight font-display">
             Everything you need to pass.<br />
             <span className="text-teal">Nothing you don't.</span>
           </h2>
@@ -187,7 +198,7 @@ export default function LandingPage() {
           {FEATURES.map((f, i) => (
             <div key={i}
               className="rounded-2xl p-7 border border-white/6 bg-white/[0.025] hover:-translate-y-1 hover:border-teal/25 hover:bg-teal/[0.04] transition-all duration-300">
-              <div className="text-3xl mb-4">{f.icon}</div>
+              <div className="mb-4 w-8 h-8 text-teal"><f.Icon className="w-8 h-8" /></div>
               <h3 className="text-[1.05rem] font-semibold mb-2 text-white">{f.title}</h3>
               <p className="text-white/55 text-sm leading-relaxed font-light">{f.desc}</p>
             </div>
@@ -200,7 +211,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
             <p className="font-mono text-amber text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Featured · New Mode</p>
-            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight font-display">
               Knowledge is <em className="text-amber not-italic">earned</em>, not accessed.
             </h2>
             <p className="text-white/50 mt-3 text-base font-light max-w-xl mx-auto">
@@ -267,7 +278,7 @@ export default function LandingPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-amber inline-block" />
                   <span className="font-mono text-amber text-[0.68rem] tracking-widest">PRO &amp; TRIPLE CROWN</span>
                 </div>
-                <h3 className="text-[clamp(1.3rem,3vw,1.9rem)] font-black leading-snug mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h3 className="text-[clamp(1.3rem,3vw,1.9rem)] font-black leading-snug mb-4 font-display">
                   Structured challenge.<br />
                   <span className="text-teal">Real accountability.</span>
                 </h3>
@@ -306,7 +317,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Exam Coverage</p>
-            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black font-display">
               All Certifications Covered
             </h2>
             <p className="text-white/50 mt-3 text-base font-light">
@@ -319,7 +330,7 @@ export default function LandingPage() {
               <div key={i}
                 className={`rounded-2xl p-7 border ${c.borderColor} bg-white/[0.03] hover:-translate-y-1 hover:bg-white/5 transition-all duration-300`}>
                 <div className="flex justify-between items-start mb-4">
-                  <span className="text-4xl">{c.icon}</span>
+                  <c.Icon className={`w-9 h-9 ${c.labelColor}`} />
                   <span className={`${c.badgeBg} border ${c.badgeBorder} rounded-full px-3 py-0.5 font-mono text-[0.68rem] font-semibold ${c.labelColor}`}>
                     {c.questions}+ Qs
                   </span>
@@ -337,7 +348,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">The Process</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black font-display">
             From signup to certified<br />
             <span className="text-teal">in four steps.</span>
           </h2>
@@ -366,7 +377,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">From the Community</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-black font-display">
               Real techs. Real results.
             </h2>
           </div>
@@ -398,7 +409,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="font-mono text-teal text-[0.7rem] tracking-[0.12em] mb-3 uppercase">Career Services</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5 font-display">
               Your certification opens doors.<br />
               <span className="text-teal">A qualified resume gets you through them.</span>
             </h2>
@@ -435,7 +446,7 @@ export default function LandingPage() {
       <section id="pricing" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">Plans</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black font-display">
             Start free. Upgrade when<br />
             <span className="text-teal">you're ready to commit.</span>
           </h2>
@@ -506,7 +517,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <p className="font-mono text-amber text-[0.72rem] tracking-[0.12em] mb-3 uppercase">For Programs &amp; Institutions</p>
-            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight font-display">
               Get your entire staff certified.<br />
               <span className="text-teal">We&apos;ll build the app around you.</span>
             </h2>
@@ -516,26 +527,26 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-14">
-            {[
+            {([
               {
-                icon: "🏥",
+                Icon: Building2,
                 title: "Hospital & Department Access",
                 desc: "Give every member of your SPD team access to structured exam prep with progress tracking across your department. Know who is ready and who needs more time before they sit for certification.",
               },
               {
-                icon: "🎓",
+                Icon: GraduationCap,
                 title: "Training Program Integration",
                 desc: "Running an SPD certification program? Embed our question bank and AI study tools directly into your curriculum. Custom domains, your branding, and content aligned to your schedule.",
               },
               {
-                icon: "📈",
+                Icon: TrendingUp,
                 title: "Team Dashboards & Reporting",
                 desc: "Managers and instructors get a live view of team progress by domain, difficulty, and readiness score — so you can intervene early and hit your certification targets.",
               },
-            ].map((item, i) => (
+            ] as { Icon: LucideIcon; title: string; desc: string }[]).map((item, i) => (
               <div key={i}
                 className="rounded-2xl p-7 border border-amber/15 bg-amber/[0.03] hover:-translate-y-1 hover:border-amber/30 transition-all duration-300">
-                <div className="text-4xl mb-4">{item.icon}</div>
+                <item.Icon className="w-9 h-9 text-amber mb-4" />
                 <h3 className="text-base font-semibold text-white mb-2">{item.title}</h3>
                 <p className="text-white/50 text-sm leading-relaxed font-light">{item.desc}</p>
               </div>
@@ -544,7 +555,7 @@ export default function LandingPage() {
 
           <div className="rounded-2xl border border-teal/20 bg-teal/[0.05] p-10 text-center">
             <p className="font-mono text-teal text-[0.7rem] tracking-widest mb-3 uppercase">Ready to get started?</p>
-            <h3 className="text-[clamp(1.4rem,3vw,2rem)] font-black mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-[clamp(1.4rem,3vw,2rem)] font-black mb-3 font-display">
               Let&apos;s build something together.
             </h3>
             <p className="text-white/55 text-sm leading-relaxed mb-8 max-w-lg mx-auto font-light">
@@ -566,7 +577,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
         <div className="max-w-3xl mx-auto text-center">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
-          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4 font-display">
             Do you need professional study assistance?
           </h2>
           <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
@@ -590,7 +601,7 @@ export default function LandingPage() {
       <section id="faq" className="py-24 px-4 max-w-2xl mx-auto">
         <div className="text-center mb-12">
           <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">FAQ</p>
-          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(1.8rem,4vw,2.6rem)] font-black font-display">
             Common questions
           </h2>
         </div>
@@ -602,7 +613,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at center, rgba(42,157,143,0.15) 0%, transparent 70%)" }} />
         <div className="relative z-10 max-w-xl mx-auto">
-          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-[clamp(2rem,5vw,3.2rem)] font-black leading-[1.1] mb-5 font-display">
             Your certification is<br />
             <span className="text-teal">closer than you think.</span>
           </h2>

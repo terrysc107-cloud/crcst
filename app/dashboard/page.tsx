@@ -1,12 +1,12 @@
 'use client'
 
-// Dashboard - certification selector
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
 import { getXpTier } from '@/lib/progression-config'
+import { BookOpen, Layers, Clock, Sliders, FileText } from 'lucide-react'
 
 interface Certification {
   id: string
@@ -562,14 +562,14 @@ export default function DashboardPage() {
           </div>
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             {[
-              { icon: '1', title: 'Practice Quiz', desc: 'Instant feedback on 20 questions' },
-              { icon: '2', title: 'Flashcards', desc: 'Flip through cards to memorize' },
-              { icon: '3', title: 'Mock Exam', desc: 'Timed simulation of real exam' },
-              { icon: '4', title: 'Custom Quiz', desc: 'Build your own by domain' },
+              { Icon: BookOpen, title: 'Practice Quiz', desc: 'Instant feedback on 20 questions' },
+              { Icon: Layers, title: 'Flashcards', desc: 'Flip through cards to memorize' },
+              { Icon: Clock, title: 'Mock Exam', desc: 'Timed simulation of real exam' },
+              { Icon: Sliders, title: 'Custom Quiz', desc: 'Build your own by domain' },
             ].map((feature, i) => (
               <div key={i} className="text-center">
-                <div className="w-12 h-12 bg-teal/10 text-teal rounded-full flex items-center justify-center font-serif text-xl font-bold mx-auto mb-3">
-                  {feature.icon}
+                <div className="w-12 h-12 bg-teal/10 text-teal rounded-full flex items-center justify-center mx-auto mb-3">
+                  <feature.Icon className="w-5 h-5" />
                 </div>
                 <div className="font-serif font-bold text-navy mb-1">{feature.title}</div>
                 <div className="text-xs text-text-3">{feature.desc}</div>
@@ -584,8 +584,8 @@ export default function DashboardPage() {
       {/* Resume Service Card */}
       <div className="px-6 py-6 border-t border-cream-2">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4" style={{ borderLeftColor: '#14BDAC' }}>
-            <div className="text-2xl flex-shrink-0">📄</div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-cream rounded-xl p-5 border-l-4" style={{ borderLeftColor: 'var(--teal)' }}>
+            <FileText className="w-7 h-7 flex-shrink-0 text-teal" />
             <div className="flex-1 min-w-0">
               <div className="font-serif font-bold text-navy text-sm mb-0.5">Turn your certification into your next opportunity</div>
               <div className="text-xs text-text-3">Expert-written, ATS-optimized resumes for healthcare professionals · 87% interview rate · Starting at $29</div>

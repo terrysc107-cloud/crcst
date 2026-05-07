@@ -44,13 +44,11 @@ export default function ProgressionPage() {
 
       const user = session.user
 
-      // Fetch user_levels
       const { data: userLevels } = await supabase
         .from('user_levels')
         .select('*')
         .eq('user_id', user.id)
 
-      // On first visit — seed Level 1 as unlocked
       if (!userLevels || userLevels.length === 0) {
         await supabase
           .from('user_levels')
@@ -72,7 +70,6 @@ export default function ProgressionPage() {
         setBestScores(scoreMap)
       }
 
-      // Fetch bonus_unlocks
       const { data: bonusData } = await supabase
         .from('bonus_unlocks')
         .select('module_id')
@@ -82,7 +79,6 @@ export default function ProgressionPage() {
         setUnlockedBonuses(new Set((bonusData as BonusUnlock[]).map((b) => b.module_id)))
       }
 
-      // Fetch user XP
       const { data: xpData } = await supabase
         .from('user_xp')
         .select('total_xp')
@@ -91,7 +87,6 @@ export default function ProgressionPage() {
 
       if (xpData) setTotalXp(xpData.total_xp ?? 0)
 
-      // Fetch earned progression badges
       const { data: badgeData } = await supabase
         .from('progression_badges')
         .select('badge_id')
@@ -101,7 +96,6 @@ export default function ProgressionPage() {
         setEarnedBadgeIds(new Set(badgeData.map((b: { badge_id: string }) => b.badge_id)))
       }
 
-      // Weak-spot analysis from pre-aggregated domain mastery table
       const { data: domainData } = await supabase
         .from('crcst_domain_mastery')
         .select('domain_name, questions_answered, mastery_percentage')
@@ -137,21 +131,13 @@ export default function ProgressionPage() {
 
   if (loading || sub.loading) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          background: '#F5F0E8',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F0E8' }}>
         <div
           style={{
             width: 36,
             height: 36,
             border: '3px solid rgba(20,189,172,0.2)',
-            borderTopColor: '#14BDAC',
+            borderTopColor: 'var(--teal)',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
           }}
@@ -163,13 +149,13 @@ export default function ProgressionPage() {
 
   if (!sub.isPaid) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0D1B2A', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.25rem', textAlign: 'center' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center px-5 text-center" style={{ background: '#0D1B2A' }}>
         <div style={{ width: 64, height: 64, background: 'rgba(20,189,172,0.1)', border: '1px solid rgba(20,189,172,0.3)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-          <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24" style={{ color: '#14BDAC' }}>
+          <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--teal)' }}>
             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
           </svg>
         </div>
-        <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: '#14BDAC', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+        <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: 'var(--teal)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
           Pro Feature
         </div>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', fontWeight: 700, color: '#F5F0E8', lineHeight: 1.2, marginBottom: '1rem', maxWidth: 420 }}>
@@ -178,8 +164,8 @@ export default function ProgressionPage() {
         <p style={{ fontSize: '0.92rem', color: 'rgba(245,240,232,0.5)', lineHeight: 1.65, maxWidth: 380, marginBottom: '2rem' }}>
           Unlock the full Unlock Challenge — five sequential levels, XP rewards, badges, and bonus content — with a Pro or Triple Crown plan.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', maxWidth: 320 }}>
-          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'linear-gradient(135deg, #14BDAC, #0D7377)', color: '#0D1B2A', borderRadius: 10, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem', letterSpacing: '0.04em', textDecoration: 'none' }}>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'linear-gradient(135deg, var(--teal), var(--teal-dark))', color: '#0D1B2A', borderRadius: 10, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem', letterSpacing: '0.04em', textDecoration: 'none' }}>
             Upgrade to Pro →
           </Link>
           <Link href="/dashboard" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'transparent', color: 'rgba(245,240,232,0.4)', border: '1px solid rgba(245,240,232,0.1)', borderRadius: 10, fontSize: '0.85rem', fontFamily: 'monospace', textDecoration: 'none' }}>
@@ -191,24 +177,17 @@ export default function ProgressionPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F0E8' }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: '#F5F0E8' }}>
       {/* Header */}
-      <header style={{ background: '#0D1B2A', color: '#fff', padding: '1rem 1.5rem' }}>
-        <div
-          style={{
-            maxWidth: 768,
-            margin: '0 auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <header className="px-4 sm:px-6 py-4" style={{ background: '#0D1B2A', color: '#fff' }}>
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div
+              className="flex-shrink-0"
               style={{
                 width: 40,
                 height: 40,
-                background: '#14BDAC',
+                background: 'var(--teal)',
                 borderRadius: 8,
                 display: 'flex',
                 alignItems: 'center',
@@ -221,17 +200,18 @@ export default function ProgressionPage() {
             >
               SP
             </div>
-            <div>
-              <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 700 }}>
+            <div className="min-w-0">
+              <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 700 }} className="truncate">
                 SPD Cert Companion
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.04em' }}>
+              <div className="hidden sm:block" style={{ fontSize: '0.72rem', color: 'var(--teal)', letterSpacing: '0.04em' }}>
                 Sterile Processing Certification Prep
               </div>
             </div>
           </div>
           <Link
             href="/dashboard"
+            className="flex-shrink-0"
             style={{
               fontSize: '0.8rem',
               color: 'rgba(255,255,255,0.5)',
@@ -245,19 +225,18 @@ export default function ProgressionPage() {
 
       {/* Hero */}
       <div
+        className="px-4 sm:px-6 py-12 sm:py-16 text-center"
         style={{
           background: 'linear-gradient(to bottom, #0D1B2A, #2A3A4A)',
           color: '#fff',
-          padding: '3.5rem 1.5rem 3rem',
-          textAlign: 'center',
         }}
       >
-        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+        <div className="max-w-2xl mx-auto">
           <div
             style={{
               fontSize: '0.7rem',
               letterSpacing: '0.14em',
-              color: '#14BDAC',
+              color: 'var(--teal)',
               marginBottom: '0.75rem',
               textTransform: 'uppercase',
             }}
@@ -274,7 +253,7 @@ export default function ProgressionPage() {
             }}
           >
             Knowledge is{' '}
-            <em style={{ color: '#DAA520', fontStyle: 'italic' }}>earned</em>, not accessed.
+            <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>earned</em>, not accessed.
           </h1>
           <p
             style={{
@@ -291,7 +270,7 @@ export default function ProgressionPage() {
           </p>
 
           {/* Progress bar */}
-          <div style={{ maxWidth: 360, margin: '0 auto' }}>
+          <div className="max-w-sm mx-auto">
             <div
               style={{
                 display: 'flex',
@@ -302,7 +281,7 @@ export default function ProgressionPage() {
               }}
             >
               <span>Progress</span>
-              <span style={{ color: '#14BDAC', fontWeight: 600 }}>
+              <span style={{ color: 'var(--teal)', fontWeight: 600 }}>
                 {completedCount} of 5 levels completed
               </span>
             </div>
@@ -318,7 +297,7 @@ export default function ProgressionPage() {
                 style={{
                   height: '100%',
                   width: `${(completedCount / 5) * 100}%`,
-                  background: '#14BDAC',
+                  background: 'var(--teal)',
                   borderRadius: 100,
                   transition: 'width 0.6s ease',
                 }}
@@ -362,7 +341,7 @@ export default function ProgressionPage() {
       </div>
 
       {/* Main content */}
-      <div style={{ maxWidth: 768, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         {/* Section label */}
         <div
           style={{
@@ -395,12 +374,12 @@ export default function ProgressionPage() {
                     position: 'relative',
                     background: '#fff',
                     borderRadius: 14,
-                    padding: '1.4rem 1.5rem',
+                    padding: '1.25rem 1rem',
                     cursor: isLocked ? 'default' : 'pointer',
                     opacity: isLocked ? 0.5 : 1,
                     filter: isLocked ? 'grayscale(1)' : 'none',
                     border: isUnlocked
-                      ? '2px solid #14BDAC'
+                      ? '2px solid var(--teal)'
                       : isCompleted
                       ? '2px solid rgba(20,189,172,0.4)'
                       : '1px solid rgba(255,255,255,0.1)',
@@ -443,7 +422,7 @@ export default function ProgressionPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#14BDAC',
+                        color: 'var(--teal)',
                       }}
                     >
                       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -453,18 +432,18 @@ export default function ProgressionPage() {
                   )}
 
                   {/* Card content */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
                     {/* Level number circle */}
                     <div
+                      className="flex-shrink-0"
                       style={{
-                        flexShrink: 0,
                         width: 42,
                         height: 42,
                         borderRadius: '50%',
                         background: isCompleted
                           ? 'rgba(20,189,172,0.12)'
                           : isUnlocked
-                          ? '#14BDAC'
+                          ? 'var(--teal)'
                           : 'rgba(13,27,42,0.08)',
                         display: 'flex',
                         alignItems: 'center',
@@ -472,7 +451,7 @@ export default function ProgressionPage() {
                         fontFamily: 'serif',
                         fontWeight: 700,
                         fontSize: '1.1rem',
-                        color: isUnlocked ? '#fff' : isCompleted ? '#14BDAC' : 'rgba(13,27,42,0.4)',
+                        color: isUnlocked ? '#fff' : isCompleted ? 'var(--teal)' : 'rgba(13,27,42,0.4)',
                       }}
                     >
                       {level.id}
@@ -530,7 +509,7 @@ export default function ProgressionPage() {
                             style={{
                               fontSize: '0.8rem',
                               fontFamily: 'monospace',
-                              color: '#14BDAC',
+                              color: 'var(--teal)',
                               fontWeight: 600,
                             }}
                           >
@@ -555,7 +534,7 @@ export default function ProgressionPage() {
                             href={`/progression/${level.id}`}
                             style={{
                               display: 'inline-block',
-                              background: '#14BDAC',
+                              background: 'var(--teal)',
                               color: '#fff',
                               padding: '0.45rem 1.1rem',
                               borderRadius: 8,
@@ -632,7 +611,7 @@ export default function ProgressionPage() {
               overflow: 'hidden',
             }}>
               <div style={{
-                padding: '0.85rem 1.5rem',
+                padding: '0.85rem 1.25rem',
                 borderBottom: '1px solid rgba(13,27,42,0.07)',
                 fontSize: '0.78rem',
                 color: 'rgba(13,27,42,0.45)',
@@ -642,17 +621,18 @@ export default function ProgressionPage() {
                 Domains where you score lowest — based on your quiz history
               </div>
               {weakSpots.map((spot, i) => {
-                const color = spot.accuracy < 50 ? '#EF4444' : spot.accuracy < 70 ? '#DAA520' : '#14BDAC'
+                const color = spot.accuracy < 50 ? '#EF4444' : spot.accuracy < 70 ? 'var(--amber)' : 'var(--teal)'
                 return (
                   <div key={spot.name} style={{
-                    padding: '1rem 1.5rem',
+                    padding: '1rem 1.25rem',
                     borderTop: i === 0 ? 'none' : '1px solid rgba(13,27,42,0.07)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '1rem',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
                       <div style={{
                         flexShrink: 0,
                         width: 44,
@@ -670,8 +650,8 @@ export default function ProgressionPage() {
                       }}>
                         {spot.accuracy}%
                       </div>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0D1B2A', marginBottom: '0.15rem' }}>
+                      <div className="min-w-0">
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0D1B2A', marginBottom: '0.15rem' }} className="truncate">
                           {spot.name}
                         </div>
                         <div style={{ fontSize: '0.7rem', color: 'rgba(13,27,42,0.4)', fontFamily: 'monospace' }}>
@@ -686,7 +666,7 @@ export default function ProgressionPage() {
                         fontSize: '0.75rem',
                         fontFamily: 'monospace',
                         fontWeight: 700,
-                        color: '#14BDAC',
+                        color: 'var(--teal)',
                         textDecoration: 'none',
                         whiteSpace: 'nowrap' as const,
                         padding: '0.4rem 0.9rem',
@@ -729,7 +709,7 @@ export default function ProgressionPage() {
                   position: 'relative',
                   background: '#fff',
                   borderRadius: 14,
-                  padding: '1.25rem 1.5rem',
+                  padding: '1.25rem 1rem',
                   opacity: isUnlockedBonus ? 1 : 0.55,
                   border: isUnlockedBonus
                     ? '2px solid rgba(218,165,32,0.5)'
@@ -763,7 +743,7 @@ export default function ProgressionPage() {
                       width: 10,
                       height: 10,
                       borderRadius: '50%',
-                      background: isUnlockedBonus ? '#DAA520' : 'rgba(13,27,42,0.15)',
+                      background: isUnlockedBonus ? 'var(--amber)' : 'rgba(13,27,42,0.15)',
                       marginTop: '0.35rem',
                     }}
                   />
@@ -791,7 +771,7 @@ export default function ProgressionPage() {
                       {module.description}
                     </p>
 
-                    {/* Locked label — curiosity hook */}
+                    {/* Locked label */}
                     {!isUnlockedBonus && (
                       <div
                         style={{
@@ -819,7 +799,7 @@ export default function ProgressionPage() {
                           display: 'inline-block',
                           background: 'rgba(218,165,32,0.12)',
                           border: '1px solid rgba(218,165,32,0.5)',
-                          color: '#DAA520',
+                          color: 'var(--amber)',
                           padding: '0.4rem 1rem',
                           borderRadius: 8,
                           fontSize: '0.8rem',
@@ -841,7 +821,7 @@ export default function ProgressionPage() {
       </div>
 
       {/* Badge Locker */}
-      <div style={{ maxWidth: 768, margin: '0 auto', padding: '0 1.5rem 2.5rem' }}>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-10">
         <div
           style={{
             fontSize: '0.68rem',
@@ -855,11 +835,7 @@ export default function ProgressionPage() {
           Badge Locker
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-          gap: '0.85rem',
-        }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {PROGRESSION_BADGES.map((badge) => {
             const earned = earnedBadgeIds.has(badge.id)
             return (
@@ -868,7 +844,7 @@ export default function ProgressionPage() {
                 style={{
                   background: '#fff',
                   borderRadius: 14,
-                  padding: '1.1rem 1rem',
+                  padding: '1rem',
                   textAlign: 'center',
                   border: earned
                     ? `2px solid ${badge.color}60`
@@ -921,18 +897,16 @@ export default function ProgressionPage() {
 
       {/* Footer */}
       <footer
+        className="px-4 py-8 text-center mt-8"
         style={{
           background: '#0D1B2A',
           color: '#fff',
-          padding: '2rem 1.5rem',
-          textAlign: 'center',
-          marginTop: '2rem',
         }}
       >
         <div style={{ fontFamily: 'serif', fontSize: '1.1rem', marginBottom: '0.4rem' }}>
           SPD Cert Companion
         </div>
-        <div style={{ fontSize: '0.75rem', color: '#14BDAC' }}>
+        <div style={{ fontSize: '0.75rem', color: 'var(--teal)' }}>
           Helping sterile processing professionals pass their certification exams
         </div>
       </footer>

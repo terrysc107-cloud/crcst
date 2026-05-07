@@ -23,7 +23,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Description of Service</h2>
-            <p>SPD Cert Prep is an online study and exam preparation platform for sterile processing professionals pursuing CRCST, CER, and CHL certifications through IAHCSMM. We provide practice questions, mock exams, study guides, an AI-powered study assistant, and performance tracking tools.</p>
+            <p>SPD Cert Prep is an online study and exam preparation platform for sterile processing professionals pursuing CRCST, CER, and CHL certifications through IAHCSMM. We provide practice questions, full timed exams, study guides, an AI-powered study assistant, and performance tracking tools.</p>
             <p className="mt-2">We are not affiliated with IAHCSMM or any certifying body. Passing our practice exams does not guarantee passing official certification exams.</p>
           </section>
 

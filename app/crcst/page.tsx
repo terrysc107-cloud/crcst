@@ -11,7 +11,7 @@ import { getXpTier } from '@/lib/progression-config'
 import { useSubscription } from '@/hooks/useSubscription'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'homework'
-type QuizMode = 'practice' | 'flashcards' | 'mock' | 'custom' | 'quiz' | 'test' | 'homework'
+type QuizMode = 'practice' | 'flashcards' | 'custom' | 'quiz' | 'test' | 'homework'
 
 interface QuizData {
   questions: Question[]
@@ -388,8 +388,7 @@ export default function Home() {
     if (quizMode === 'practice') selected = questions.slice(0, 20)
     if (quizMode === 'homework') selected = questions.slice(0, 20)
     if (quizMode === 'quiz') selected = questions.slice(0, 25)
-    if (quizMode === 'mock') selected = questions.slice(0, 50)
-    if (quizMode === 'test') selected = questions.slice(0, 100)
+    if (quizMode === 'test') selected = questions.slice(0, 150)
     if (quizMode === 'flashcards') selected = questions.slice(0, 25)
     if (quizMode === 'custom') selected = questions.slice(0, customQuestionCount)
 
@@ -718,15 +717,9 @@ export default function Home() {
                 mode: 'quiz' as QuizMode,
               },
               {
-                icon: '🎯',
-                name: 'Mock Exam',
-                desc: '50 questions · 50 min',
-                mode: 'mock' as QuizMode,
-              },
-              {
                 icon: '📋',
-                name: 'Full Test',
-                desc: '100 questions · 2.5 hr',
+                name: 'Full Exam',
+                desc: '150 questions · 3 hr',
                 mode: 'test' as QuizMode,
               },
             ].map(({ icon, name, desc, mode: m }) => (
@@ -871,7 +864,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-correct">✓</span>
-                  Full-length mock exams
+                  Full-length timed certification exams
                 </li>
               </ul>
             </div>

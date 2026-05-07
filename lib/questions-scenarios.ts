@@ -665,6 +665,111 @@ export const scenarioQuestions: ScenarioQuestion[] = [
     tags: ["loaner set", "vendor sterilization", "reprocessing requirement", "chemical indicator", "transport integrity", "CIS content"],
   },
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FLOOR-LEVEL "WHAT JUST HAPPENED" SCENARIOS
+  // Real situations a tech encounters mid-shift.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: "scen-steril-005",
+    type: "scenario",
+    domain: "Sterilization",
+    difficulty: "intermediate",
+    context: "You open the steam sterilizer at the end of a wrapped-tray cycle and, after the prescribed cool-down, you notice visible water droplets pooled on top of one of the wrapped trays. The chemical indicator on the outside has changed appropriately and the cycle printout shows all parameters were met.",
+    question: "How should this load be handled?",
+    options: {
+      a: "Wipe the moisture off with a clean low-lint towel, confirm the CI passed, and release the tray to the sterile storage area",
+      b: "Leave the load on the cart for an additional 30–60 minutes to allow the moisture to evaporate, then release if dry",
+      c: "Consider the wet tray non-sterile. Do not release it — investigate the cause (overloading, blocked drain, inadequate cool-down, mineral content of steam supply, etc.), document the wet pack, and reprocess the items",
+      d: "Re-sterilize the wrapped tray without opening it — the inside is still sterile and a second cycle will dry the wrapper",
+    },
+    correct: "c",
+    explanation: "A wet pack at the end of a sterilization cycle must be considered non-sterile and cannot be released. Moisture acts as a wick: microorganisms on the outside of the wrapper can migrate through the wet barrier into the package (strike-through). A passing CI only proves sterilization conditions were reached at that location — it says nothing about whether the package barrier was compromised by moisture. Per AAMI ST79, wet packs require root-cause investigation: common causes include overloading, dense or improperly oriented loads, inadequate dry time, damaged steam traps, poor steam quality, blocked chamber drains, or removing the load before cool-down. Drying the outside or running a second cycle does not restore the package's barrier integrity.",
+    realWorldNote: "Wet packs are one of the most frequent reasons SPD departments are cited during accreditation surveys. Many facilities have a 'wet pack log' to track frequency and trigger biomed if a sterilizer pattern emerges.",
+    standardRef: "AAMI ST79 — wet pack handling and root-cause investigation",
+    tags: ["wet pack", "wet load", "strike-through", "package integrity", "sterilizer cool-down", "root cause"],
+  },
+
+  {
+    id: "scen-decon-006",
+    type: "pitfall",
+    domain: "Decontamination & Cleaning",
+    difficulty: "intermediate",
+    context: "You're loading the next cycle into the automated washer-disinfector when you notice the items from the previous cycle have visible detergent foam residue and patches of bioburden in a clear striped pattern across the rack. Looking up, you can see the upper spray arm appears to be jammed — it didn't rotate during the prior cycle.",
+    question: "What is the correct response?",
+    options: {
+      a: "The cycle ran for the full programmed time, so the items are still considered cleaned. Send them forward to prep & pack and place a maintenance ticket for the spray arm",
+      b: "Manually clean the visibly soiled instruments at the sink, assume the rest are clean, and proceed to assembly",
+      c: "Treat the entire previous load as not cleaned. Return all items to decontamination, troubleshoot the cause (oversized item blocking arm rotation, clogged spray jet, bearing failure), correct it, and rerun the cycle. Take the washer out of service if the arm cannot be restored",
+      d: "Run a second back-to-back cycle on the same load to compensate for the failed first cycle",
+    },
+    correct: "c",
+    explanation: "Mechanical washers rely on impingement — pressurized water and detergent striking every surface — and a non-rotating spray arm means large areas of the rack received no mechanical action at all. The striped soil pattern is the visual fingerprint of a failed arm. Cleaning is the foundation of the entire reprocessing chain; sterilization cannot compensate for items that were never cleaned. The whole load must be considered contaminated and reprocessed after the root cause is corrected. Common causes are tall items (basins, trays, scopes) blocking arm clearance, debris-clogged spray jets, or worn arm bearings. If the arm can't be made to spin reliably, the washer is removed from service per AAMI ST79.",
+    realWorldNote: "Always do a quick visual check that arms spin freely before starting a cycle, and watch for the rotation indicator (many washers have a small flag or LED). The 30 seconds it takes prevents a reprocessing of an entire load.",
+    standardRef: "AAMI ST79 — mechanical cleaning equipment performance and load-release criteria",
+    tags: ["washer-disinfector", "spray arm", "mechanical cleaning", "load failure", "cleaning verification", "equipment troubleshooting"],
+  },
+
+  {
+    id: "scen-decon-007",
+    type: "pitfall",
+    domain: "Decontamination & Cleaning",
+    difficulty: "foundational",
+    context: "A new tech is loading hinged instruments — Kelly clamps, needle holders, hemostats, Metzenbaum scissors — into the washer rack with every box-lock fully closed and ratcheted. When you point this out, the tech says, \"The water pressure in the washer is high enough to get in there. It'll be fine.\"",
+    question: "What should you do, and why does the tech's reasoning fail?",
+    options: {
+      a: "Agree — modern washers run at high pressure and the cycle time accounts for joints. Sign off the rack and start the cycle",
+      b: "Stop the rack from being started. Open every box-lock, unlock every ratchet, and disassemble multi-part instruments per IFU before the rack enters the washer. Closed joints trap bioburden in the box-lock crevice where spray cannot reach, so soil is baked on and carried forward to sterilization",
+      c: "Run the cycle as-is, then re-inspect each instrument at assembly and brush any visibly soiled box-locks before packaging",
+      d: "Leave them closed but flip the rack upside-down halfway through the cycle so water reaches the joints from the other side",
+    },
+    correct: "b",
+    explanation: "Hinged instruments must be in the fully OPEN (or first-ratchet) position throughout cleaning — manual and mechanical — and any instrument designed to disassemble must be taken apart per its IFU. A closed box-lock seals the most contamination-prone area of the instrument: the joint crevice where blood, tissue, and saline collect. No washer, regardless of pressure, can drive cleaning solution into a sealed mechanical joint. Bioburden left there will be fixed by heat in the disinfection or sterilization phase, may shed onto the patient, and can corrode the metal. This is one of the most cited findings in HSPA / AAMI cleaning standards and a frequent question on the CRCST exam.",
+    realWorldNote: "Some racks have spring-loaded stringers specifically designed to hold ringed instruments open — use them. If you find soil at assembly, the instrument goes back to decontam, not into the tray.",
+    standardRef: "AAMI ST79 §6.3; instrument-specific IFUs",
+    tags: ["box-lock", "hinged instruments", "open position", "washer loading", "bioburden trap", "disassembly", "IFU"],
+  },
+
+  {
+    id: "scen-instr-004",
+    type: "decision",
+    domain: "Instrument Handling & Inspection",
+    difficulty: "foundational",
+    context: "You are assembling a sterile-side major laparotomy tray in the prep & pack area. As you reach for the tray count sheet, your elbow knocks a Mayo clamp off the prep table and it lands on the SPD floor. The instrument is one of the last items on your count and the OR has called twice asking for the tray.",
+    question: "What is the correct action?",
+    options: {
+      a: "Pick it up, wipe it down with a hospital-grade disinfectant wipe, and place it back into the tray — the floor in SPD's clean side is regularly mopped",
+      b: "Visually inspect the clamp; if no soil or damage is visible, it can go back in the tray since it was already cleaned and disinfected upstream",
+      c: "Run it through an immediate-use steam sterilization (IUSS) cycle and add it to the tray once the cycle completes",
+      d: "Send the dropped instrument back to decontamination for the full reprocessing cycle — clean, disinfect, inspect, repackage. Pull a replacement clamp from the available pool to complete the tray and notify the OR of any delay",
+    },
+    correct: "d",
+    explanation: "Once a processed instrument contacts the floor — even a clean SPD floor — it is considered contaminated and must re-enter the reprocessing cycle from the beginning: decontamination, inspection, and repackaging. Wiping with a disinfectant does not equal cleaning, and disinfectants only work on cleaned surfaces. Visual inspection cannot rule out microbial contamination. IUSS is reserved for unwrapped items used immediately on the patient and is not a substitute for full reprocessing of dropped clean instruments. The right answer is the slower one: pull a replacement to keep the case moving and reprocess the dropped instrument properly. OR pressure does not change reprocessing standards.",
+    realWorldNote: "Many SPDs keep a small 'replacement pool' of common high-volume instruments (Mayos, Kellys, mosquitos) precisely so a dropped item or a missing count doesn't hold up a tray.",
+    standardRef: "AAMI ST79 — handling of contaminated/recontaminated items; HSPA Manual Ch. 6",
+    tags: ["dropped instrument", "recontamination", "IUSS misuse", "OR pressure", "replacement pool", "reprocessing chain"],
+  },
+
+  {
+    id: "scen-decon-008",
+    type: "scenario",
+    domain: "Decontamination & Cleaning",
+    difficulty: "intermediate",
+    context: "You're partway through manually cleaning a stack of instruments at the sink. The enzymatic detergent solution has noticeably cooled (it feels lukewarm through your gloves) and the water has turned visibly brown with suspended debris. You still have a half-tray of instruments left to clean.",
+    question: "What is the correct next step?",
+    options: {
+      a: "Top off the sink with very hot tap water to bring the temperature back up, and continue cleaning the remaining instruments in the same basin",
+      b: "Add a fresh dose of enzymatic concentrate to the existing solution to compensate for the bioburden load, and continue",
+      c: "Continue cleaning — the brushing action is what removes soil; the water itself is just a carrier and the discoloration doesn't affect cleaning effectiveness",
+      d: "Drain the sink, rinse it, and prepare a fresh enzymatic solution at the temperature and dilution specified in the detergent's IFU before continuing with the remaining instruments",
+    },
+    correct: "d",
+    explanation: "Cleaning solution that is heavily soiled, off-temperature, or both must be discarded and replaced — not topped up or boosted. Two things have failed at once here. First, enzymatic detergents are formulated for a specific temperature window (commonly ~80–110°F / 27–43°C); below it, enzyme activity drops sharply, and adding very hot water can push it above the upper limit, denaturing the enzymes AND coagulating residual blood/protein onto the instruments — the opposite of what you want. Second, water saturated with bioburden re-deposits soil onto items and dilutes the active detergent. The correct response is always to drain, rinse the basin, and remake the solution per the manufacturer's IFU. There is no shortcut for fresh cleaning solution.",
+    realWorldNote: "A practical rule of thumb: change the solution between trays, when it visibly discolors, when temperature drifts outside the IFU range, or at minimum every 30 minutes. The detergent IFU is the authoritative source — keep it posted at the sink.",
+    standardRef: "AAMI ST79 — manual cleaning solution management; detergent manufacturer IFU",
+    tags: ["enzymatic detergent", "manual cleaning", "water temperature", "soil load", "protein coagulation", "IFU compliance"],
+  },
+
 ];
 
 // ─── UTILITY EXPORTS ──────────────────────────────────────────────────────────

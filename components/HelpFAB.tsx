@@ -18,9 +18,6 @@ const feedbackTypes: { value: FeedbackType; label: string; icon: string }[] = [
 export default function HelpFAB() {
   const pathname = usePathname()
 
-  // Menu state
-  const [menuOpen, setMenuOpen] = useState(false)
-
   // Chat state
   const [chatOpen, setChatOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -50,6 +47,18 @@ export default function HelpFAB() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Listen for triggers dispatched by the header buttons
+  useEffect(() => {
+    const openChatHandler = () => setChatOpen(true)
+    const openFeedbackHandler = () => setFeedbackOpen(true)
+    window.addEventListener('open-ai-chat', openChatHandler)
+    window.addEventListener('open-feedback', openFeedbackHandler)
+    return () => {
+      window.removeEventListener('open-ai-chat', openChatHandler)
+      window.removeEventListener('open-feedback', openFeedbackHandler)
+    }
+  }, [])
 
   // ── Chat handlers ──────────────────────────────────────────────────────────
   const sendChat = async () => {
@@ -125,61 +134,14 @@ export default function HelpFAB() {
     }
   }
 
-  const openChat = () => { setMenuOpen(false); setChatOpen(true) }
-  const openFeedback = () => { setMenuOpen(false); setFeedbackOpen(true) }
-
   // Hide on the public landing page
   if (pathname === '/') return null
 
   return (
     <>
-      {/* ── Floating Action Button ── */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        {/* Sub-buttons (shown when menu open) */}
-        {menuOpen && (
-          <div className="flex flex-col items-end gap-2 mb-1 slide-up">
-            <button
-              onClick={openChat}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-cream-2 rounded-full shadow-md text-sm font-mono text-navy hover:bg-cream transition"
-            >
-              <svg className="w-4 h-4 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              AI Chat
-            </button>
-            <button
-              onClick={openFeedback}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-cream-2 rounded-full shadow-md text-sm font-mono text-navy hover:bg-cream transition"
-            >
-              <svg className="w-4 h-4 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-              </svg>
-              Feedback
-            </button>
-          </div>
-        )}
-
-        {/* Main toggle button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="w-12 h-12 rounded-full bg-teal text-white shadow-lg hover:bg-teal-2 transition-all duration-200 flex items-center justify-center"
-          aria-label="Help menu"
-        >
-          {menuOpen ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          )}
-        </button>
-      </div>
-
       {/* ── Chat Window ── */}
       {chatOpen && (
-        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 slide-up border border-cream-2">
+        <div className="fixed bottom-6 right-6 w-80 sm:w-96 h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 slide-up border border-cream-2">
           <div className="bg-navy text-white px-4 py-3 flex justify-between items-center">
             <div>
               <div className="font-mono text-sm font-medium">SPD Study Assistant</div>

@@ -138,7 +138,7 @@ export default function LandingPage() {
           <div className="lp-fade-in inline-flex items-center gap-2 bg-teal/10 border border-teal/30 rounded-full px-4 py-1.5 mb-7">
             <span className="w-2 h-2 rounded-full bg-teal shadow-[0_0_8px_theme(colors.teal.DEFAULT)] inline-block" />
             <span className="font-mono text-teal text-[0.72rem] font-semibold tracking-widest">
-              NOW COVERING CRCST · CHL · CER · SJT
+              NOW COVERING CRCST · CHL · CER
             </span>
           </div>
 

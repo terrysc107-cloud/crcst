@@ -94,8 +94,8 @@ const FEATURES = [
   },
   {
     icon: '⏱️',
-    title: 'Mock Exam',
-    desc: 'Full timed simulation of the real certification exam format.',
+    title: 'Full Exam',
+    desc: '150-question, 3-hour timed simulation of the real certification exam.',
     href: '/crcst',
   },
 ]

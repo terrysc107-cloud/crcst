@@ -1,3 +1,5 @@
+import { cerGeneratedQuestions } from "./questions-cer-generated";
+
 export type QuestionType = "mcq" | "true_false";
 
 export interface CERQuestion {
@@ -12,7 +14,7 @@ export interface CERQuestion {
   difficulty: "easy" | "medium" | "hard";
 }
 
-export const cerQuestions: CERQuestion[] = [
+const cerBaseQuestions: CERQuestion[] = [
 
   // ═══════════════════════════════════════════════════════════════
   // CHAPTER 1: Introduction to Endoscopes
@@ -1757,6 +1759,8 @@ export const cerQuestions: CERQuestion[] = [
   },
 
 ];
+
+export const cerQuestions: CERQuestion[] = [...cerBaseQuestions, ...cerGeneratedQuestions];
 
 export const cerQuestionCount = cerQuestions.length;
 

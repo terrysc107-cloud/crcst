@@ -13,7 +13,7 @@ interface QuizData {
 
 interface QuizProps {
   quizData: QuizData
-  mode: 'practice' | 'flashcards' | 'mock' | 'custom' | 'quiz' | 'test' | 'homework'
+  mode: 'practice' | 'flashcards' | 'custom' | 'quiz' | 'test' | 'homework'
   onComplete: (results: any) => void
   onExit: () => void
   onPause?: (sessionData: any) => void
@@ -26,7 +26,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [showExplanation, setShowExplanation] = useState(false)
   const [isFlipped, setIsFlipped] = useState(false)
   const [timeLeft, setTimeLeft] = useState(
-    mode === 'mock' ? 50 * 60 : mode === 'quiz' ? 30 * 60 : mode === 'test' ? 150 * 60 : 0
+    mode === 'quiz' ? 30 * 60 : mode === 'test' ? 180 * 60 : 0
   )
   const [isPausing, setIsPausing] = useState(false)
   const [pauseSaved, setPauseSaved] = useState(false)
@@ -38,9 +38,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const hasAnswered = answers[current] !== null
   const isCorrect = hasAnswered && answers[current] === q.correct_answer
 
-  // Timer for mock exam
+  // Timer for timed exam modes
   useEffect(() => {
-    if ((mode !== 'mock' && mode !== 'quiz' && mode !== 'test') || timeLeft <= 0) return
+    if ((mode !== 'quiz' && mode !== 'test') || timeLeft <= 0) return
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -128,7 +128,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     if (rateLimitReached) return
     // In practice/homework mode, lock once explanation is showing
     if ((mode === 'practice' || mode === 'homework') && showExplanation) return
-    // In mock/custom mode, allow changing answers freely but only track first answer
+    // In timed/custom mode, allow changing answers freely but only track first answer
     const isFirstAnswer = !hasAnswered
 
     const newAnswers = [...answers]
@@ -458,7 +458,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     )
   }
 
-  // Quiz mode (practice, mock, custom)
+  // Quiz mode (practice, custom, quiz, test, homework)
   return (
     <div className="max-w-2xl mx-auto">
       {/* Progress bar */}
@@ -474,7 +474,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
             {current + 1} / {quizData.questions.length}
           </div>
         </div>
-        {(mode === 'mock' || mode === 'quiz' || mode === 'test') && (
+        {(mode === 'quiz' || mode === 'test') && (
           <div className={`mx-4 font-mono text-sm ${timeLeft < 300 ? 'text-wrong' : 'text-amber'}`}>
             ⏱ {formatTime(timeLeft)}
           </div>

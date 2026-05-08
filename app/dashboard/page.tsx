@@ -153,7 +153,7 @@ export default function DashboardPage() {
             Pass your <em className="text-amber">certification exam</em> with confidence.
           </h1>
           <p className="text-teal-3 max-w-xl mx-auto mb-8">
-            Comprehensive question banks, practice quizzes, and mock exams for CRCST, CHL, and CER certifications.
+            Comprehensive question banks, practice quizzes, and full timed exams for CRCST, CHL, and CER certifications.
           </p>
           <div className="flex justify-center gap-8 text-center">
             <div>
@@ -564,7 +564,7 @@ export default function DashboardPage() {
             {[
               { icon: '1', title: 'Practice Quiz', desc: 'Instant feedback on 20 questions' },
               { icon: '2', title: 'Flashcards', desc: 'Flip through cards to memorize' },
-              { icon: '3', title: 'Mock Exam', desc: 'Timed simulation of real exam' },
+              { icon: '3', title: 'Full Exam', desc: '150 questions · 3 hr timed simulation' },
               { icon: '4', title: 'Custom Quiz', desc: 'Build your own by domain' },
             ].map((feature, i) => (
               <div key={i} className="text-center">

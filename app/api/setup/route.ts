@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         CREATE TABLE IF NOT EXISTS public.quiz_sessions (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-          quiz_mode TEXT NOT NULL CHECK (quiz_mode IN ('practice', 'mock', 'flashcard', 'custom')),
+          quiz_mode TEXT NOT NULL CHECK (quiz_mode IN ('practice', 'test', 'quiz', 'flashcards', 'flashcard', 'custom', 'homework')),
           question_ids JSONB NOT NULL,
           answers JSONB NOT NULL,
           current_question_index INTEGER NOT NULL DEFAULT 0,

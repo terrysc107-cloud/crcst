@@ -282,6 +282,28 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {!sub.loading && sub.plan === 'free' && (
+          <div style={{
+            textAlign: 'center',
+            marginTop: '-0.5rem',
+            marginBottom: '1.25rem',
+            fontSize: '0.78rem',
+            color: 'rgba(0,0,0,0.5)',
+          }}>
+            Have an access code?{' '}
+            <Link
+              href="/redeem"
+              style={{
+                color: '#0D7377',
+                textDecoration: 'underline',
+                textDecorationColor: 'rgba(13,115,119,0.4)',
+              }}
+            >
+              Redeem it here
+            </Link>
+          </div>
+        )}
+
         <div className="text-xs tracking-widest text-text-3 mb-6 text-center">
           SELECT YOUR CERTIFICATION
         </div>

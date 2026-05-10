@@ -330,12 +330,20 @@ export default function ProgressionPage() {
                         )}
 
                         {isCompleted && (
-                          <Link
-                            href={`/progression/${level.id}`}
-                            className="text-[0.78rem] font-mono text-navy/45 underline tracking-[0.02em]"
-                          >
-                            Retake
-                          </Link>
+                          <div className="flex items-center gap-3">
+                            <Link
+                              href={`/progression/${level.id}/study`}
+                              className="text-[0.75rem] font-mono font-bold text-amber no-underline px-[0.85rem] py-[0.35rem] rounded-[7px] border border-amber/40 bg-amber/[6%]"
+                            >
+                              Study Module →
+                            </Link>
+                            <Link
+                              href={`/progression/${level.id}`}
+                              className="text-[0.78rem] font-mono text-navy/45 underline tracking-[0.02em]"
+                            >
+                              Retake
+                            </Link>
+                          </div>
                         )}
                       </div>
                     </div>

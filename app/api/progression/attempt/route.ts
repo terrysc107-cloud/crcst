@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { levelId, answers } = body as {
+  const { levelId, answers, durationSeconds = 0 } = body as {
     levelId: number
-    answers: Record<string, number> // questionId -> selected option index
+    answers: Record<string, number>
+    durationSeconds?: number
   }
 
   const level = PROGRESSION_LEVELS.find(l => l.id === levelId)
@@ -241,6 +242,25 @@ export async function POST(req: NextRequest) {
     // Perfect Round — 100%
     if (score === 100) await awardBadge('perfect-round')
   }
+
+  // Log session for study time tracking
+  const clampedDuration = Math.max(0, Math.min(durationSeconds, 7200))
+  await supabaseAdmin.from('user_sessions').insert({
+    user_id: user.id,
+    activity_type: 'progression',
+    cert: 'crcst',
+    duration_seconds: clampedDuration,
+    questions_answered: total,
+    score_pct: score,
+    xp_earned: xpBreakdown.total,
+    started_at: new Date(Date.now() - clampedDuration * 1000).toISOString(),
+    completed_at: new Date().toISOString(),
+  })
+
+  await supabaseAdmin.rpc('increment_study_seconds', {
+    p_user_id: user.id,
+    p_seconds: clampedDuration,
+  })
 
   return NextResponse.json({
     passed,

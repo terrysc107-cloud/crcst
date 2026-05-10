@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useSubscription } from '@/hooks/useSubscription'
-import { getXpTier } from '@/lib/progression-config'
+import { getXpTier, getNextXpTier } from '@/lib/progression-config'
 
 interface Certification {
   id: string
@@ -411,49 +411,127 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Progression Widget — live user stats */}
-        {progLoaded && (
-          <div style={{
-            background: 'rgba(20,189,172,0.04)',
-            border: '1px solid rgba(20,189,172,0.2)',
-            borderRadius: 12,
-            padding: '1rem 1.25rem',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-          }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.3rem', fontFamily: 'monospace' }}>
-                YOUR PROGRESSION
+        {/* XP + Progression Widget — shown to all users */}
+        {(() => {
+          const nextTier = getNextXpTier(progXp)
+          const barPct = nextTier
+            ? Math.min(100, Math.round(((progXp - tier.minXp) / (nextTier.minXp - tier.minXp)) * 100))
+            : 100
+          return (
+            <div style={{
+              background: '#0B1F3A',
+              border: '1px solid rgba(20,189,172,0.2)',
+              borderRadius: 14,
+              padding: '1.1rem 1.25rem',
+              marginBottom: '1rem',
+            }}>
+              {/* Top row: tier badge + XP total + CTA */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <span style={{
+                    fontSize: '0.62rem',
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.12em',
+                    color: tier.color,
+                    border: `1px solid ${tier.color}`,
+                    borderRadius: '100px',
+                    padding: '0.15rem 0.6rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase' as const,
+                  }}>
+                    {tier.label}
+                  </span>
+                  <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1.1rem', color: tier.color }}>
+                    {progXp} XP
+                  </span>
+                  {progLoaded && progBadgeCount > 0 && (
+                    <span style={{ fontSize: '0.75rem', color: 'rgba(245,240,232,0.4)', fontFamily: 'monospace' }}>
+                      · {progBadgeCount} badge{progBadgeCount !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                <Link
+                  href="/progression"
+                  style={{
+                    background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
+                    color: '#fff',
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: 8,
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap' as const,
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.04em',
+                    textDecoration: 'none',
+                    flexShrink: 0,
+                  }}
+                >
+                  {sub.isPaid ? 'View Progression →' : 'Earn XP →'}
+                </Link>
               </div>
-              <div style={{ fontSize: '0.85rem', color: 'rgba(0,0,0,0.65)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-                <span>XP: <strong>{progXp}</strong> &middot; <span style={{ color: tier.color, fontWeight: 600 }}>{tier.label}</span></span>
-                <span>Badges: <strong>{progBadgeCount}</strong></span>
-                <span>Levels: <strong>{progLevelsCompleted} / 5</strong></span>
+
+              {/* Progress bar to next tier */}
+              <div>
+                <div style={{
+                  height: 6,
+                  background: 'rgba(255,255,255,0.07)',
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${barPct}%`,
+                    background: `linear-gradient(90deg, ${tier.color}80, ${tier.color})`,
+                    borderRadius: 3,
+                    transition: 'width 0.6s ease',
+                  }} />
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: '0.3rem',
+                  fontSize: '0.65rem',
+                  fontFamily: 'monospace',
+                  color: 'rgba(245,240,232,0.28)',
+                }}>
+                  <span>{tier.label}</span>
+                  {nextTier
+                    ? <span>{nextTier.minXp - progXp} XP to {nextTier.label}</span>
+                    : <span>Max tier reached</span>
+                  }
+                </div>
               </div>
+
+              {/* Levels row — only if pro and has data */}
+              {progLoaded && sub.isPaid && progLevelsCompleted > 0 && (
+                <div style={{
+                  marginTop: '0.65rem',
+                  paddingTop: '0.65rem',
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  fontSize: '0.75rem',
+                  color: 'rgba(245,240,232,0.4)',
+                  fontFamily: 'monospace',
+                }}>
+                  {progLevelsCompleted} of 5 levels complete
+                </div>
+              )}
+
+              {/* Hook for free users */}
+              {!sub.loading && !sub.isPaid && (
+                <div style={{
+                  marginTop: '0.65rem',
+                  paddingTop: '0.65rem',
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  fontSize: '0.73rem',
+                  color: 'rgba(245,240,232,0.35)',
+                  fontFamily: 'monospace',
+                }}>
+                  Upgrade to Pro to earn XP, badges, and track progression →
+                </div>
+              )}
             </div>
-            <Link
-              href="/progression"
-              style={{
-                background: 'linear-gradient(135deg, #0D7377, #14BDAC)',
-                color: '#fff',
-                padding: '0.5rem 1.1rem',
-                borderRadius: 8,
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                whiteSpace: 'nowrap' as const,
-                fontFamily: 'monospace',
-                letterSpacing: '0.04em',
-                textDecoration: 'none',
-              }}
-            >
-              View Progression →
-            </Link>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Progression Mode Card */}
         <div style={{

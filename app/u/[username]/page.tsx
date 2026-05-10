@@ -9,6 +9,7 @@ interface Profile {
   id: string;
   username: string;
   display_name: string | null;
+  total_study_seconds: number | null;
   created_at: string;
 }
 
@@ -16,6 +17,16 @@ interface CertifiedUser {
   cert: string;
   pass_date: string;
   full_name: string;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatStudyTime(totalSeconds: number): string {
+  const hrs = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  if (hrs === 0) return `${mins} min`;
+  if (mins === 0) return `${hrs} hr`;
+  return `${hrs} hr ${mins} min`;
 }
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
@@ -29,7 +40,7 @@ async function getProfileData(username: string): Promise<{ profile: Profile; cer
 
   const { data: profile } = await sb
     .from("public_profiles")
-    .select("id, username, display_name, created_at")
+    .select("id, username, display_name, total_study_seconds, created_at")
     .eq("username", username)
     .single();
 
@@ -113,6 +124,7 @@ export default async function PublicProfilePage({
     month: "long",
     year: "numeric",
   });
+  const studySeconds = profile.total_study_seconds ?? 0;
 
   return (
     <div className="min-h-screen bg-navy text-white">
@@ -141,9 +153,21 @@ export default async function PublicProfilePage({
         <p className="font-mono text-white/40 text-xs tracking-widest mb-2 uppercase">
           @{username}
         </p>
-        <p className="text-white/45 text-sm">
+        <p className="text-white/45 text-sm mb-6">
           Sterile Processing Professional · Member since {joinDate}
         </p>
+
+        {/* Study time stat — only show if meaningful */}
+        {studySeconds >= 60 && (
+          <div className="inline-flex flex-col items-center gap-1 bg-white/[0.04] border border-white/10 rounded-2xl px-6 py-4">
+            <div className="font-serif text-2xl font-bold text-teal">
+              {formatStudyTime(studySeconds)}
+            </div>
+            <div className="font-mono text-white/40 text-[0.65rem] tracking-[0.1em] uppercase">
+              Verified Study Time
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Certifications */}

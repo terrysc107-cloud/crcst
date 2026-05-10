@@ -91,6 +91,9 @@ export default function LevelPage() {
   // Study guide toggle
   const [showGuide, setShowGuide] = useState(false)
 
+  // Start time for session duration tracking
+  const [quizStartedAt, setQuizStartedAt] = useState<number>(0)
+
   // ─── Access check on mount ────────────────────────────────────────────────
 
   useEffect(() => {
@@ -175,19 +178,23 @@ export default function LevelPage() {
     const session = await supabase.auth.getSession()
     const token = session.data.session?.access_token
 
+    const durationSeconds = quizStartedAt > 0
+      ? Math.round((Date.now() - quizStartedAt) / 1000)
+      : 0
+
     const res = await fetch('/api/progression/attempt', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ levelId, answers: finalAnswers }),
+      body: JSON.stringify({ levelId, answers: finalAnswers, durationSeconds }),
     })
 
     const data = await res.json()
     setResult(data)
     setSubmitting(false)
-  }, [levelId])
+  }, [levelId, quizStartedAt])
 
   // ─── Begin level ─────────────────────────────────────────────────────────
 
@@ -203,6 +210,7 @@ export default function LevelPage() {
     setAnswers({})
     setResult(null)
     setExpandedIds(new Set())
+    setQuizStartedAt(Date.now())
     setScreen('quiz')
   }
 
@@ -461,6 +469,23 @@ export default function LevelPage() {
         {/* PASS extras */}
         {result.passed && (
           <>
+            {/* Study Module card */}
+            <div className="mb-4 px-5 py-4 rounded-[10px] bg-amber/[6%] border border-amber/30">
+              <div className="text-[0.68rem] font-mono tracking-[0.12em] text-amber uppercase mb-2">
+                Study Module Unlocked
+              </div>
+              <p className="text-white/65 text-[0.85rem] leading-[1.55] mb-3">
+                Review the 5 key concepts for Level {level.id} and complete the CEU assessment.
+                Completion is tracked for future credentialing.
+              </p>
+              <Link
+                href={`/progression/${levelId}/study`}
+                className="inline-block bg-amber/[15%] border border-amber/50 text-amber no-underline px-4 py-[0.45rem] rounded-[8px] text-[0.8rem] font-bold font-mono tracking-[0.03em]"
+              >
+                Open Study Module →
+              </Link>
+            </div>
+
             {/* Next level unlocked */}
             {result.nextLevelUnlocked && (
               <div className="mb-4 px-5 py-4 rounded-[10px] bg-teal/[6%] border border-teal/45 relative overflow-hidden">

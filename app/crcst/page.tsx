@@ -8,6 +8,7 @@ import Results from '@/components/Results'
 import { QUESTIONS, type Question } from '@/lib/questions'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 import { getXpTier } from '@/lib/progression-config'
+import { awardQuizXp } from '@/lib/award-xp'
 import { useSubscription } from '@/hooks/useSubscription'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'homework'
@@ -262,6 +263,20 @@ export default function Home() {
         })),
       })
       loadStats(user.id)
+
+      // Award XP for this quiz session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        awardQuizXp({
+          mode: quizResults.mode,
+          cert: 'crcst',
+          correct: quizResults.correct,
+          total: quizResults.total,
+          elapsedSeconds: quizResults.elapsed ?? 0,
+          domains: domainScores,
+          accessToken: session.access_token,
+        })
+      }
     } catch (error) {
       console.error('Error saving results:', error)
     }

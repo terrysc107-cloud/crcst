@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { PROGRESSION_LEVELS, BONUS_MODULES, PROGRESSION_BADGES, getXpTier, getNextXpTier } from '@/lib/progression-config'
+import { PROGRESSION_LEVELS, LEVEL_TIERS, BONUS_MODULES, PROGRESSION_BADGES, getXpTier, getNextXpTier } from '@/lib/progression-config'
 import { useSubscription } from '@/hooks/useSubscription'
 import { Progress } from '@/components/ui/progress'
 
@@ -322,250 +322,97 @@ export default function ProgressionPage() {
 
       {/* Main content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        {/* Section label */}
-        <div
-          style={{
-            fontSize: '0.68rem',
-            letterSpacing: '0.12em',
-            color: 'rgba(13,27,42,0.45)',
-            textTransform: 'uppercase',
-            marginBottom: '1.25rem',
-            fontFamily: 'monospace',
-          }}
-        >
-          Core Levels
-        </div>
-
-        {/* Level cards — vertical stack */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
-          {PROGRESSION_LEVELS.map((level) => {
-            const status = levelStatus[level.id] ?? 'locked'
-            const score = bestScores[level.id]
-            const isLocked = status === 'locked'
-            const isUnlocked = status === 'unlocked'
-            const isCompleted = status === 'completed'
-            const showMessage = lockedClickMessage[level.id]
-
+        {/* Level grid — grouped by tier */}
+        <div className="mb-8">
+          {LEVEL_TIERS.map((tier) => {
+            const tierLevels = PROGRESSION_LEVELS.filter((l) => tier.levels.includes(l.id))
             return (
-              <div key={level.id}>
-                <div
-                  onClick={isLocked ? () => handleLockedClick(level.id) : undefined}
-                  style={{
-                    position: 'relative',
-                    background: '#fff',
-                    borderRadius: 14,
-                    padding: '1.25rem 1rem',
-                    cursor: isLocked ? 'default' : 'pointer',
-                    opacity: isLocked ? 0.5 : 1,
-                    filter: isLocked ? 'grayscale(1)' : 'none',
-                    border: isUnlocked
-                      ? '2px solid var(--teal)'
-                      : isCompleted
-                      ? '2px solid rgba(20,189,172,0.4)'
-                      : '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: isUnlocked
-                      ? '0 0 0 4px rgba(20,189,172,0.12)'
-                      : isCompleted
-                      ? '0 2px 8px rgba(0,0,0,0.06)'
-                      : '0 1px 4px rgba(0,0,0,0.05)',
-                    transition: 'box-shadow 0.2s, border-color 0.2s',
-                  }}
-                >
-                  {/* Lock icon — locked state */}
-                  {isLocked && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '1rem',
-                        color: 'rgba(13,27,42,0.35)',
-                      }}
-                    >
-                      <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
-                      </svg>
-                    </div>
-                  )}
-
-                  {/* Checkmark badge — completed state */}
-                  {isCompleted && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '1rem',
-                        width: 26,
-                        height: 26,
-                        background: 'rgba(20,189,172,0.12)',
-                        border: '1px solid rgba(20,189,172,0.4)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--teal)',
-                      }}
-                    >
-                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-
-                  {/* Card content */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
-                    {/* Level number circle */}
-                    <div
-                      className="flex-shrink-0"
-                      style={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: '50%',
-                        background: isCompleted
-                          ? 'rgba(20,189,172,0.12)'
-                          : isUnlocked
-                          ? 'var(--teal)'
-                          : 'rgba(13,27,42,0.08)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontFamily: 'serif',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        color: isUnlocked ? '#fff' : isCompleted ? 'var(--teal)' : 'rgba(13,27,42,0.4)',
-                      }}
-                    >
-                      {level.id}
-                    </div>
-
-                    <div style={{ flex: 1, minWidth: 0, paddingRight: isLocked || isCompleted ? '2rem' : 0 }}>
-                      <div
-                        style={{
-                          fontFamily: 'serif',
-                          fontWeight: 700,
-                          fontSize: '1.05rem',
-                          color: '#0D1B2A',
-                          marginBottom: '0.2rem',
-                        }}
-                      >
-                        Level {level.id}: {level.name}
-                      </div>
-                      <p
-                        style={{
-                          fontSize: '0.82rem',
-                          color: 'rgba(13,27,42,0.6)',
-                          lineHeight: 1.55,
-                          marginBottom: '0.75rem',
-                        }}
-                      >
-                        {level.description}
-                      </p>
-
-                      {/* Domain tags */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.85rem' }}>
-                        {level.domains.map((domain) => (
-                          <span
-                            key={domain}
-                            style={{
-                              fontSize: '0.68rem',
-                              fontFamily: 'monospace',
-                              letterSpacing: '0.04em',
-                              padding: '0.2rem 0.55rem',
-                              borderRadius: 100,
-                              background: 'rgba(13,27,42,0.06)',
-                              color: 'rgba(13,27,42,0.55)',
-                              border: '1px solid rgba(13,27,42,0.1)',
-                            }}
-                          >
-                            {domain}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Bottom row: score + action */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                        {/* Best score */}
-                        {isCompleted && score != null && (
-                          <span
-                            style={{
-                              fontSize: '0.8rem',
-                              fontFamily: 'monospace',
-                              color: 'var(--teal)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Best: {score}%
-                          </span>
-                        )}
-                        {!isCompleted && (
-                          <span
-                            style={{
-                              fontSize: '0.75rem',
-                              fontFamily: 'monospace',
-                              color: 'rgba(13,27,42,0.35)',
-                            }}
-                          >
-                            {level.questionCount} questions · {level.passingScore}% to pass
-                          </span>
-                        )}
-
-                        {/* Action button */}
-                        {isUnlocked && (
-                          <Link
-                            href={`/progression/${level.id}`}
-                            style={{
-                              display: 'inline-block',
-                              background: 'var(--teal)',
-                              color: '#fff',
-                              padding: '0.45rem 1.1rem',
-                              borderRadius: 8,
-                              fontSize: '0.82rem',
-                              fontWeight: 700,
-                              fontFamily: 'monospace',
-                              letterSpacing: '0.03em',
-                              textDecoration: 'none',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            Start Challenge →
-                          </Link>
-                        )}
-
-                        {isCompleted && (
-                          <Link
-                            href={`/progression/${level.id}`}
-                            style={{
-                              fontSize: '0.78rem',
-                              fontFamily: 'monospace',
-                              color: 'rgba(13,27,42,0.45)',
-                              textDecoration: 'underline',
-                              letterSpacing: '0.02em',
-                            }}
-                          >
-                            Retake
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+              <div key={tier.label} className="mb-7">
+                <div className="text-[0.68rem] font-mono tracking-[0.12em] uppercase text-navy/40 mb-3">
+                  {tier.label}
                 </div>
+                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
+                  {tierLevels.map((level) => {
+                    const status = levelStatus[level.id] ?? 'locked'
+                    const score = bestScores[level.id]
+                    const isLocked = status === 'locked'
+                    const isUnlocked = status === 'unlocked'
+                    const isCompleted = status === 'completed'
+                    const showMessage = lockedClickMessage[level.id]
 
-                {/* Locked inline message */}
-                {isLocked && showMessage && (
-                  <div
-                    style={{
-                      marginTop: '0.4rem',
-                      padding: '0.6rem 1rem',
-                      borderRadius: 8,
-                      background: 'rgba(13,27,42,0.06)',
-                      border: '1px solid rgba(13,27,42,0.1)',
-                      fontSize: '0.8rem',
-                      color: 'rgba(13,27,42,0.55)',
-                      fontFamily: 'monospace',
-                    }}
-                  >
-                    Complete Level {level.id - 1} to unlock this
-                  </div>
-                )}
+                    const tileBase =
+                      'relative w-full text-left rounded-xl p-3 transition-all duration-200 select-none'
+                    const tileStyle = isUnlocked
+                      ? `${tileBase} bg-white border-2 border-teal shadow-[0_0_0_3px_rgba(20,189,172,0.12)] cursor-pointer hover:shadow-[0_0_0_5px_rgba(20,189,172,0.18)]`
+                      : isCompleted
+                      ? `${tileBase} bg-white border border-teal/35 cursor-pointer hover:border-teal/60`
+                      : `${tileBase} bg-white/60 border border-navy/10 opacity-50 cursor-default`
+
+                    const inner = (
+                      <>
+                        {/* Status badge — top right */}
+                        <div className="absolute top-2 right-2">
+                          {isCompleted && (
+                            <div className="w-[18px] h-[18px] rounded-full bg-teal/15 border border-teal/40 flex items-center justify-center">
+                              <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                          {isLocked && (
+                            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" className="text-navy/30">
+                              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                            </svg>
+                          )}
+                        </div>
+
+                        {/* Level number */}
+                        <div className={`text-xl font-black font-display leading-none mb-1 ${isUnlocked ? 'text-teal' : isCompleted ? 'text-teal/80' : 'text-navy/25'}`}>
+                          {level.id}
+                        </div>
+
+                        {/* Level name */}
+                        <div className="text-[0.72rem] font-sans leading-snug text-navy/65 line-clamp-2 pr-3">
+                          {level.name}
+                        </div>
+
+                        {/* Score / call-to-action */}
+                        {isCompleted && score != null && (
+                          <div className="mt-2 text-[0.65rem] font-mono text-teal font-semibold">
+                            {score}%
+                          </div>
+                        )}
+                        {isUnlocked && (
+                          <div className="mt-2 text-[0.65rem] font-mono text-teal font-bold">
+                            Go →
+                          </div>
+                        )}
+                      </>
+                    )
+
+                    return (
+                      <div key={level.id} className="relative">
+                        {isLocked ? (
+                          <button className={tileStyle} onClick={() => handleLockedClick(level.id)}>
+                            {inner}
+                          </button>
+                        ) : (
+                          <Link href={`/progression/${level.id}`} className={tileStyle}>
+                            {inner}
+                          </Link>
+                        )}
+
+                        {/* Locked tooltip */}
+                        {isLocked && showMessage && (
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 text-center text-[0.7rem] font-mono bg-navy text-white/75 rounded-lg px-2.5 py-1.5 z-10 pointer-events-none shadow-lg">
+                            Complete Level {level.id - 1} first
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy" />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )
           })}

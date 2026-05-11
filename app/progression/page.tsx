@@ -6,10 +6,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { PROGRESSION_LEVELS, BONUS_MODULES, PROGRESSION_BADGES, getXpTier, getNextXpTier } from '@/lib/progression-config'
 import { useSubscription } from '@/hooks/useSubscription'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Label } from '@/components/ui/typography'
 
 type LevelStatus = 'locked' | 'unlocked' | 'completed'
 
@@ -135,35 +131,44 @@ export default function ProgressionPage() {
 
   if (loading || sub.loading) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="w-9 h-9 rounded-full border-[3px] border-teal/20 border-t-teal animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F0E8' }}>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            border: '3px solid rgba(20,189,172,0.2)',
+            borderTopColor: 'var(--teal)',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
   if (!sub.isPaid) {
     return (
-      <div className="min-h-screen bg-navy flex flex-col items-center justify-center px-5 py-8 text-center">
-        <div className="w-16 h-16 bg-teal/10 border border-teal/30 rounded-2xl flex items-center justify-center mb-6">
-          <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24" className="text-teal">
+      <div className="min-h-screen flex flex-col items-center justify-center px-5 text-center" style={{ background: '#0D1B2A' }}>
+        <div style={{ width: 64, height: 64, background: 'rgba(20,189,172,0.1)', border: '1px solid rgba(20,189,172,0.3)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--teal)' }}>
             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
           </svg>
         </div>
-        <Label color="teal" className="mb-3">Pro Feature</Label>
-        <h1 className="font-display text-[clamp(1.6rem,5vw,2.2rem)] font-bold text-cream leading-tight mb-4 max-w-[420px]">
+        <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: 'var(--teal)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+          Pro Feature
+        </div>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.6rem, 5vw, 2.2rem)', fontWeight: 700, color: '#F5F0E8', lineHeight: 1.2, marginBottom: '1rem', maxWidth: 420 }}>
           Progression Mode requires a Pro subscription
         </h1>
-        <p className="text-[0.92rem] text-cream/50 leading-relaxed max-w-[380px] mb-8">
+        <p style={{ fontSize: '0.92rem', color: 'rgba(245,240,232,0.5)', lineHeight: 1.65, maxWidth: 380, marginBottom: '2rem' }}>
           Unlock the full Unlock Challenge — five sequential levels, XP rewards, badges, and bonus content — with a Pro or Triple Crown plan.
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <Button asChild variant="gradient">
-            <Link href="/pricing">Upgrade to Pro →</Link>
-          </Button>
-          <Link
-            href="/dashboard"
-            className="block text-center py-[0.9rem] text-cream/40 border border-cream/10 rounded-[10px] text-[0.85rem] font-mono no-underline"
-          >
+          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'linear-gradient(135deg, var(--teal), var(--teal-dark))', color: '#0D1B2A', borderRadius: 10, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem', letterSpacing: '0.04em', textDecoration: 'none' }}>
+            Upgrade to Pro →
+          </Link>
+          <Link href="/dashboard" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'transparent', color: 'rgba(245,240,232,0.4)', border: '1px solid rgba(245,240,232,0.1)', borderRadius: 10, fontSize: '0.85rem', fontFamily: 'monospace', textDecoration: 'none' }}>
             Back to Dashboard
           </Link>
         </div>
@@ -172,64 +177,159 @@ export default function ProgressionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen overflow-x-hidden" style={{ background: '#F5F0E8' }}>
       {/* Header */}
-      <header className="bg-navy text-white px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal rounded-lg flex items-center justify-center font-serif text-xl font-bold text-white">
+      <header className="px-4 sm:px-6 py-4" style={{ background: '#0D1B2A', color: '#fff' }}>
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="flex-shrink-0"
+              style={{
+                width: 40,
+                height: 40,
+                background: 'var(--teal)',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'serif',
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#fff',
+              }}
+            >
               SP
             </div>
-            <div>
-              <div className="font-serif text-[1.1rem] font-bold">SPD Cert Companion</div>
-              <div className="text-xs text-teal tracking-[0.04em]">Sterile Processing Certification Prep</div>
+            <div className="min-w-0">
+              <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 700 }} className="truncate">
+                SPD Cert Companion
+              </div>
+              <div className="hidden sm:block" style={{ fontSize: '0.72rem', color: 'var(--teal)', letterSpacing: '0.04em' }}>
+                Sterile Processing Certification Prep
+              </div>
             </div>
           </div>
-          <Link href="/dashboard" className="text-[0.8rem] text-white/50 no-underline">
+          <Link
+            href="/dashboard"
+            className="flex-shrink-0"
+            style={{
+              fontSize: '0.8rem',
+              color: 'rgba(255,255,255,0.5)',
+              textDecoration: 'none',
+            }}
+          >
             ← Dashboard
           </Link>
         </div>
       </header>
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-navy to-[#2A3A4A] text-white py-14 px-6 text-center">
+      <div
+        className="px-4 sm:px-6 py-12 sm:py-16 text-center"
+        style={{
+          background: 'linear-gradient(to bottom, #0D1B2A, #2A3A4A)',
+          color: '#fff',
+        }}
+      >
         <div className="max-w-2xl mx-auto">
-          <Label color="teal" className="mb-3">The Unlock Challenge</Label>
-          <h1 className="font-display text-[clamp(1.75rem,5vw,2.5rem)] font-bold mb-4 leading-tight">
+          <div
+            style={{
+              fontSize: '0.7rem',
+              letterSpacing: '0.14em',
+              color: 'var(--teal)',
+              marginBottom: '0.75rem',
+              textTransform: 'uppercase',
+            }}
+          >
+            The Unlock Challenge
+          </div>
+          <h1
+            style={{
+              fontFamily: 'serif',
+              fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
+              fontWeight: 700,
+              marginBottom: '1rem',
+              lineHeight: 1.2,
+            }}
+          >
             Knowledge is{' '}
-            <em className="text-amber italic">earned</em>, not accessed.
+            <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>earned</em>, not accessed.
           </h1>
-          <p className="text-[0.95rem] text-white/60 max-w-[480px] mx-auto mb-8 leading-relaxed">
+          <p
+            style={{
+              fontSize: '0.95rem',
+              color: 'rgba(255,255,255,0.6)',
+              maxWidth: 480,
+              margin: '0 auto 2rem',
+              lineHeight: 1.6,
+            }}
+          >
             Work through five sequential levels covering the full CRCST domain. Each level
             unlocks the next. Pass a level to advance — or prove mastery to unlock bonus
             content.
           </p>
 
+          {/* Progress bar */}
           <div className="max-w-sm mx-auto">
-            <div className="flex justify-between text-xs text-white/50 mb-2">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.5)',
+                marginBottom: '0.5rem',
+              }}
+            >
               <span>Progress</span>
-              <span className="text-teal font-semibold">{completedCount} of 5 levels completed</span>
+              <span style={{ color: 'var(--teal)', fontWeight: 600 }}>
+                {completedCount} of 5 levels completed
+              </span>
             </div>
-            <Progress value={(completedCount / 5) * 100} color="teal" className="h-2" />
+            <div
+              style={{
+                height: 8,
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: 100,
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  width: `${(completedCount / 5) * 100}%`,
+                  background: 'var(--teal)',
+                  borderRadius: 100,
+                  transition: 'width 0.6s ease',
+                }}
+              />
+            </div>
 
+            {/* XP display */}
             {(() => {
               const tier = getXpTier(totalXp)
               const next = getNextXpTier(totalXp)
               return (
-                <div className="mt-6 flex flex-col items-center gap-[0.4rem]">
-                  <div className="flex items-center gap-[0.6rem]">
-                    <span
-                      className="text-[0.65rem] tracking-[0.12em] font-mono uppercase rounded-full px-[0.6rem] py-[0.15rem] opacity-90"
-                      style={{ color: tier.color, border: `1px solid ${tier.color}` }}
-                    >
+                <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      letterSpacing: '0.12em',
+                      fontFamily: 'monospace',
+                      color: tier.color,
+                      textTransform: 'uppercase',
+                      border: `1px solid ${tier.color}`,
+                      borderRadius: 100,
+                      padding: '0.15rem 0.6rem',
+                      opacity: 0.9,
+                    }}>
                       {tier.label}
                     </span>
-                    <span className="font-mono font-bold text-base" style={{ color: tier.color }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1rem', color: tier.color }}>
                       {totalXp} XP
                     </span>
                   </div>
                   {next && (
-                    <div className="text-[0.7rem] text-cream/35 font-mono">
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace' }}>
                       {next.minXp - totalXp} XP to {next.label}
                     </div>
                   )}
@@ -241,10 +341,23 @@ export default function ProgressionPage() {
       </div>
 
       {/* Main content */}
-      <div className="max-w-3xl mx-auto px-6 py-10">
-        <Label className="mb-5">Core Levels</Label>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        {/* Section label */}
+        <div
+          style={{
+            fontSize: '0.68rem',
+            letterSpacing: '0.12em',
+            color: 'rgba(13,27,42,0.45)',
+            textTransform: 'uppercase',
+            marginBottom: '1.25rem',
+            fontFamily: 'monospace',
+          }}
+        >
+          Core Levels
+        </div>
 
-        <div className="flex flex-col gap-4 mb-10">
+        {/* Level cards — vertical stack */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
           {PROGRESSION_LEVELS.map((level) => {
             const status = levelStatus[level.id] ?? 'locked'
             const score = bestScores[level.id]
@@ -257,101 +370,219 @@ export default function ProgressionPage() {
               <div key={level.id}>
                 <div
                   onClick={isLocked ? () => handleLockedClick(level.id) : undefined}
-                  className={cn(
-                    'relative bg-white rounded-[14px] p-6 transition-[box-shadow,border-color]',
-                    isLocked && 'cursor-default opacity-50 grayscale border border-white/10 shadow-[0_1px_4px_rgba(0,0,0,0.05)]',
-                    isUnlocked && 'border-2 border-teal shadow-[0_0_0_4px_rgba(20,189,172,0.12)]',
-                    isCompleted && 'border-2 border-teal/40 shadow-[0_2px_8px_rgba(0,0,0,0.06)]',
-                  )}
+                  style={{
+                    position: 'relative',
+                    background: '#fff',
+                    borderRadius: 14,
+                    padding: '1.25rem 1rem',
+                    cursor: isLocked ? 'default' : 'pointer',
+                    opacity: isLocked ? 0.5 : 1,
+                    filter: isLocked ? 'grayscale(1)' : 'none',
+                    border: isUnlocked
+                      ? '2px solid var(--teal)'
+                      : isCompleted
+                      ? '2px solid rgba(20,189,172,0.4)'
+                      : '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: isUnlocked
+                      ? '0 0 0 4px rgba(20,189,172,0.12)'
+                      : isCompleted
+                      ? '0 2px 8px rgba(0,0,0,0.06)'
+                      : '0 1px 4px rgba(0,0,0,0.05)',
+                    transition: 'box-shadow 0.2s, border-color 0.2s',
+                  }}
                 >
+                  {/* Lock icon — locked state */}
                   {isLocked && (
-                    <div className="absolute top-4 right-4 text-navy/35">
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        right: '1rem',
+                        color: 'rgba(13,27,42,0.35)',
+                      }}
+                    >
                       <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                       </svg>
                     </div>
                   )}
 
+                  {/* Checkmark badge — completed state */}
                   {isCompleted && (
-                    <div className="absolute top-4 right-4 w-[26px] h-[26px] bg-teal/[12%] border border-teal/40 rounded-full flex items-center justify-center text-teal">
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        right: '1rem',
+                        width: 26,
+                        height: 26,
+                        background: 'rgba(20,189,172,0.12)',
+                        border: '1px solid rgba(20,189,172,0.4)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--teal)',
+                      }}
+                    >
                       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                   )}
 
-                  <div className="flex items-start gap-4">
+                  {/* Card content */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
+                    {/* Level number circle */}
                     <div
-                      className={cn(
-                        'flex-shrink-0 w-[42px] h-[42px] rounded-full flex items-center justify-center font-serif font-bold text-lg',
-                        isCompleted && 'bg-teal/[12%] text-teal',
-                        isUnlocked && 'bg-teal text-white',
-                        isLocked && 'bg-navy/[8%] text-navy/40',
-                      )}
+                      className="flex-shrink-0"
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: '50%',
+                        background: isCompleted
+                          ? 'rgba(20,189,172,0.12)'
+                          : isUnlocked
+                          ? 'var(--teal)'
+                          : 'rgba(13,27,42,0.08)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: 'serif',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
+                        color: isUnlocked ? '#fff' : isCompleted ? 'var(--teal)' : 'rgba(13,27,42,0.4)',
+                      }}
                     >
                       {level.id}
                     </div>
 
-                    <div className={cn('flex-1 min-w-0', (isLocked || isCompleted) && 'pr-8')}>
-                      <div className="font-serif font-bold text-[1.05rem] text-navy mb-1">
+                    <div style={{ flex: 1, minWidth: 0, paddingRight: isLocked || isCompleted ? '2rem' : 0 }}>
+                      <div
+                        style={{
+                          fontFamily: 'serif',
+                          fontWeight: 700,
+                          fontSize: '1.05rem',
+                          color: '#0D1B2A',
+                          marginBottom: '0.2rem',
+                        }}
+                      >
                         Level {level.id}: {level.name}
                       </div>
-                      <p className="text-[0.82rem] text-navy/60 leading-[1.55] mb-3">
+                      <p
+                        style={{
+                          fontSize: '0.82rem',
+                          color: 'rgba(13,27,42,0.6)',
+                          lineHeight: 1.55,
+                          marginBottom: '0.75rem',
+                        }}
+                      >
                         {level.description}
                       </p>
 
-                      <div className="flex flex-wrap gap-[0.35rem] mb-[0.85rem]">
+                      {/* Domain tags */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.85rem' }}>
                         {level.domains.map((domain) => (
                           <span
                             key={domain}
-                            className="text-[0.68rem] font-mono tracking-[0.04em] px-[0.55rem] py-[0.2rem] rounded-full bg-navy/[6%] text-navy/55 border border-navy/10"
+                            style={{
+                              fontSize: '0.68rem',
+                              fontFamily: 'monospace',
+                              letterSpacing: '0.04em',
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: 100,
+                              background: 'rgba(13,27,42,0.06)',
+                              color: 'rgba(13,27,42,0.55)',
+                              border: '1px solid rgba(13,27,42,0.1)',
+                            }}
                           >
                             {domain}
                           </span>
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between flex-wrap gap-2">
+                      {/* Bottom row: score + action */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        {/* Best score */}
                         {isCompleted && score != null && (
-                          <span className="text-[0.8rem] font-mono text-teal font-semibold">
+                          <span
+                            style={{
+                              fontSize: '0.8rem',
+                              fontFamily: 'monospace',
+                              color: 'var(--teal)',
+                              fontWeight: 600,
+                            }}
+                          >
                             Best: {score}%
                           </span>
                         )}
                         {!isCompleted && (
-                          <span className="text-[0.75rem] font-mono text-navy/35">
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              fontFamily: 'monospace',
+                              color: 'rgba(13,27,42,0.35)',
+                            }}
+                          >
                             {level.questionCount} questions · {level.passingScore}% to pass
                           </span>
                         )}
 
+                        {/* Action button */}
                         {isUnlocked && (
-                          <Button asChild size="sm">
-                            <Link href={`/progression/${level.id}`}>Start Challenge →</Link>
-                          </Button>
+                          <Link
+                            href={`/progression/${level.id}`}
+                            style={{
+                              display: 'inline-block',
+                              background: 'var(--teal)',
+                              color: '#fff',
+                              padding: '0.45rem 1.1rem',
+                              borderRadius: 8,
+                              fontSize: '0.82rem',
+                              fontWeight: 700,
+                              fontFamily: 'monospace',
+                              letterSpacing: '0.03em',
+                              textDecoration: 'none',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            Start Challenge →
+                          </Link>
                         )}
 
                         {isCompleted && (
-                          <div className="flex items-center gap-3">
-                            <Link
-                              href={`/progression/${level.id}/study`}
-                              className="text-[0.75rem] font-mono font-bold text-amber no-underline px-[0.85rem] py-[0.35rem] rounded-[7px] border border-amber/40 bg-amber/[6%]"
-                            >
-                              Study Module →
-                            </Link>
-                            <Link
-                              href={`/progression/${level.id}`}
-                              className="text-[0.78rem] font-mono text-navy/45 underline tracking-[0.02em]"
-                            >
-                              Retake
-                            </Link>
-                          </div>
+                          <Link
+                            href={`/progression/${level.id}`}
+                            style={{
+                              fontSize: '0.78rem',
+                              fontFamily: 'monospace',
+                              color: 'rgba(13,27,42,0.45)',
+                              textDecoration: 'underline',
+                              letterSpacing: '0.02em',
+                            }}
+                          >
+                            Retake
+                          </Link>
                         )}
                       </div>
                     </div>
                   </div>
                 </div>
 
+                {/* Locked inline message */}
                 {isLocked && showMessage && (
-                  <div className="mt-[0.4rem] px-4 py-[0.6rem] rounded-lg bg-navy/[6%] border border-navy/10 text-[0.8rem] text-navy/55 font-mono">
+                  <div
+                    style={{
+                      marginTop: '0.4rem',
+                      padding: '0.6rem 1rem',
+                      borderRadius: 8,
+                      background: 'rgba(13,27,42,0.06)',
+                      border: '1px solid rgba(13,27,42,0.1)',
+                      fontSize: '0.8rem',
+                      color: 'rgba(13,27,42,0.55)',
+                      fontFamily: 'monospace',
+                    }}
+                  >
                     Complete Level {level.id - 1} to unlock this
                   </div>
                 )}
@@ -362,37 +593,87 @@ export default function ProgressionPage() {
 
         {/* Weak Spots */}
         {weakSpots.length > 0 && (
-          <div className="mb-10">
-            <Label className="mb-5">Your Weak Spots</Label>
-            <div className="bg-white rounded-[14px] border border-navy/10 overflow-hidden">
-              <div className="px-6 py-[0.85rem] border-b border-navy/[7%] text-[0.78rem] text-navy/45 font-mono tracking-[0.02em]">
+          <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{
+              fontSize: '0.68rem',
+              letterSpacing: '0.12em',
+              color: 'rgba(13,27,42,0.45)',
+              textTransform: 'uppercase',
+              marginBottom: '1.25rem',
+              fontFamily: 'monospace',
+            }}>
+              Your Weak Spots
+            </div>
+            <div style={{
+              background: '#fff',
+              borderRadius: 14,
+              border: '1px solid rgba(13,27,42,0.1)',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                padding: '0.85rem 1.25rem',
+                borderBottom: '1px solid rgba(13,27,42,0.07)',
+                fontSize: '0.78rem',
+                color: 'rgba(13,27,42,0.45)',
+                fontFamily: 'monospace',
+                letterSpacing: '0.02em',
+              }}>
                 Domains where you score lowest — based on your quiz history
               </div>
               {weakSpots.map((spot, i) => {
-                const color = spot.accuracy < 50 ? '#EF4444' : spot.accuracy < 70 ? '#DAA520' : '#14BDAC'
+                const color = spot.accuracy < 50 ? '#EF4444' : spot.accuracy < 70 ? 'var(--amber)' : 'var(--teal)'
                 return (
-                  <div
-                    key={spot.name}
-                    className={cn(
-                      'px-6 py-4 flex items-center justify-between gap-4',
-                      i > 0 && 'border-t border-navy/[7%]',
-                    )}
-                  >
-                    <div className="flex items-center gap-[0.85rem] flex-1 min-w-0">
-                      <div
-                        className="flex-shrink-0 w-11 h-11 rounded-[10px] flex items-center justify-center font-mono font-bold text-[0.88rem]"
-                        style={{ background: `${color}12`, border: `1px solid ${color}40`, color }}
-                      >
+                  <div key={spot.name} style={{
+                    padding: '1rem 1.25rem',
+                    borderTop: i === 0 ? 'none' : '1px solid rgba(13,27,42,0.07)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        flexShrink: 0,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 10,
+                        background: `${color}12`,
+                        border: `1px solid ${color}40`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        color,
+                      }}>
                         {spot.accuracy}%
                       </div>
-                      <div>
-                        <div className="font-semibold text-[0.9rem] text-navy mb-[0.15rem]">{spot.name}</div>
-                        <div className="text-[0.7rem] text-navy/40 font-mono">{spot.total} questions answered</div>
+                      <div className="min-w-0">
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0D1B2A', marginBottom: '0.15rem' }} className="truncate">
+                          {spot.name}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'rgba(13,27,42,0.4)', fontFamily: 'monospace' }}>
+                          {spot.total} questions answered
+                        </div>
                       </div>
                     </div>
                     <Link
                       href={`/crcst?domain=${encodeURIComponent(spot.name)}`}
-                      className="flex-shrink-0 text-[0.75rem] font-mono font-bold text-teal no-underline px-[0.9rem] py-[0.4rem] rounded-[7px] border border-teal/30 bg-teal/[6%]"
+                      style={{
+                        flexShrink: 0,
+                        fontSize: '0.75rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        color: 'var(--teal)',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap' as const,
+                        padding: '0.4rem 0.9rem',
+                        borderRadius: 7,
+                        border: '1px solid rgba(20,189,172,0.3)',
+                        background: 'rgba(20,189,172,0.06)',
+                      }}
                     >
                       Practice →
                     </Link>
@@ -403,52 +684,106 @@ export default function ProgressionPage() {
           </div>
         )}
 
-        {/* Bonus Modules */}
-        <Label className="mb-5">Bonus Modules</Label>
-        <div className="flex flex-col gap-[0.85rem]">
+        {/* Bonus modules */}
+        <div
+          style={{
+            fontSize: '0.68rem',
+            letterSpacing: '0.12em',
+            color: 'rgba(13,27,42,0.45)',
+            textTransform: 'uppercase',
+            marginBottom: '1.25rem',
+            fontFamily: 'monospace',
+          }}
+        >
+          Bonus Modules
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           {BONUS_MODULES.map((module) => {
             const isUnlockedBonus = unlockedBonuses.has(module.id)
+
             return (
               <div
                 key={module.id}
-                className={cn(
-                  'relative bg-white rounded-[14px] p-5',
-                  isUnlockedBonus
-                    ? 'border-2 border-amber/50 shadow-[0_0_0_4px_rgba(218,165,32,0.08)]'
-                    : 'opacity-[0.55] border border-navy/10 shadow-sm',
-                )}
+                style={{
+                  position: 'relative',
+                  background: '#fff',
+                  borderRadius: 14,
+                  padding: '1.25rem 1rem',
+                  opacity: isUnlockedBonus ? 1 : 0.55,
+                  border: isUnlockedBonus
+                    ? '2px solid rgba(218,165,32,0.5)'
+                    : '1px solid rgba(13,27,42,0.1)',
+                  boxShadow: isUnlockedBonus
+                    ? '0 0 0 4px rgba(218,165,32,0.08)'
+                    : '0 1px 4px rgba(0,0,0,0.04)',
+                }}
               >
+                {/* Lock icon for locked bonus */}
                 {!isUnlockedBonus && (
-                  <div className="absolute top-4 right-4 text-navy/30">
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '1rem',
+                      right: '1rem',
+                      color: 'rgba(13,27,42,0.3)',
+                    }}
+                  >
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                     </svg>
                   </div>
                 )}
 
-                <div className="flex items-start gap-4">
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  {/* Amber accent dot */}
                   <div
-                    className={cn(
-                      'flex-shrink-0 w-2.5 h-2.5 rounded-full mt-[0.35rem]',
-                      isUnlockedBonus ? 'bg-amber' : 'bg-navy/15',
-                    )}
+                    style={{
+                      flexShrink: 0,
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      background: isUnlockedBonus ? 'var(--amber)' : 'rgba(13,27,42,0.15)',
+                      marginTop: '0.35rem',
+                    }}
                   />
 
-                  <div className="flex-1 min-w-0">
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
-                      className={cn(
-                        'font-serif font-bold text-base mb-1',
-                        isUnlockedBonus ? 'text-navy' : 'text-navy/70',
-                      )}
+                      style={{
+                        fontFamily: 'serif',
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        color: isUnlockedBonus ? '#0D1B2A' : 'rgba(13,27,42,0.7)',
+                        marginBottom: '0.25rem',
+                      }}
                     >
                       {module.title}
                     </div>
-                    <p className="text-[0.82rem] text-navy/55 leading-[1.55] mb-3">
+                    <p
+                      style={{
+                        fontSize: '0.82rem',
+                        color: 'rgba(13,27,42,0.55)',
+                        lineHeight: 1.55,
+                        marginBottom: '0.75rem',
+                      }}
+                    >
                       {module.description}
                     </p>
 
+                    {/* Locked label */}
                     {!isUnlockedBonus && (
-                      <div className="text-[0.72rem] font-mono text-navy/40 tracking-[0.04em] flex items-center gap-[0.35rem]">
+                      <div
+                        style={{
+                          fontSize: '0.72rem',
+                          fontFamily: 'monospace',
+                          color: 'rgba(13,27,42,0.4)',
+                          letterSpacing: '0.04em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                        }}
+                      >
                         <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                         </svg>
@@ -456,10 +791,23 @@ export default function ProgressionPage() {
                       </div>
                     )}
 
+                    {/* Open button — unlocked */}
                     {isUnlockedBonus && (
                       <Link
                         href={`/progression/bonus/${module.id}`}
-                        className="inline-block bg-amber/[12%] border border-amber/50 text-amber no-underline px-4 py-[0.4rem] rounded-lg text-[0.8rem] font-bold font-mono tracking-[0.03em]"
+                        style={{
+                          display: 'inline-block',
+                          background: 'rgba(218,165,32,0.12)',
+                          border: '1px solid rgba(218,165,32,0.5)',
+                          color: 'var(--amber)',
+                          padding: '0.4rem 1rem',
+                          borderRadius: 8,
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          fontFamily: 'monospace',
+                          letterSpacing: '0.03em',
+                          textDecoration: 'none',
+                        }}
                       >
                         Open →
                       </Link>
@@ -473,47 +821,72 @@ export default function ProgressionPage() {
       </div>
 
       {/* Badge Locker */}
-      <div className="max-w-3xl mx-auto px-6 pb-10">
-        <Label className="mb-5">Badge Locker</Label>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-[0.85rem]">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-10">
+        <div
+          style={{
+            fontSize: '0.68rem',
+            letterSpacing: '0.12em',
+            color: 'rgba(13,27,42,0.45)',
+            textTransform: 'uppercase',
+            marginBottom: '1.25rem',
+            fontFamily: 'monospace',
+          }}
+        >
+          Badge Locker
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {PROGRESSION_BADGES.map((badge) => {
             const earned = earnedBadgeIds.has(badge.id)
             return (
               <div
                 key={badge.id}
-                className={cn(
-                  'bg-white rounded-[14px] p-4 text-center border transition-[box-shadow]',
-                  !earned && 'opacity-50 grayscale border-navy/[9%] shadow-sm',
-                )}
-                style={earned ? {
-                  border: `2px solid ${badge.color}60`,
-                  boxShadow: `0 0 0 4px ${badge.color}12`,
-                } : undefined}
+                style={{
+                  background: '#fff',
+                  borderRadius: 14,
+                  padding: '1rem',
+                  textAlign: 'center',
+                  border: earned
+                    ? `2px solid ${badge.color}60`
+                    : '1px solid rgba(13,27,42,0.09)',
+                  boxShadow: earned
+                    ? `0 0 0 4px ${badge.color}12`
+                    : '0 1px 4px rgba(0,0,0,0.04)',
+                  opacity: earned ? 1 : 0.5,
+                  filter: earned ? 'none' : 'grayscale(1)',
+                  transition: 'box-shadow 0.2s',
+                }}
               >
-                <div
-                  className={cn(
-                    'w-12 h-12 rounded-full flex items-center justify-center text-[1.4rem] mx-auto mb-[0.6rem]',
-                    !earned && 'bg-navy/[6%] border border-navy/10',
-                  )}
-                  style={earned ? {
-                    background: `${badge.color}18`,
-                    border: `1px solid ${badge.color}50`,
-                  } : undefined}
-                >
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: earned ? `${badge.color}18` : 'rgba(13,27,42,0.06)',
+                  border: earned ? `1px solid ${badge.color}50` : '1px solid rgba(13,27,42,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.4rem',
+                  margin: '0 auto 0.6rem',
+                }}>
                   {badge.icon}
                 </div>
-                <div
-                  className={cn(
-                    'font-serif font-bold text-[0.82rem] mb-[0.3rem] leading-tight',
-                    earned ? 'text-navy' : 'text-navy/50',
-                  )}
-                >
+                <div style={{
+                  fontFamily: 'serif',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  color: earned ? '#0D1B2A' : 'rgba(13,27,42,0.5)',
+                  marginBottom: '0.3rem',
+                  lineHeight: 1.3,
+                }}>
                   {badge.name}
                 </div>
-                <div
-                  className={cn('text-[0.68rem] font-mono tracking-[0.03em]', !earned && 'text-navy/35')}
-                  style={earned ? { color: badge.color } : undefined}
-                >
+                <div style={{
+                  fontSize: '0.68rem',
+                  fontFamily: 'monospace',
+                  color: earned ? badge.color : 'rgba(13,27,42,0.35)',
+                  letterSpacing: '0.03em',
+                }}>
                   {earned ? 'Earned' : badge.triggerLabel}
                 </div>
               </div>
@@ -523,9 +896,19 @@ export default function ProgressionPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-navy text-white px-6 py-8 text-center mt-8">
-        <div className="font-serif text-[1.1rem] mb-[0.4rem]">SPD Cert Companion</div>
-        <div className="text-xs text-teal">Helping sterile processing professionals pass their certification exams</div>
+      <footer
+        className="px-4 py-8 text-center mt-8"
+        style={{
+          background: '#0D1B2A',
+          color: '#fff',
+        }}
+      >
+        <div style={{ fontFamily: 'serif', fontSize: '1.1rem', marginBottom: '0.4rem' }}>
+          SPD Cert Companion
+        </div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--teal)' }}>
+          Helping sterile processing professionals pass their certification exams
+        </div>
       </footer>
     </div>
   )

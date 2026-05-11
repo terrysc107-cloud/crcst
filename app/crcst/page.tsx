@@ -10,6 +10,7 @@ import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant
 import { getXpTier } from '@/lib/progression-config'
 import { awardQuizXp } from '@/lib/award-xp'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Badge } from '@/components/ui/badge'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'homework'
 type QuizMode = 'practice' | 'flashcards' | 'custom' | 'quiz' | 'test' | 'homework'
@@ -570,19 +571,22 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '0.75rem', paddingTop: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.65rem', fontFamily: 'monospace', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' }}>
+            <div className="border-t border-white/[0.08] mt-3 pt-[0.65rem] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[0.65rem] font-mono tracking-[0.1em] text-white/35 uppercase">
                   Progression XP
                 </span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.82rem', color: '#14BDAC' }}>
+                <span className="font-mono font-bold text-[0.82rem] text-teal">
                   {progXp} XP
                 </span>
-                <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: getXpTier(progXp).color, border: `1px solid ${getXpTier(progXp).color}50`, borderRadius: 100, padding: '0.1rem 0.45rem' }}>
+                <span
+                  className="text-[0.68rem] font-mono rounded-full py-[0.1rem] px-[0.45rem] border"
+                  style={{ color: getXpTier(progXp).color, borderColor: `${getXpTier(progXp).color}50` }}
+                >
                   {getXpTier(progXp).label}
                 </span>
               </div>
-              <a href="/progression" style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: '#14BDAC', textDecoration: 'none', letterSpacing: '0.04em' }}>
+              <a href="/progression" className="text-[0.7rem] font-mono text-teal no-underline tracking-[0.04em]">
                 View →
               </a>
             </div>
@@ -648,55 +652,39 @@ export default function Home() {
           {/* Progression Challenge — featured entry point */}
           <a
             href={sub.isPaid ? '/progression' : '/pricing'}
-            style={{ display: 'block', marginBottom: '1.25rem', textDecoration: 'none' }}
+            className="block mb-5 no-underline"
           >
-            <div style={{
-              background: '#0D1B2A',
-              border: `2px solid ${sub.isPaid ? '#14BDAC' : 'rgba(20,189,172,0.3)'}`,
-              borderRadius: 14,
-              padding: '1rem 1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.75rem',
-              boxShadow: sub.isPaid ? '0 0 0 4px rgba(20,189,172,0.08)' : 'none',
-              opacity: sub.isPaid ? 1 : 0.75,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <div style={{
-                  width: 42, height: 42,
-                  background: 'rgba(20,189,172,0.15)',
-                  border: '1px solid rgba(20,189,172,0.4)',
-                  borderRadius: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1.2rem', flexShrink: 0,
-                }}>
+            <div className={`bg-navy py-4 px-5 flex items-center justify-between gap-3 rounded-[14px] border-2 transition ${
+              sub.isPaid
+                ? 'border-teal shadow-[0_0_0_4px_rgba(20,189,172,0.08)]'
+                : 'border-teal/30 opacity-75'
+            }`}>
+              <div className="flex items-center gap-[0.85rem]">
+                <div className="w-[42px] h-[42px] bg-teal/15 border border-teal/40 rounded-[10px] flex items-center justify-center text-[1.2rem] shrink-0">
                   {sub.isPaid ? '🔓' : '🔒'}
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.58rem', fontFamily: 'monospace', letterSpacing: '0.14em', color: '#14BDAC', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
+                  <div className="text-[0.58rem] font-mono tracking-[0.14em] text-teal uppercase mb-[0.15rem]">
                     The Unlock Challenge
                   </div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontWeight: 700, color: '#F5F0E8', fontSize: '1rem', lineHeight: 1.2 }}>
+                  <div className="font-serif font-bold text-cream text-base leading-tight">
                     Progression Mode
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'rgba(245,240,232,0.4)', marginTop: '0.2rem', fontFamily: 'monospace' }}>
+                  <div className="text-[0.72rem] text-cream/40 mt-[0.2rem] font-mono">
                     5 levels · earn XP · unlock bonus content
                   </div>
                 </div>
               </div>
-              <div style={{ flexShrink: 0, textAlign: 'right' }}>
+              <div className="shrink-0 text-right">
                 {!sub.isPaid ? (
-                  <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', fontWeight: 700, color: '#DAA520', border: '1px solid rgba(218,165,32,0.4)', borderRadius: 100, padding: '0.2rem 0.6rem', letterSpacing: '0.06em' }}>
-                    PRO
-                  </span>
+                  <Badge variant="pro">PRO</Badge>
                 ) : progXp > 0 ? (
                   <>
-                    <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#14BDAC', fontSize: '0.9rem' }}>{progXp} XP</div>
-                    <div style={{ fontSize: '0.65rem', color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace' }}>{getXpTier(progXp).label}</div>
+                    <div className="font-mono font-bold text-teal text-[0.9rem]">{progXp} XP</div>
+                    <div className="text-[0.65rem] text-cream/35 font-mono">{getXpTier(progXp).label}</div>
                   </>
                 ) : (
-                  <div style={{ fontFamily: 'monospace', fontWeight: 700, color: '#14BDAC', fontSize: '0.9rem' }}>Start →</div>
+                  <div className="font-mono font-bold text-teal text-[0.9rem]">Start →</div>
                 )}
               </div>
             </div>

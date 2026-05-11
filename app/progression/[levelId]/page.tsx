@@ -319,8 +319,7 @@ export default function LevelPage() {
             >
               <span>Key Concepts — Study Before You Begin</span>
               <span
-                className="text-[0.9rem] transition-transform duration-200"
-                style={{ transform: showGuide ? 'rotate(180deg)' : 'none' }}
+                className={`text-[0.9rem] transition-transform duration-200 ${showGuide ? 'rotate-180' : ''}`}
               >
                 ▾
               </span>
@@ -663,8 +662,7 @@ export default function LevelPage() {
                       className="w-full px-5 py-[0.6rem] bg-white/[3%] border-none border-t border-white/[7%] text-white/45 text-[0.78rem] cursor-pointer text-left font-mono tracking-[0.04em] flex items-center gap-[0.4rem] hover:text-teal transition-colors"
                     >
                       <span
-                        className="inline-block transition-transform duration-200"
-                        style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                        className={`inline-block transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
                       >
                         ›
                       </span>

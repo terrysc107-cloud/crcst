@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { PROGRESSION_LEVELS, BONUS_MODULES, PROGRESSION_BADGES, getXpTier, getNextXpTier } from '@/lib/progression-config'
 import { useSubscription } from '@/hooks/useSubscription'
+import { Progress } from '@/components/ui/progress'
 
 type LevelStatus = 'locked' | 'unlocked' | 'completed'
 
@@ -162,7 +163,7 @@ export default function ProgressionPage() {
           Progression Mode requires a Pro subscription
         </h1>
         <p style={{ fontSize: '0.92rem', color: 'rgba(245,240,232,0.5)', lineHeight: 1.65, maxWidth: 380, marginBottom: '2rem' }}>
-          Unlock the full Unlock Challenge — five sequential levels, XP rewards, badges, and bonus content — with a Pro or Triple Crown plan.
+          Unlock the full Progression Challenge — {PROGRESSION_LEVELS.length} sequential levels, XP rewards, badges, and bonus content — with a Pro or Triple Crown plan.
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Link href="/pricing" style={{ display: 'block', textAlign: 'center', padding: '0.9rem', background: 'linear-gradient(135deg, var(--teal), var(--teal-dark))', color: '#0D1B2A', borderRadius: 10, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem', letterSpacing: '0.04em', textDecoration: 'none' }}>
@@ -264,45 +265,24 @@ export default function ProgressionPage() {
               lineHeight: 1.6,
             }}
           >
-            Work through five sequential levels covering the full CRCST domain. Each level
+            Work through {PROGRESSION_LEVELS.length} sequential levels covering the full CRCST domain. Each level
             unlocks the next. Pass a level to advance — or prove mastery to unlock bonus
             content.
           </p>
 
           {/* Progress bar */}
           <div className="max-w-sm mx-auto">
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.5)',
-                marginBottom: '0.5rem',
-              }}
-            >
+            <div className="flex justify-between text-[0.75rem] text-white/50 mb-2">
               <span>Progress</span>
-              <span style={{ color: 'var(--teal)', fontWeight: 600 }}>
-                {completedCount} of 5 levels completed
+              <span className="text-teal font-semibold">
+                {completedCount} of {PROGRESSION_LEVELS.length} levels completed
               </span>
             </div>
-            <div
-              style={{
-                height: 8,
-                background: 'rgba(255,255,255,0.1)',
-                borderRadius: 100,
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  height: '100%',
-                  width: `${(completedCount / 5) * 100}%`,
-                  background: 'var(--teal)',
-                  borderRadius: 100,
-                  transition: 'width 0.6s ease',
-                }}
-              />
-            </div>
+            <Progress
+              value={(completedCount / PROGRESSION_LEVELS.length) * 100}
+              color="teal"
+              className="h-2"
+            />
 
             {/* XP display */}
             {(() => {

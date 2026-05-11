@@ -9,6 +9,7 @@ import { QUESTIONS, type AppQuestion as Question } from '@/lib/questions-chl'
 import { selectQuestionText, buildCorrectCountMap } from '@/lib/question-variant'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UpsellGateModal } from '@/components/UpsellGateModal'
+import { awardQuizXp } from '@/lib/award-xp'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'locked'
 type QuizMode = 'practice' | 'flashcards' | 'test' | 'custom'
@@ -190,6 +191,20 @@ export default function CHLPage() {
         })),
       })
       loadStats(user.id)
+
+      // Award XP for this quiz session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        awardQuizXp({
+          mode: quizResults.mode,
+          cert: 'chl',
+          correct: quizResults.correct,
+          total: quizResults.total,
+          elapsedSeconds: quizResults.elapsed ?? 0,
+          domains: domainScores,
+          accessToken: session.access_token,
+        })
+      }
     } catch (error) {
       console.error('Error saving results:', error)
     }

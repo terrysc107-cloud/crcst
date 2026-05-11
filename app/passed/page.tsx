@@ -483,8 +483,7 @@ export default function PassedExamFlow() {
         {/* Confetti canvas */}
         <canvas
           ref={confettiRef}
-          className="absolute inset-0 pointer-events-none"
-          style={{ zIndex: 10 }}
+          className="absolute inset-0 pointer-events-none z-10"
         />
 
         <div className="relative z-20 max-w-2xl mx-auto px-4 py-10 text-center">
@@ -700,8 +699,7 @@ export default function PassedExamFlow() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-[0.6rem] py-2 font-sans"
-                  style={{ borderBottom: i < 4 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
+                  className={`flex items-center gap-[0.6rem] py-2 font-sans ${i < 4 ? 'border-b border-white/[5%]' : ''}`}
                 >
                   <span className="text-[0.9rem]" style={{ color: nextCfg.accent }}>✓</span>
                   <span className="text-[#D0E4EE] text-[0.88rem]">{item}</span>

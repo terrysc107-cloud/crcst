@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Label, Heading } from "@/components/ui/typography";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type Cert = "CRCST" | "CHL" | "CER";
@@ -239,15 +241,15 @@ export default function PassedExamFlow() {
 
   async function handleSubmit() {
     const e = validate();
-    if (Object.keys(e).length) { 
-      setErrors(e); 
-      return; 
+    if (Object.keys(e).length) {
+      setErrors(e);
+      return;
     }
     setErrors({});
     setStep("verifying");
 
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     // User must be authenticated to claim badge
     if (!user) {
       setStep("entry");
@@ -304,7 +306,6 @@ export default function PassedExamFlow() {
     const url = getLinkedInShareUrl();
     const popup = window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
     if (!popup) {
-      // Popup blocked — navigate directly so the user still gets to LinkedIn
       window.location.href = url;
     }
   }
@@ -320,59 +321,39 @@ export default function PassedExamFlow() {
   // ── ENTRY FORM ──────────────────────────────────────────────────────────────
   if (step === "entry") {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)",
-        fontFamily: "'Georgia', serif",
-      }}>
+      <div
+        className="min-h-screen flex items-center justify-center p-4 font-display"
+        style={{ background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)" }}
+      >
         <div className="w-full max-w-lg">
           {/* Header */}
           <div className="text-center mb-10">
             <div className="text-6xl mb-4 animate-bounce">🎉</div>
-            <h1 style={{
-              fontSize: "2.4rem",
-              fontWeight: "900",
-              color: "#FFFFFF",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
-              marginBottom: "0.5rem",
-            }}>
+            <Heading as="h1" size="3xl" className="text-white mb-2 tracking-[-0.02em]">
               You passed your exam!
-            </h1>
-            <p style={{ color: "#7B96A8", fontSize: "1rem", fontFamily: "Calibri, sans-serif" }}>
-              Let's make it official. Enter your details to receive your digital badge.
+            </Heading>
+            <p className="text-[#7B96A8] text-base font-sans">
+              Let&apos;s make it official. Enter your details to receive your digital badge.
             </p>
           </div>
 
           {/* Card */}
-          <div style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "20px",
-            padding: "2rem",
-            backdropFilter: "blur(10px)",
-          }}>
+          <div className="bg-white/[4%] border border-white/10 rounded-[20px] p-8 backdrop-blur-[10px]">
 
             {/* Cert selector */}
             <div className="mb-6">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
-                WHICH CERTIFICATION DID YOU PASS?
-              </label>
+              <Label color="teal" className="mb-[0.6rem]">Which certification did you pass?</Label>
               <div className="grid grid-cols-2 gap-3">
                 {(["CRCST", "CHL", "CER"] as Cert[]).map((c) => (
                   <button
                     key={c}
                     onClick={() => setCert(c)}
+                    className="px-3 py-3 rounded-[10px] cursor-pointer transition-all duration-200 font-display text-[0.95rem]"
                     style={{
-                      padding: "0.75rem",
-                      borderRadius: "10px",
                       border: cert === c ? `2px solid ${CERT_CONFIG[c].accent}` : "2px solid rgba(255,255,255,0.1)",
                       background: cert === c ? `${CERT_CONFIG[c].color}33` : "transparent",
                       color: cert === c ? CERT_CONFIG[c].accent : "#7B96A8",
                       fontWeight: cert === c ? "700" : "400",
-                      fontSize: "0.95rem",
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                      fontFamily: "Georgia, serif",
                     }}
                   >
                     {c}
@@ -383,64 +364,42 @@ export default function PassedExamFlow() {
 
             {/* Name */}
             <div className="mb-5">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
-                YOUR FULL NAME
-              </label>
+              <Label color="teal" className="mb-[0.6rem]">Your full name</Label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => { setName(e.target.value); setErrors({}); }}
                 placeholder="Jane Smith"
+                className="w-full px-4 py-[0.85rem] rounded-[10px] bg-white/5 text-white text-base font-sans outline-none box-border"
                 style={{
-                  width: "100%",
-                  padding: "0.85rem 1rem",
-                  borderRadius: "10px",
                   border: errors.name ? "2px solid #E85D04" : "2px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.05)",
-                  color: "#FFFFFF",
-                  fontSize: "1rem",
-                  fontFamily: "Calibri, sans-serif",
-                  outline: "none",
-                  boxSizing: "border-box",
                 }}
               />
-              {errors.name && <p style={{ color: "#E85D04", fontSize: "0.8rem", marginTop: "0.3rem", fontFamily: "Calibri, sans-serif" }}>{errors.name}</p>}
+              {errors.name && <p className="text-[#E85D04] text-[0.8rem] mt-[0.3rem] font-sans">{errors.name}</p>}
             </div>
 
             {/* HSPA # */}
             <div className="mb-5">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
-                HSPA MEMBER NUMBER
-              </label>
+              <Label color="teal" className="mb-[0.6rem]">HSPA member number</Label>
               <input
                 type="text"
                 value={hspaMember}
                 onChange={(e) => { setHspaMember(e.target.value); setErrors({}); }}
                 placeholder="e.g. 123456"
+                className="w-full px-4 py-[0.85rem] rounded-[10px] bg-white/5 text-white text-base font-sans outline-none box-border"
                 style={{
-                  width: "100%",
-                  padding: "0.85rem 1rem",
-                  borderRadius: "10px",
                   border: errors.hspaMember ? "2px solid #E85D04" : "2px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.05)",
-                  color: "#FFFFFF",
-                  fontSize: "1rem",
-                  fontFamily: "Calibri, sans-serif",
-                  outline: "none",
-                  boxSizing: "border-box",
                 }}
               />
               {errors.hspaMember
-                ? <p style={{ color: "#E85D04", fontSize: "0.8rem", marginTop: "0.3rem", fontFamily: "Calibri, sans-serif" }}>{errors.hspaMember}</p>
-                : <p style={{ color: "#7B96A8", fontSize: "0.78rem", marginTop: "0.35rem", fontFamily: "Calibri, sans-serif" }}>Found on your HSPA membership card or at hspa.com</p>
+                ? <p className="text-[#E85D04] text-[0.8rem] mt-[0.3rem] font-sans">{errors.hspaMember}</p>
+                : <p className="text-[#7B96A8] text-[0.78rem] mt-[0.35rem] font-sans">Found on your HSPA membership card or at hspa.com</p>
               }
             </div>
 
             {/* Pass date */}
             <div className="mb-7">
-              <label style={{ display: "block", color: "#14BDAC", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.6rem", fontFamily: "Calibri, sans-serif" }}>
-                DATE YOU PASSED
-              </label>
+              <Label color="teal" className="mb-[0.6rem]">Date you passed</Label>
               <input
                 type="date"
                 defaultValue={new Date().toISOString().split("T")[0]}
@@ -448,75 +407,40 @@ export default function PassedExamFlow() {
                   const d = new Date(e.target.value + "T12:00:00");
                   setPassDate(d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
                 }}
-                style={{
-                  width: "100%",
-                  padding: "0.85rem 1rem",
-                  borderRadius: "10px",
-                  border: "2px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.05)",
-                  color: "#FFFFFF",
-                  fontSize: "1rem",
-                  fontFamily: "Calibri, sans-serif",
-                  outline: "none",
-                  boxSizing: "border-box",
-                  colorScheme: "dark",
-                }}
+                className="w-full px-4 py-[0.85rem] rounded-[10px] border-2 border-white/[12%] bg-white/5 text-white text-base font-sans outline-none box-border"
+                style={{ colorScheme: "dark" }}
               />
             </div>
 
             {/* Submit error */}
             {errors.submit && (
-              <div style={{
-                background: "rgba(232,93,4,0.15)",
-                border: "1px solid rgba(232,93,4,0.4)",
-                borderRadius: "10px",
-                padding: "0.85rem 1rem",
-                marginBottom: "1rem",
-              }}>
-                <p style={{ color: "#E85D04", fontSize: "0.88rem", margin: 0, fontFamily: "Calibri, sans-serif" }}>
+              <div className="bg-[#E85D04]/15 border border-[#E85D04]/40 rounded-[10px] px-4 py-[0.85rem] mb-4">
+                <p className="text-[#E85D04] text-[0.88rem] m-0 font-sans">
                   {errors.submit}
                 </p>
               </div>
             )}
 
             {/* Submit */}
-            <button
+            <Button
               onClick={handleSubmit}
+              className="w-full py-4 rounded-xl text-[1.05rem] font-bold tracking-[0.03em] font-sans"
               style={{
-                width: "100%",
-                padding: "1rem",
-                borderRadius: "12px",
-                border: "none",
                 background: `linear-gradient(135deg, ${cfg.color}, ${cfg.accent})`,
-                color: "#FFFFFF",
-                fontSize: "1.05rem",
-                fontWeight: "700",
-                cursor: "pointer",
-                letterSpacing: "0.03em",
-                fontFamily: "Calibri, sans-serif",
                 boxShadow: `0 4px 20px ${cfg.accent}40`,
-                transition: "all 0.2s",
               }}
             >
               Claim My {cert} Badge →
-            </button>
+            </Button>
 
-            <p style={{ textAlign: "center", color: "#7B96A8", fontSize: "0.75rem", marginTop: "1rem", fontFamily: "Calibri, sans-serif" }}>
+            <p className="text-center text-[#7B96A8] text-xs mt-4 font-sans">
               Your badge is yours to download and share on LinkedIn
             </p>
-            
+
             {/* Back to Home link */}
             <Link
               href="/"
-              style={{
-                display: "block",
-                textAlign: "center",
-                color: "#7B96A8",
-                fontSize: "0.85rem",
-                marginTop: "1.5rem",
-                fontFamily: "Calibri, sans-serif",
-                textDecoration: "none",
-              }}
+              className="block text-center text-[#7B96A8] text-[0.85rem] mt-6 font-sans no-underline"
             >
               ← Back to Home
             </Link>
@@ -529,22 +453,19 @@ export default function PassedExamFlow() {
   // ── VERIFYING ───────────────────────────────────────────────────────────────
   if (step === "verifying") {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-        background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)",
-      }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)" }}
+      >
         <div className="text-center px-4">
-          <div style={{
-            width: 80, height: 80, borderRadius: "50%",
-            border: `4px solid ${cfg.accent}`,
-            borderTopColor: "transparent",
-            margin: "0 auto 2rem",
-            animation: "spin 0.8s linear infinite",
-          }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <p style={{ color: "#FFFFFF", fontSize: "1.1rem", fontFamily: "Georgia, serif" }}>
+          <div
+            className="w-20 h-20 rounded-full border-4 border-t-transparent mx-auto mb-8 animate-spin"
+            style={{ borderColor: `${cfg.accent} transparent transparent transparent` }}
+          />
+          <p className="text-white text-lg font-display">
             Verifying your certification…
           </p>
-          <p style={{ color: "#7B96A8", fontSize: "0.85rem", marginTop: "0.5rem", fontFamily: "Calibri, sans-serif" }}>
+          <p className="text-[#7B96A8] text-[0.85rem] mt-2 font-sans">
             Generating your badge
           </p>
         </div>
@@ -555,10 +476,10 @@ export default function PassedExamFlow() {
   // ── CELEBRATION ─────────────────────────────────────────────────────────────
   if (step === "celebration") {
     return (
-      <div className="min-h-screen relative overflow-hidden" style={{
-        background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 40%, #021B3A 100%)",
-        fontFamily: "Georgia, serif",
-      }}>
+      <div
+        className="min-h-screen relative overflow-hidden font-display"
+        style={{ background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 40%, #021B3A 100%)" }}
+      >
         {/* Confetti canvas */}
         <canvas
           ref={confettiRef}
@@ -569,61 +490,53 @@ export default function PassedExamFlow() {
         <div className="relative z-20 max-w-2xl mx-auto px-4 py-10 text-center">
 
           {/* Headline */}
-          <div style={{ marginBottom: "0.5rem" }}>
-            <span style={{
-              display: "inline-block",
-              background: `linear-gradient(135deg, ${cfg.color}40, ${cfg.accent}40)`,
-              border: `1px solid ${cfg.accent}50`,
-              borderRadius: "100px",
-              padding: "0.3rem 1.2rem",
-              fontSize: "0.75rem",
-              color: cfg.accent,
-              letterSpacing: "0.12em",
-              fontFamily: "Calibri, sans-serif",
-              marginBottom: "1rem",
-            }}>
+          <div className="mb-2">
+            <span
+              className="inline-block rounded-full px-5 py-[0.3rem] text-xs tracking-[0.12em] font-sans mb-4"
+              style={{
+                background: `linear-gradient(135deg, ${cfg.color}40, ${cfg.accent}40)`,
+                border: `1px solid ${cfg.accent}50`,
+                color: cfg.accent,
+              }}
+            >
               CERTIFIED ✓
             </span>
           </div>
 
-          <h1 style={{
-            fontSize: "clamp(2rem, 5vw, 3rem)",
-            fontWeight: "900",
-            color: "#FFFFFF",
-            lineHeight: 1.1,
-            marginBottom: "0.75rem",
-          }}>
+          <Heading as="h1" size="3xl" className="text-white mb-3 text-[clamp(2rem,5vw,3rem)]">
             Congratulations,<br />
             <span style={{ color: cfg.accent }}>{name}!</span>
-          </h1>
+          </Heading>
 
-          <p style={{ color: "#A0BCD0", fontSize: "1rem", marginBottom: "2.5rem", fontFamily: "Calibri, sans-serif" }}>
-            You are now a <strong style={{ color: "#FFFFFF" }}>{cert}</strong> — {cfg.label}.
+          <p className="text-[#A0BCD0] text-base mb-10 font-sans">
+            You are now a <strong className="text-white">{cert}</strong> — {cfg.label}.
             <br />This is a real achievement. Be proud of it.
           </p>
 
           {/* Badge */}
-          <div style={{ maxWidth: 280, margin: "0 auto 2rem", position: "relative" }}>
+          <div className="max-w-[280px] mx-auto mb-8 relative">
             {/* Glow effect behind badge */}
-            <div style={{
-              position: "absolute", inset: "-20px",
-              background: `radial-gradient(circle, ${cfg.accent}30 0%, transparent 70%)`,
-              borderRadius: "50%",
-              animation: "pulse 2s ease-in-out infinite",
-            }} />
+            <div
+              className="absolute rounded-full animate-pulse"
+              style={{
+                inset: "-20px",
+                background: `radial-gradient(circle, ${cfg.accent}30 0%, transparent 70%)`,
+              }}
+            />
             {/* Shimmer ring */}
-            <div style={{
-              position: "absolute", inset: "-8px",
-              borderRadius: "50%",
-              border: `2px solid transparent`,
-              background: `linear-gradient(90deg, transparent, ${cfg.accent}60, transparent) border-box`,
-              WebkitMask: "linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)",
-              WebkitMaskComposite: "xor",
-              maskComposite: "exclude",
-              animation: "shimmer 2s linear infinite",
-            }} />
+            <div
+              className="absolute rounded-full"
+              style={{
+                inset: "-8px",
+                border: "2px solid transparent",
+                background: `linear-gradient(90deg, transparent, ${cfg.accent}60, transparent) border-box`,
+                WebkitMask: "linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
+                animation: "shimmer 2s linear infinite",
+              }}
+            />
             <style>{`
-              @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
               @keyframes badgeDrop { from{opacity:0;transform:translateY(-30px) scale(0.85)} to{opacity:1;transform:translateY(0) scale(1)} }
               @keyframes shimmer { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
             `}</style>
@@ -633,161 +546,80 @@ export default function PassedExamFlow() {
           </div>
 
           {/* Stats strip */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "1rem",
-            marginBottom: "2rem",
-          }}>
+          <div className="grid grid-cols-3 gap-4 mb-8">
             {[
               { label: "Certification", value: cert },
               { label: "Member #", value: hspaMember },
               { label: "Date Earned", value: passDate.split(",")[0] },
             ].map((s, i) => (
-              <div key={i} style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "12px",
-                padding: "1rem 0.5rem",
-              }}>
-                <div style={{ color: cfg.accent, fontSize: "1.1rem", fontWeight: "700" }}>{s.value}</div>
-                <div style={{ color: "#7B96A8", fontSize: "0.7rem", letterSpacing: "0.08em", fontFamily: "Calibri, sans-serif", marginTop: "0.2rem" }}>{s.label.toUpperCase()}</div>
+              <div key={i} className="bg-white/[4%] border border-white/[8%] rounded-xl py-4 px-2">
+                <div className="font-bold text-lg font-display" style={{ color: cfg.accent }}>{s.value}</div>
+                <div className="text-[#7B96A8] text-[0.7rem] tracking-[0.08em] font-sans mt-[0.2rem] uppercase">{s.label}</div>
               </div>
             ))}
           </div>
 
           {/* Action buttons */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: 380, margin: "0 auto 2rem" }}>
+          <div className="flex flex-col gap-[0.9rem] max-w-[380px] mx-auto mb-8">
 
             {/* LinkedIn Share */}
-            <button
+            <Button
               onClick={handleShare}
+              className="w-full py-4 rounded-xl text-base font-bold font-sans flex items-center justify-center gap-2"
               style={{
-                padding: "1rem",
-                borderRadius: "12px",
-                border: "none",
                 background: `linear-gradient(135deg, ${cfg.color}, ${cfg.accent})`,
-                color: "#FFFFFF",
-                fontSize: "1rem",
-                fontWeight: "700",
-                cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
                 boxShadow: `0 4px 20px ${cfg.accent}40`,
-                transition: "all 0.2s",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
               }}
             >
               🔗 Share on LinkedIn
-            </button>
+            </Button>
 
             {/* Copy profile link */}
             {username && (
-              <button
+              <Button
                 onClick={handleCopyLink}
-                style={{
-                  padding: "0.85rem",
-                  borderRadius: "12px",
-                  border: `1px solid ${cfg.accent}40`,
-                  background: "rgba(255,255,255,0.04)",
-                  color: "#FFFFFF",
-                  fontSize: "0.9rem",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  fontFamily: "Calibri, sans-serif",
-                  transition: "all 0.2s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
-                }}
+                variant="outline"
+                className="w-full py-[0.85rem] rounded-xl text-[0.9rem] font-sans flex items-center justify-center gap-2"
+                style={{ borderColor: `${cfg.accent}40` }}
               >
                 {copiedLink ? "✓ Link copied!" : `📋 Copy profile link — spdcertprep.com/u/${username}`}
-              </button>
+              </Button>
             )}
 
             {/* View public profile */}
             {username && (
-              <a
-                href={`/u/${username}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
-                  padding: "0.85rem",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "rgba(255,255,255,0.03)",
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "0.88rem",
-                  textDecoration: "none",
-                  fontFamily: "Calibri, sans-serif",
-                  transition: "all 0.2s",
-                }}
-              >
-                👤 View my public profile
-              </a>
+              <Button asChild variant="ghost" className="w-full py-[0.85rem] rounded-xl text-[0.88rem] font-sans text-white/60 border border-white/10">
+                <a href={`/u/${username}`} className="flex items-center justify-center gap-2">
+                  👤 View my public profile
+                </a>
+              </Button>
             )}
 
             {/* Next cert */}
             {cfg.next && (
-              <button
+              <Button
                 onClick={() => setStep("next_cert")}
-                style={{
-                  padding: "1rem",
-                  borderRadius: "12px",
-                  border: `2px solid ${cfg.accent}50`,
-                  background: "rgba(255,255,255,0.04)",
-                  color: "#FFFFFF",
-                  fontSize: "1rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  fontFamily: "Calibri, sans-serif",
-                  transition: "all 0.2s",
-                }}
+                variant="outline"
+                className="w-full py-4 rounded-xl text-base font-semibold font-sans"
+                style={{ borderColor: `${cfg.accent}50` }}
               >
                 🎯 Start my next certification
-              </button>
+              </Button>
             )}
 
             {/* Return home */}
-            <Link
-              href="/"
-              style={{
-                display: "block",
-                padding: "0.8rem",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#FFFFFF",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
-                textDecoration: "none",
-                textAlign: "center",
-              }}
-            >
-              ← Back to Home
-            </Link>
+            <Button asChild variant="ghost" className="w-full py-[0.8rem] rounded-xl text-[0.9rem] font-sans border border-white/[15%] bg-white/5 text-white">
+              <Link href="/">← Back to Home</Link>
+            </Button>
           </div>
 
           {/* Encouragement quote */}
-          <div style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            borderRadius: "14px",
-            padding: "1.5rem",
-            maxWidth: 480,
-            margin: "0 auto",
-          }}>
-            <p style={{ color: "#A0BCD0", fontSize: "0.95rem", fontStyle: "italic", lineHeight: 1.6, margin: 0 }}>
+          <div className="bg-white/[3%] border border-white/[6%] rounded-[14px] p-6 max-w-[480px] mx-auto">
+            <p className="text-[#A0BCD0] text-[0.95rem] italic leading-[1.6] m-0 font-display">
               "Every instrument you process, every patient protected —
               that's what this certification means. The work you do every day saves lives."
             </p>
-            <p style={{ color: cfg.accent, fontSize: "0.78rem", marginTop: "0.75rem", letterSpacing: "0.08em", fontFamily: "Calibri, sans-serif" }}>
+            <p className="text-[0.78rem] mt-3 tracking-[0.08em] font-sans" style={{ color: cfg.accent }}>
               — ASEPTIC TECHNICAL SOLUTIONS
             </p>
           </div>
@@ -801,57 +633,64 @@ export default function PassedExamFlow() {
   if (step === "next_cert" && cfg.next) {
     const nextCfg = CERT_CONFIG[cfg.next];
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{
-        background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)",
-        fontFamily: "Georgia, serif",
-      }}>
+      <div
+        className="min-h-screen flex items-center justify-center p-4 font-display"
+        style={{ background: "linear-gradient(135deg, #021B3A 0%, #0D3D5E 50%, #021B3A 100%)" }}
+      >
         <div className="w-full max-w-lg text-center">
 
           {/* Breadcrumb */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            gap: "0.6rem", marginBottom: "2rem",
-          }}>
-            <span style={{
-              background: `${cfg.color}40`, border: `1px solid ${cfg.accent}`,
-              borderRadius: "100px", padding: "0.25rem 0.8rem",
-              color: cfg.accent, fontSize: "0.8rem", fontFamily: "Calibri, sans-serif",
-            }}>{cert} ✓</span>
-            <span style={{ color: "#7B96A8", fontSize: "1.2rem" }}>→</span>
-            <span style={{
-              background: `${nextCfg.color}30`, border: `1px solid ${nextCfg.accent}`,
-              borderRadius: "100px", padding: "0.25rem 0.8rem",
-              color: nextCfg.accent, fontSize: "0.8rem", fontFamily: "Calibri, sans-serif",
-            }}>{cfg.next}</span>
+          <div className="flex items-center justify-center gap-[0.6rem] mb-8">
+            <span
+              className="rounded-full px-[0.8rem] py-1 text-[0.8rem] font-sans"
+              style={{
+                background: `${cfg.color}40`,
+                border: `1px solid ${cfg.accent}`,
+                color: cfg.accent,
+              }}
+            >
+              {cert} ✓
+            </span>
+            <span className="text-[#7B96A8] text-xl">→</span>
+            <span
+              className="rounded-full px-[0.8rem] py-1 text-[0.8rem] font-sans"
+              style={{
+                background: `${nextCfg.color}30`,
+                border: `1px solid ${nextCfg.accent}`,
+                color: nextCfg.accent,
+              }}
+            >
+              {cfg.next}
+            </span>
           </div>
 
-          <h1 style={{ fontSize: "2.2rem", fontWeight: "900", color: "#FFFFFF", marginBottom: "1rem", lineHeight: 1.1 }}>
+          <Heading as="h1" size="3xl" className="text-white mb-4 text-[2.2rem]">
             Ready for your<br />
             <span style={{ color: nextCfg.accent }}>next level?</span>
-          </h1>
+          </Heading>
 
-          <p style={{ color: "#A0BCD0", fontSize: "1rem", marginBottom: "2.5rem", lineHeight: 1.6, fontFamily: "Calibri, sans-serif" }}>
+          <p className="text-[#A0BCD0] text-base mb-10 leading-[1.6] font-sans">
             {cfg.nextDesc}
           </p>
 
           {/* Next cert card */}
-          <div style={{
-            background: `linear-gradient(135deg, ${nextCfg.color}20, ${nextCfg.accent}10)`,
-            border: `2px solid ${nextCfg.accent}40`,
-            borderRadius: "20px",
-            padding: "2rem",
-            marginBottom: "2rem",
-          }}>
-            <div style={{ fontSize: "3.5rem", marginBottom: "0.75rem" }}>{nextCfg.icon}</div>
-            <div style={{ color: nextCfg.accent, fontSize: "2rem", fontWeight: "900", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
+          <div
+            className="rounded-[20px] p-8 mb-8"
+            style={{
+              background: `linear-gradient(135deg, ${nextCfg.color}20, ${nextCfg.accent}10)`,
+              border: `2px solid ${nextCfg.accent}40`,
+            }}
+          >
+            <div className="text-[3.5rem] mb-3">{nextCfg.icon}</div>
+            <div className="text-[2rem] font-black tracking-[0.08em] mb-2 font-display" style={{ color: nextCfg.accent }}>
               {cfg.next}
             </div>
-            <div style={{ color: "#FFFFFF", fontSize: "0.95rem", fontFamily: "Calibri, sans-serif", opacity: 0.85 }}>
+            <div className="text-white text-[0.95rem] font-sans opacity-85">
               {cfg.nextLabel}
             </div>
 
             {/* What's included */}
-            <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
+            <div className="mt-6 text-left">
               {[
                 `Full ${cfg.next} question bank`,
                 "Chapter-by-chapter study mode",
@@ -859,120 +698,82 @@ export default function PassedExamFlow() {
                 "Exam tips and domain mastery tracking",
                 "Badge when you pass",
               ].map((item, i) => (
-                <div key={i} style={{
-                  display: "flex", alignItems: "center", gap: "0.6rem",
-                  padding: "0.5rem 0",
-                  borderBottom: i < 4 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                }}>
-                  <span style={{ color: nextCfg.accent, fontSize: "0.9rem" }}>✓</span>
-                  <span style={{ color: "#D0E4EE", fontSize: "0.88rem", fontFamily: "Calibri, sans-serif" }}>{item}</span>
+                <div
+                  key={i}
+                  className="flex items-center gap-[0.6rem] py-2 font-sans"
+                  style={{ borderBottom: i < 4 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
+                >
+                  <span className="text-[0.9rem]" style={{ color: nextCfg.accent }}>✓</span>
+                  <span className="text-[#D0E4EE] text-[0.88rem]">{item}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* CTA */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: 380, margin: "0 auto" }}>
+          <div className="flex flex-col gap-[0.9rem] max-w-[380px] mx-auto">
             {cfg.next && (
-            <button
-              onClick={() => window.location.href = `/${cfg.next!.toLowerCase()}`}
-              style={{
-                padding: "1.1rem",
-                borderRadius: "12px",
-                border: "none",
-                background: `linear-gradient(135deg, ${nextCfg.color}, ${nextCfg.accent})`,
-                color: "#FFFFFF",
-                fontSize: "1.05rem",
-                fontWeight: "700",
-                cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
-                boxShadow: `0 4px 24px ${nextCfg.accent}50`,
-              }}
-            >
-              Start {cfg.next} Prep Now →
-            </button>
+              <Button
+                onClick={() => window.location.href = `/${cfg.next!.toLowerCase()}`}
+                className="w-full py-[1.1rem] rounded-xl text-[1.05rem] font-bold font-sans"
+                style={{
+                  background: `linear-gradient(135deg, ${nextCfg.color}, ${nextCfg.accent})`,
+                  boxShadow: `0 4px 24px ${nextCfg.accent}50`,
+                }}
+              >
+                Start {cfg.next} Prep Now →
+              </Button>
             )}
 
-            <button
+            <Button
               onClick={() => setStep("celebration")}
-              style={{
-                padding: "0.8rem",
-                borderRadius: "12px",
-                border: "none",
-                background: "transparent",
-                color: "#7B96A8",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                fontFamily: "Calibri, sans-serif",
-              }}
+              variant="ghost"
+              className="w-full py-[0.8rem] rounded-xl text-[0.9rem] font-sans text-[#7B96A8]"
             >
               ← Back to my badge
-            </button>
+            </Button>
           </div>
 
           {/* ATS mention */}
-          <p style={{
-            color: "#7B96A8", fontSize: "0.78rem", marginTop: "2rem",
-            fontFamily: "Calibri, sans-serif", lineHeight: 1.5,
-          }}>
+          <p className="text-[#7B96A8] text-[0.78rem] mt-8 font-sans leading-[1.5]">
             Need facility-wide training?{" "}
-            <a href="https://aseptictechnicalsolutions.com" style={{ color: cfg.accent, textDecoration: "none" }}>
+            <a href="https://aseptictechnicalsolutions.com" className="no-underline" style={{ color: cfg.accent }}>
               Aseptic Technical Solutions
             </a>{" "}
             offers on-site certification prep and compliance training for SPD departments.
           </p>
 
           {/* Resume Service Upsell */}
-          <div style={{
-            marginTop: "2rem",
-            padding: "1.5rem",
-            borderRadius: "16px",
-            background: "rgba(232,160,32,0.07)",
-            border: "1px solid rgba(232,160,32,0.35)",
-            textAlign: "left",
-          }}>
-            <div style={{
-              fontSize: "0.7rem", letterSpacing: "0.12em", color: "#E8A020",
-              fontFamily: "'DM Mono', monospace", marginBottom: "0.6rem",
-            }}>
-              CAREER NEXT STEP
-            </div>
-            <h3 style={{
-              fontSize: "1.15rem", fontWeight: "800", color: "#FFFFFF",
-              fontFamily: "Georgia, serif", marginBottom: "0.75rem", lineHeight: 1.3,
-            }}>
+          <div className="mt-8 p-6 rounded-2xl bg-amber/[7%] border border-amber/35 text-left">
+            <Label color="amber" className="mb-[0.6rem]">Career Next Step</Label>
+            <h3 className="text-lg font-black text-white font-display mb-3 leading-[1.3]">
               You passed. Now land the job.
             </h3>
-            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <ul className="list-none p-0 m-0 flex flex-col gap-2 mb-5 font-sans">
               {[
                 `Highlight your new ${cert} certification`,
                 "ATS-optimized for healthcare & SPD roles",
                 "87% of clients land interviews",
               ].map((item, i) => (
-                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "#C8D8E0", fontSize: "0.88rem", fontFamily: "Calibri, sans-serif" }}>
-                  <span style={{ color: "#E8A020", flexShrink: 0 }}>✓</span>
+                <li key={i} className="flex items-start gap-2 text-[#C8D8E0] text-[0.88rem]">
+                  <span className="text-amber flex-shrink-0">✓</span>
                   {item}
                 </li>
               ))}
             </ul>
-            <a
-              href="https://www.myqualifiedresume.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-block",
-                padding: "0.7rem 1.4rem",
-                borderRadius: "10px",
-                background: "linear-gradient(135deg, #E8A020, #DAA520)",
-                color: "#021B3A",
-                fontWeight: "700",
-                fontSize: "0.88rem",
-                textDecoration: "none",
-                fontFamily: "Calibri, sans-serif",
-              }}
+            <Button
+              asChild
+              variant="amber"
+              className="rounded-[10px] text-[0.88rem] font-bold font-sans"
             >
-              Get My Resume – Starting at $29 →
-            </a>
+              <a
+                href="https://www.myqualifiedresume.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Get My Resume – Starting at $29 →
+              </a>
+            </Button>
           </div>
 
         </div>

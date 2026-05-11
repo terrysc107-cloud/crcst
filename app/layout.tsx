@@ -1,8 +1,21 @@
 import type { Metadata } from 'next'
-import { Libre_Baskerville, DM_Mono, DM_Sans, Playfair_Display } from 'next/font/google'
+import { Playfair_Display, DM_Sans, Libre_Baskerville, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import HelpFAB from '@/components/HelpFAB'
 import './globals.css'
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
+})
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ['latin'],
@@ -15,19 +28,6 @@ const dmMono = DM_Mono({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   variable: '--font-mono',
-})
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-sans',
-})
-
-const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  style: ['normal', 'italic'],
-  variable: '--font-display',
 })
 
 const SITE_URL = 'https://spdcertprep.com'
@@ -182,7 +182,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${libreBaskerville.variable} ${dmMono.variable} ${dmSans.variable} ${playfairDisplay.variable}`}>
+    <html lang="en" className={`${playfairDisplay.variable} ${dmSans.variable} ${libreBaskerville.variable} ${dmMono.variable}`}>
       <head>
         <script
           type="application/ld+json"

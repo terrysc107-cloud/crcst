@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { QUESTIONS } from '@/lib/questions'
-import { PROGRESSION_LEVELS, XP_RULES, XpBreakdown, LEVEL_BADGE_MAP } from '@/lib/progression-config'
+import { PROGRESSION_LEVELS, XP_RULES, XpBreakdown, LEVEL_BADGE_MAP, TOTAL_LEVELS } from '@/lib/progression-config'
 import { getPlan } from '@/lib/subscription'
 
 export async function POST(req: NextRequest) {
@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { levelId, answers } = body as {
+  const { levelId, answers, durationSeconds = 0 } = body as {
     levelId: number
-    answers: Record<string, number> // questionId -> selected option index
+    answers: Record<string, number>
+    durationSeconds?: number
   }
 
   const level = PROGRESSION_LEVELS.find(l => l.id === levelId)
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
     }, { onConflict: 'user_id,level_id' })
 
   // Unlock next level if passed
-  if (passed && levelId < 5) {
+  if (passed && levelId < TOTAL_LEVELS) {
     await supabaseAdmin
       .from('user_levels')
       .upsert({
@@ -233,7 +234,7 @@ export async function POST(req: NextRequest) {
       .select('level_id')
       .eq('user_id', user.id)
       .eq('status', 'completed')
-    if ((completedLevels?.length ?? 0) >= 5) await awardBadge('full-circuit')
+    if ((completedLevels?.length ?? 0) >= TOTAL_LEVELS) await awardBadge('full-circuit')
 
     // Precision — 90%+ on any level
     if (score >= 90) await awardBadge('precision')
@@ -242,6 +243,25 @@ export async function POST(req: NextRequest) {
     if (score === 100) await awardBadge('perfect-round')
   }
 
+  // Log session for study time tracking
+  const clampedDuration = Math.max(0, Math.min(durationSeconds, 7200))
+  await supabaseAdmin.from('user_sessions').insert({
+    user_id: user.id,
+    activity_type: 'progression',
+    cert: 'crcst',
+    duration_seconds: clampedDuration,
+    questions_answered: total,
+    score_pct: score,
+    xp_earned: xpBreakdown.total,
+    started_at: new Date(Date.now() - clampedDuration * 1000).toISOString(),
+    completed_at: new Date().toISOString(),
+  })
+
+  await supabaseAdmin.rpc('increment_study_seconds', {
+    p_user_id: user.id,
+    p_seconds: clampedDuration,
+  })
+
   return NextResponse.json({
     passed,
     score,
@@ -249,7 +269,7 @@ export async function POST(req: NextRequest) {
     total,
     incorrectItems,
     bonusUnlocked,
-    nextLevelUnlocked: passed && levelId < 5 ? levelId + 1 : null,
+    nextLevelUnlocked: passed && levelId < TOTAL_LEVELS ? levelId + 1 : null,
     xpBreakdown,
     totalXp: newTotal,
     badgesEarned,

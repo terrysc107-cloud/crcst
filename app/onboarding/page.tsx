@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Label, Heading } from '@/components/ui/typography'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -92,8 +94,8 @@ const FEATURES = [
   },
   {
     icon: '⏱️',
-    title: 'Mock Exam',
-    desc: 'Full timed simulation of the real certification exam format.',
+    title: 'Full Exam',
+    desc: '150-question, 3-hour timed simulation of the real certification exam.',
     href: '/crcst',
   },
 ]
@@ -102,20 +104,18 @@ const FEATURES = [
 
 function StepDots({ current, total }: { current: number; total: number }) {
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '2rem' }}>
+    <div className="flex gap-2 justify-center mb-8">
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
+          className="h-2 rounded-full transition-all duration-300"
           style={{
             width: i === current ? 28 : 8,
-            height: 8,
-            borderRadius: 100,
             background: i === current
               ? '#14BDAC'
               : i < current
                 ? 'rgba(20,189,172,0.4)'
                 : 'rgba(255,255,255,0.15)',
-            transition: 'all 0.3s ease',
           }}
         />
       ))}
@@ -137,63 +137,34 @@ function CertCard({
   return (
     <button
       onClick={onClick}
+      className="w-full text-left rounded-[14px] p-5 cursor-pointer transition-all duration-200 flex items-start gap-4 font-sans"
       style={{
-        width: '100%',
-        textAlign: 'left',
         background: selected
           ? `linear-gradient(135deg, ${cert.color}30, ${cert.color}15)`
           : 'rgba(255,255,255,0.04)',
         border: `2px solid ${selected ? cert.accent : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: 14,
-        padding: '1.25rem',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '1rem',
-        fontFamily: 'inherit',
       }}
     >
       <div
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 10,
-          background: `linear-gradient(135deg, ${cert.color}, ${cert.accent})`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1rem',
-          fontWeight: 700,
-          color: '#fff',
-          flexShrink: 0,
-        }}
+        className="w-12 h-12 rounded-[10px] flex items-center justify-center text-base font-bold text-white flex-shrink-0"
+        style={{ background: `linear-gradient(135deg, ${cert.color}, ${cert.accent})` }}
       >
         {cert.name}
       </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-          <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>{cert.fullName}</span>
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-1">
+          <span className="font-bold text-white text-[0.95rem]">{cert.fullName}</span>
           {selected && (
-            <span style={{
-              width: 22,
-              height: 22,
-              borderRadius: '50%',
-              background: cert.accent,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.75rem',
-              color: '#fff',
-              flexShrink: 0,
-              marginLeft: '0.5rem',
-            }}>
+            <span
+              className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-xs text-white flex-shrink-0 ml-2"
+              style={{ background: cert.accent }}
+            >
               ✓
             </span>
           )}
         </div>
-        <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{cert.desc}</div>
-        <div style={{ fontSize: '0.72rem', color: cert.accent, marginTop: '0.4rem', fontFamily: 'monospace' }}>
+        <div className="text-[0.8rem] text-white/50 leading-[1.5]">{cert.desc}</div>
+        <div className="text-[0.72rem] mt-[0.4rem] font-mono" style={{ color: cert.accent }}>
           {cert.questions} questions
         </div>
       </div>
@@ -330,28 +301,19 @@ export default function OnboardingPage() {
   const primaryCertData = CERTS.find((c) => c.id === primaryCert)
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#021B3A',
-      color: '#fff',
-      fontFamily: 'DM Mono, monospace',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '2rem 1.25rem',
-    }}>
+    <div className="min-h-screen bg-navy text-white font-mono flex flex-col items-center px-5 py-8">
       {/* Logo + skip */}
-      <div style={{ width: '100%', maxWidth: 520, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div style={{ width: 32, height: 32, background: '#14BDAC', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>
+      <div className="w-full max-w-[520px] flex items-center justify-between mb-10">
+        <div className="flex items-center gap-[0.6rem]">
+          <div className="w-8 h-8 bg-teal rounded-[7px] flex items-center justify-center font-bold text-[0.8rem] text-navy">
             SP
           </div>
-          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>SPD Cert Companion</span>
+          <span className="font-semibold text-[0.9rem] text-white/80">SPD Cert Companion</span>
         </div>
         {step < TOTAL_STEPS - 1 && (
           <button
             onClick={handleSkip}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit' }}
+            className="bg-transparent border-none text-white/35 text-[0.8rem] cursor-pointer font-mono"
           >
             Skip setup →
           </button>
@@ -359,46 +321,31 @@ export default function OnboardingPage() {
       </div>
 
       {/* Card */}
-      <div style={{
-        width: '100%',
-        maxWidth: 520,
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 20,
-        padding: '2.25rem',
-      }}>
+      <div className="w-full max-w-[520px] bg-white/[4%] border border-white/10 rounded-[20px] p-9">
         <StepDots current={step} total={TOTAL_STEPS} />
 
         {/* ── STEP 0: Welcome ── */}
         {step === 0 && (
           <div>
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>👋</div>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '0.75rem', lineHeight: 1.2, fontFamily: 'Libre Baskerville, serif' }}>
+            <div className="text-center mb-8">
+              <div className="text-[2.5rem] mb-4">👋</div>
+              <Heading as="h1" size="2xl" className="text-white mb-3 leading-[1.2]">
                 Welcome to<br />
-                <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>SPD Cert Companion</em>
-              </h1>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                <em className="text-teal italic">SPD Cert Companion</em>
+              </Heading>
+              <p className="text-white/55 text-[0.9rem] leading-[1.6]">
                 Let&apos;s get you set up in 2 minutes. We&apos;ll personalize your study plan so you can focus on what matters most.
               </p>
             </div>
 
             {userEmail && (
-              <div style={{
-                background: 'rgba(20,189,172,0.08)',
-                border: '1px solid rgba(20,189,172,0.2)',
-                borderRadius: 10,
-                padding: '0.75rem 1rem',
-                marginBottom: '1.5rem',
-                fontSize: '0.82rem',
-                color: 'rgba(255,255,255,0.6)',
-              }}>
-                Signed in as <strong style={{ color: '#14BDAC' }}>{userEmail}</strong>
+              <div className="bg-teal/[8%] border border-teal/20 rounded-[10px] px-4 py-3 mb-6 text-[0.82rem] text-white/60">
+                Signed in as <strong className="text-teal">{userEmail}</strong>
               </div>
             )}
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+            <div className="mb-6">
+              <label className="block text-xs text-white/50 tracking-[0.08em] mb-2 uppercase">
                 What should we call you? (optional)
               </label>
               <input
@@ -406,37 +353,24 @@ export default function OnboardingPage() {
                 value={data.displayName}
                 onChange={(e) => setData((d) => ({ ...d, displayName: e.target.value }))}
                 placeholder={userEmail ? userEmail.split('@')[0] : 'Your name'}
-                style={{
-                  width: '100%',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: 10,
-                  padding: '0.75rem 1rem',
-                  color: '#fff',
-                  fontSize: '0.95rem',
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                className="w-full bg-white/[6%] border border-white/[15%] rounded-[10px] px-4 py-3 text-white text-[0.95rem] font-mono outline-none box-border focus:border-teal/40"
               />
             </div>
 
             {/* What you'll get */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
-                What you&apos;ll set up
-              </div>
+            <div className="bg-white/[3%] rounded-xl p-4 mb-6">
+              <Label color="muted" className="mb-3">What you&apos;ll set up</Label>
               {[
                 'Which certification you\'re studying for',
                 'Your experience level',
                 'Your exam timeline',
                 'A quick tour of study tools',
               ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(20,189,172,0.2)', border: '1px solid rgba(20,189,172,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: '#14BDAC', flexShrink: 0 }}>
+                <div key={i} className="flex items-center gap-[0.6rem] mb-2">
+                  <div className="w-5 h-5 rounded-full bg-teal/20 border border-teal/40 flex items-center justify-center text-[0.65rem] text-teal flex-shrink-0">
                     {i + 1}
                   </div>
-                  <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)' }}>{item}</span>
+                  <span className="text-[0.85rem] text-white/65">{item}</span>
                 </div>
               ))}
             </div>
@@ -446,14 +380,14 @@ export default function OnboardingPage() {
         {/* ── STEP 1: Cert Goals ── */}
         {step === 1 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <Heading as="h2" size="xl" className="text-white mb-2 font-display">
               Which certification are you<br />
-              <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>studying for?</em>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+              <em className="text-teal italic">studying for?</em>
+            </Heading>
+            <p className="text-white/50 text-[0.85rem] mb-7 leading-[1.5]">
               Select all that apply — you can study for multiple certs.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div className="flex flex-col gap-3 mb-4">
               {CERTS.map((cert) => (
                 <CertCard
                   key={cert.id}
@@ -464,7 +398,7 @@ export default function OnboardingPage() {
               ))}
             </div>
             {data.certGoals.length === 0 && (
-              <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: '0.5rem' }}>
+              <p className="text-[0.78rem] text-white/30 text-center mt-2">
                 Select at least one certification to continue
               </p>
             )}
@@ -474,46 +408,37 @@ export default function OnboardingPage() {
         {/* ── STEP 2: Experience Level ── */}
         {step === 2 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <Heading as="h2" size="xl" className="text-white mb-2 font-display">
               How much SPD experience<br />
-              <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>do you have?</em>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+              <em className="text-teal italic">do you have?</em>
+            </Heading>
+            <p className="text-white/50 text-[0.85rem] mb-7 leading-[1.5]">
               This helps us tailor explanations and difficulty to where you are.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="flex flex-col gap-3">
               {EXPERIENCE_OPTIONS.map((opt) => {
                 const selected = data.experienceLevel === opt.id
                 return (
                   <button
                     key={opt.id}
                     onClick={() => setData((d) => ({ ...d, experienceLevel: opt.id }))}
+                    className="text-left rounded-[14px] px-5 py-4 cursor-pointer flex items-center gap-4 w-full font-mono transition-all duration-200"
                     style={{
-                      textAlign: 'left',
                       background: selected ? 'rgba(20,189,172,0.12)' : 'rgba(255,255,255,0.04)',
                       border: `2px solid ${selected ? '#14BDAC' : 'rgba(255,255,255,0.1)'}`,
-                      borderRadius: 14,
-                      padding: '1rem 1.25rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      width: '100%',
-                      fontFamily: 'inherit',
-                      transition: 'all 0.2s ease',
                     }}
                   >
-                    <span style={{ fontSize: '1.75rem', flexShrink: 0 }}>{opt.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, color: selected ? '#14BDAC' : '#fff', fontSize: '0.95rem', marginBottom: '0.2rem' }}>
+                    <span className="text-[1.75rem] flex-shrink-0">{opt.icon}</span>
+                    <div className="flex-1">
+                      <div className={`font-semibold text-[0.95rem] mb-[0.2rem] ${selected ? 'text-teal' : 'text-white'}`}>
                         {opt.label}
                       </div>
-                      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>
+                      <div className="text-[0.8rem] text-white/50 leading-[1.4]">
                         {opt.desc}
                       </div>
                     </div>
                     {selected && (
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#14BDAC', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#fff', flexShrink: 0 }}>
+                      <div className="w-[22px] h-[22px] rounded-full bg-teal flex items-center justify-center text-xs text-navy flex-shrink-0">
                         ✓
                       </div>
                     )}
@@ -527,17 +452,17 @@ export default function OnboardingPage() {
         {/* ── STEP 3: Exam Date + Study Schedule ── */}
         {step === 3 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <Heading as="h2" size="xl" className="text-white mb-2 font-display">
               Plan your<br />
-              <em style={{ color: '#e9c46a', fontStyle: 'italic' }}>study schedule</em>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+              <em className="text-amber italic">study schedule</em>
+            </Heading>
+            <p className="text-white/50 text-[0.85rem] mb-7 leading-[1.5]">
               Optional — but knowing your exam date helps you stay on track.
             </p>
 
             {/* Exam date */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+            <div className="mb-6">
+              <label className="block text-xs text-white/50 tracking-[0.08em] mb-2 uppercase">
                 Target exam date (optional)
               </label>
               <input
@@ -545,22 +470,14 @@ export default function OnboardingPage() {
                 value={data.examDate}
                 onChange={(e) => setData((d) => ({ ...d, examDate: e.target.value }))}
                 min={new Date().toISOString().split('T')[0]}
+                className="w-full bg-white/[6%] border border-white/[15%] rounded-[10px] px-4 py-3 text-[0.95rem] font-mono outline-none box-border"
                 style={{
-                  width: '100%',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: 10,
-                  padding: '0.75rem 1rem',
                   color: data.examDate ? '#fff' : 'rgba(255,255,255,0.3)',
-                  fontSize: '0.95rem',
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                  boxSizing: 'border-box',
                   colorScheme: 'dark',
                 }}
               />
               {data.examDate && (
-                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#14BDAC' }}>
+                <div className="mt-2 text-[0.8rem] text-teal">
                   {Math.ceil((new Date(data.examDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days to go
                 </div>
               )}
@@ -568,45 +485,39 @@ export default function OnboardingPage() {
 
             {/* Days per week */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <label className="block text-xs text-white/50 tracking-[0.08em] mb-3 uppercase">
                 Days per week you can study
               </label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="flex gap-2">
                 {([1, 2, 3, 4, 5, 6, 7] as StudyDays[]).map((day) => (
                   <button
                     key={day}
                     onClick={() => setData((d) => ({ ...d, studyDaysPerWeek: day }))}
+                    className="flex-1 rounded-[10px] font-mono text-[0.9rem] cursor-pointer transition-all duration-150 py-2"
                     style={{
-                      flex: 1,
                       aspectRatio: '1',
-                      borderRadius: 10,
                       background: data.studyDaysPerWeek === day
                         ? 'rgba(20,189,172,0.2)'
                         : 'rgba(255,255,255,0.04)',
                       border: `2px solid ${data.studyDaysPerWeek === day ? '#14BDAC' : 'rgba(255,255,255,0.1)'}`,
                       color: data.studyDaysPerWeek === day ? '#14BDAC' : 'rgba(255,255,255,0.5)',
                       fontWeight: data.studyDaysPerWeek === day ? 700 : 400,
-                      fontSize: '0.9rem',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      transition: 'all 0.15s ease',
-                      padding: '0.5rem 0',
                     }}
                   >
                     {day}
                   </button>
                 ))}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem' }}>
-                <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>casual</span>
-                <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>every day</span>
+              <div className="flex justify-between mt-[0.4rem]">
+                <span className="text-[0.72rem] text-white/30">casual</span>
+                <span className="text-[0.72rem] text-white/30">every day</span>
               </div>
             </div>
 
             {/* Study tip */}
-            <div style={{ marginTop: '1.5rem', background: 'rgba(233,196,106,0.08)', border: '1px solid rgba(233,196,106,0.2)', borderRadius: 10, padding: '0.85rem 1rem' }}>
-              <div style={{ fontSize: '0.72rem', color: '#e9c46a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>Study tip</div>
-              <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
+            <div className="mt-6 bg-amber/[8%] border border-amber/20 rounded-[10px] px-4 py-[0.85rem]">
+              <Label color="amber" className="mb-[0.4rem]">Study tip</Label>
+              <div className="text-[0.82rem] text-white/60 leading-[1.5]">
                 {data.studyDaysPerWeek >= 5
                   ? 'Daily practice is the fastest path to passing. Even 20 minutes counts.'
                   : data.studyDaysPerWeek >= 3
@@ -620,32 +531,24 @@ export default function OnboardingPage() {
         {/* ── STEP 4: Feature Tour ── */}
         {step === 4 && (
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'Libre Baskerville, serif' }}>
+            <Heading as="h2" size="xl" className="text-white mb-2 font-display">
               Here&apos;s how to<br />
-              <em style={{ color: '#14BDAC', fontStyle: 'italic' }}>study effectively</em>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+              <em className="text-teal italic">study effectively</em>
+            </Heading>
+            <p className="text-white/50 text-[0.85rem] mb-7 leading-[1.5]">
               Four study modes designed to build real exam confidence.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <div className="flex flex-col gap-3 mb-6">
               {FEATURES.map((f, i) => (
                 <div
                   key={i}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '1rem',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 12,
-                    padding: '1rem',
-                  }}
+                  className="flex items-start gap-4 bg-white/[4%] border border-white/[8%] rounded-xl p-4"
                 >
-                  <div style={{ fontSize: '1.5rem', flexShrink: 0, lineHeight: 1 }}>{f.icon}</div>
+                  <div className="text-[1.5rem] flex-shrink-0 leading-none">{f.icon}</div>
                   <div>
-                    <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{f.title}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{f.desc}</div>
+                    <div className="font-semibold text-white text-[0.9rem] mb-[0.2rem]">{f.title}</div>
+                    <div className="text-[0.8rem] text-white/50 leading-[1.5]">{f.desc}</div>
                   </div>
                 </div>
               ))}
@@ -653,16 +556,20 @@ export default function OnboardingPage() {
 
             {/* Personalized summary */}
             {primaryCertData && (
-              <div style={{
-                background: `linear-gradient(135deg, ${primaryCertData.color}20, ${primaryCertData.color}10)`,
-                border: `1px solid ${primaryCertData.accent}30`,
-                borderRadius: 12,
-                padding: '1rem 1.25rem',
-              }}>
-                <div style={{ fontSize: '0.72rem', color: primaryCertData.accent, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+              <div
+                className="rounded-xl px-5 py-4"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryCertData.color}20, ${primaryCertData.color}10)`,
+                  border: `1px solid ${primaryCertData.accent}30`,
+                }}
+              >
+                <div
+                  className="text-[0.72rem] tracking-[0.08em] uppercase mb-[0.4rem] font-mono"
+                  style={{ color: primaryCertData.accent }}
+                >
                   Your focus
                 </div>
-                <div style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                <div className="text-[0.88rem] text-white/70 leading-[1.5]">
                   You&apos;ll start with{' '}
                   <strong style={{ color: primaryCertData.accent }}>
                     {data.certGoals.join(', ')}
@@ -670,7 +577,7 @@ export default function OnboardingPage() {
                   {data.examDate && (
                     <>
                       {' '}—{' '}
-                      <strong style={{ color: '#e9c46a' }}>
+                      <strong className="text-amber">
                         {Math.ceil((new Date(data.examDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days
                       </strong>{' '}
                       to exam day
@@ -687,43 +594,22 @@ export default function OnboardingPage() {
         )}
 
         {/* ── Navigation Buttons ── */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '2rem' }}>
+        <div className="flex gap-3 mt-8">
           {step > 0 && (
-            <button
+            <Button
               onClick={back}
-              style={{
-                flex: 1,
-                padding: '0.85rem',
-                borderRadius: 12,
-                border: '1px solid rgba(255,255,255,0.15)',
-                background: 'none',
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
+              variant="outline"
+              className="flex-1 py-[0.85rem] rounded-xl text-[0.9rem] font-mono"
             >
               ← Back
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             onClick={next}
             disabled={!canNext() || saving}
-            style={{
-              flex: step === 0 ? 1 : 2,
-              padding: '0.85rem',
-              borderRadius: 12,
-              border: 'none',
-              background: canNext() && !saving
-                ? 'linear-gradient(135deg, #0D7377, #14BDAC)'
-                : 'rgba(255,255,255,0.1)',
-              color: canNext() && !saving ? '#fff' : 'rgba(255,255,255,0.3)',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              cursor: canNext() && !saving ? 'pointer' : 'not-allowed',
-              fontFamily: 'inherit',
-              transition: 'all 0.2s ease',
-            }}
+            variant={canNext() && !saving ? 'gradient' : 'ghost'}
+            className="py-[0.85rem] rounded-xl text-[0.9rem] font-semibold font-mono transition-all duration-200"
+            style={{ flex: step === 0 ? 1 : 2 }}
           >
             {saving
               ? 'Saving…'
@@ -732,12 +618,12 @@ export default function OnboardingPage() {
                 : step === 0
                   ? 'Get started →'
                   : 'Continue →'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Bottom note */}
-      <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
+      <p className="mt-6 text-xs text-white/25 text-center">
         You can update your preferences anytime in Account settings.
       </p>
     </div>

@@ -9,6 +9,7 @@ interface Profile {
   id: string;
   username: string;
   display_name: string | null;
+  total_study_seconds: number | null;
   created_at: string;
 }
 
@@ -16,6 +17,16 @@ interface CertifiedUser {
   cert: string;
   pass_date: string;
   full_name: string;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatStudyTime(totalSeconds: number): string {
+  const hrs = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  if (hrs === 0) return `${mins} min`;
+  if (mins === 0) return `${hrs} hr`;
+  return `${hrs} hr ${mins} min`;
 }
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
@@ -29,7 +40,7 @@ async function getProfileData(username: string): Promise<{ profile: Profile; cer
 
   const { data: profile } = await sb
     .from("public_profiles")
-    .select("id, username, display_name, created_at")
+    .select("id, username, display_name, total_study_seconds, created_at")
     .eq("username", username)
     .single();
 
@@ -113,9 +124,10 @@ export default async function PublicProfilePage({
     month: "long",
     year: "numeric",
   });
+  const studySeconds = profile.total_study_seconds ?? 0;
 
   return (
-    <div className="min-h-screen bg-navy text-white" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-navy text-white">
 
       {/* Nav */}
       <nav className="px-6 py-4 border-b border-white/7 flex items-center justify-between">
@@ -123,8 +135,7 @@ export default async function PublicProfilePage({
           SPD Cert <em className="not-italic text-teal">Prep</em>
         </Link>
         <Link href="/crcst"
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+          className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-br from-teal to-teal-2">
           Start Free
         </Link>
       </nav>
@@ -136,15 +147,27 @@ export default async function PublicProfilePage({
           {displayName.charAt(0).toUpperCase()}
         </div>
 
-        <h1 className="text-3xl font-black mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="font-display text-3xl font-black mb-2">
           {displayName}
         </h1>
         <p className="font-mono text-white/40 text-xs tracking-widest mb-2 uppercase">
           @{username}
         </p>
-        <p className="text-white/45 text-sm">
+        <p className="text-white/45 text-sm mb-6">
           Sterile Processing Professional · Member since {joinDate}
         </p>
+
+        {/* Study time stat — only show if meaningful */}
+        {studySeconds >= 60 && (
+          <div className="inline-flex flex-col items-center gap-1 bg-white/[0.04] border border-white/10 rounded-2xl px-6 py-4">
+            <div className="font-serif text-2xl font-bold text-teal">
+              {formatStudyTime(studySeconds)}
+            </div>
+            <div className="font-mono text-white/40 text-[0.65rem] tracking-[0.1em] uppercase">
+              Verified Study Time
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Certifications */}
@@ -180,8 +203,7 @@ export default async function PublicProfilePage({
               Studying for your own certification?
             </p>
             <Link href="/crcst"
-              className="inline-flex px-6 py-3 rounded-xl font-semibold text-sm text-white shadow-lg shadow-teal/20 hover:-translate-y-0.5 transition-all"
-              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
+              className="inline-flex px-6 py-3 rounded-xl font-semibold text-sm text-white shadow-lg shadow-teal/20 hover:-translate-y-0.5 transition-all bg-gradient-to-br from-teal to-teal-2">
               Start Free on SPD Cert Prep →
             </Link>
           </div>

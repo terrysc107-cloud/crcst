@@ -77,6 +77,8 @@ const config: Config = {
         },
       },
       fontFamily: {
+        display: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['DM Sans', 'sans-serif'],
         serif: ['Libre Baskerville', 'Georgia', 'serif'],
         mono: ['DM Mono', 'monospace'],
         sans: ['DM Sans', 'system-ui', 'sans-serif'],

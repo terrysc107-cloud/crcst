@@ -61,7 +61,6 @@ export async function POST(request: NextRequest) {
           if (upsertError) {
             console.error("Failed to upsert profile:", upsertError)
           } else {
-            console.log(`Successfully upgraded user ${supabaseUid} to ${tier}`)
           }
         }
         break
@@ -94,7 +93,6 @@ export async function POST(request: NextRequest) {
             if (updateError) {
               console.error("Failed to revoke access after refund:", updateError)
             } else {
-              console.log(`Revoked access for user ${profile.id} after refund`)
             }
           }
         }

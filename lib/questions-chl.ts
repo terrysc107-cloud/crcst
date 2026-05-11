@@ -4,6 +4,8 @@
 // 240 questions across all chapters
 // Fixed ampersands - Build v3
 
+import { chlGeneratedQuestions } from "./questions-chl-generated";
+
 export type Difficulty = "easy" | "medium" | "hard";
 
 export interface Question {
@@ -17,7 +19,7 @@ export interface Question {
   difficulty: Difficulty;
 }
 
-export const chlQuestions: Question[] = [
+const chlBaseQuestions: Question[] = [
 
   // ── QUIZ 1 ── Leadership Fundamentals (Ch. 1)
   {
@@ -5138,6 +5140,8 @@ export const chlQuestions: Question[] = [
     difficulty: "medium",
   },
 ];
+
+export const chlQuestions: Question[] = [...chlBaseQuestions, ...chlGeneratedQuestions];
 
 // ── Utility helpers ──────────────────────────────────────────────────────────
 

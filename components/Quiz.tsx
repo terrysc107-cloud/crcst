@@ -13,7 +13,7 @@ interface QuizData {
 
 interface QuizProps {
   quizData: QuizData
-  mode: 'practice' | 'flashcards' | 'mock' | 'custom'
+  mode: 'practice' | 'flashcards' | 'custom' | 'quiz' | 'test' | 'homework'
   onComplete: (results: any) => void
   onExit: () => void
   onPause?: (sessionData: any) => void
@@ -25,7 +25,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [answers, setAnswers] = useState<(number | null)[]>(quizData.answers)
   const [showExplanation, setShowExplanation] = useState(false)
   const [isFlipped, setIsFlipped] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(mode === 'mock' ? 50 * 60 : 0) // 50 minutes for mock
+  const [timeLeft, setTimeLeft] = useState(
+    mode === 'quiz' ? 30 * 60 : mode === 'test' ? 180 * 60 : 0
+  )
   const [isPausing, setIsPausing] = useState(false)
   const [pauseSaved, setPauseSaved] = useState(false)
   const [rateLimitReached, setRateLimitReached] = useState(false)
@@ -36,9 +38,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const hasAnswered = answers[current] !== null
   const isCorrect = hasAnswered && answers[current] === q.correct_answer
 
-  // Timer for mock exam
+  // Timer for timed exam modes
   useEffect(() => {
-    if (mode !== 'mock' || timeLeft <= 0) return
+    if ((mode !== 'quiz' && mode !== 'test') || timeLeft <= 0) return
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -124,9 +126,9 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
 
   const selectAnswer = async (idx: number) => {
     if (rateLimitReached) return
-    // In practice mode, lock once explanation is showing
-    if (mode === 'practice' && showExplanation) return
-    // In mock/custom mode, allow changing answers freely but only track first answer
+    // In practice/homework mode, lock once explanation is showing
+    if ((mode === 'practice' || mode === 'homework') && showExplanation) return
+    // In timed/custom mode, allow changing answers freely but only track first answer
     const isFirstAnswer = !hasAnswered
 
     const newAnswers = [...answers]
@@ -456,7 +458,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     )
   }
 
-  // Quiz mode (practice, mock, custom)
+  // Quiz mode (practice, custom, quiz, test, homework)
   return (
     <div className="max-w-2xl mx-auto">
       {/* Progress bar */}
@@ -472,12 +474,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
             {current + 1} / {quizData.questions.length}
           </div>
         </div>
-        {mode === 'mock' && (
-          <div className="mx-4 text-amber font-mono text-sm">
+        {(mode === 'quiz' || mode === 'test') && (
+          <div className={`mx-4 font-mono text-sm ${timeLeft < 300 ? 'text-wrong' : 'text-amber'}`}>
             ⏱ {formatTime(timeLeft)}
           </div>
         )}
-        {onPause && user && (
+        {onPause && user && mode !== 'test' && (
           <button
             onClick={handlePause}
             disabled={isPausing}
@@ -525,7 +527,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
             let optionClass =
               'w-full text-left px-4 py-3 rounded-lg border-2 transition font-mono text-sm'
 
-            if (mode === 'practice' && showExplanation) {
+            if ((mode === 'practice' || mode === 'homework') && showExplanation) {
               if (idx === q.correct_answer) {
                 optionClass += ' border-correct bg-correct-bg text-correct'
               } else if (idx === answers[current] && idx !== q.correct_answer) {
@@ -545,7 +547,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
               <button
                 key={idx}
                 onClick={() => selectAnswer(idx)}
-                disabled={mode === 'practice' && showExplanation}
+                disabled={(mode === 'practice' || mode === 'homework') && showExplanation}
                 className={optionClass}
               >
                 <span className="inline-block w-6 h-6 rounded-full bg-cream-2 text-center text-xs leading-6 mr-3">
@@ -557,8 +559,8 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           })}
         </div>
 
-        {/* Check Answer button (practice mode only, after selecting but before confirming) */}
-        {mode === 'practice' && hasAnswered && !showExplanation && (
+        {/* Check Answer button (practice/homework mode, after selecting but before confirming) */}
+        {(mode === 'practice' || mode === 'homework') && hasAnswered && !showExplanation && (
           <button
             onClick={handleCheckAnswer}
             className="w-full py-3 px-6 rounded-lg bg-navy text-white font-mono text-sm tracking-wider uppercase hover:bg-navy-2 transition mb-6"
@@ -567,8 +569,8 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           </button>
         )}
 
-        {/* Explanation (practice mode only) */}
-        {mode === 'practice' && showExplanation && (
+        {/* Explanation (practice/homework mode) */}
+        {(mode === 'practice' || mode === 'homework') && showExplanation && (
           <div
             className={`p-4 rounded-lg mb-6 fadeUp ${
               isCorrect ? 'bg-correct-bg border border-correct' : 'bg-wrong-bg border border-wrong'
@@ -592,7 +594,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
           </button>
           <button
             onClick={handleNext}
-            disabled={mode === 'practice' && !showExplanation}
+            disabled={(mode === 'practice' || mode === 'homework') && !showExplanation}
             className="px-6 py-3 bg-teal text-white rounded-lg font-mono hover:bg-teal-2 disabled:opacity-50 transition"
           >
             {current === quizData.questions.length - 1 ? 'Finish' : 'Next →'}

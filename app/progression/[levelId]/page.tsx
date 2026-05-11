@@ -6,6 +6,9 @@ import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { QUESTIONS, Question } from '@/lib/questions'
 import { getLevelById, ProgressionLevel, XpBreakdown, getXpTier, getBadgeById } from '@/lib/progression-config'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { Heading, Label, Numeric } from '@/components/ui/typography'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -48,9 +51,9 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D']
 
 function XpRow({ label, value }: { label: string; value: number }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
-      <span style={{ color: 'rgba(245,240,232,0.45)', fontFamily: 'monospace' }}>{label}</span>
-      <span style={{ color: '#DAA520', fontFamily: 'monospace', fontWeight: 600 }}>+{value}</span>
+    <div className="flex justify-between text-[0.78rem]">
+      <span className="text-white/45 font-mono">{label}</span>
+      <span className="text-amber font-mono font-semibold">+{value}</span>
     </div>
   )
 }
@@ -87,6 +90,9 @@ export default function LevelPage() {
 
   // Study guide toggle
   const [showGuide, setShowGuide] = useState(false)
+
+  // Start time for session duration tracking
+  const [quizStartedAt, setQuizStartedAt] = useState<number>(0)
 
   // ─── Access check on mount ────────────────────────────────────────────────
 
@@ -172,19 +178,23 @@ export default function LevelPage() {
     const session = await supabase.auth.getSession()
     const token = session.data.session?.access_token
 
+    const durationSeconds = quizStartedAt > 0
+      ? Math.round((Date.now() - quizStartedAt) / 1000)
+      : 0
+
     const res = await fetch('/api/progression/attempt', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ levelId, answers: finalAnswers }),
+      body: JSON.stringify({ levelId, answers: finalAnswers, durationSeconds }),
     })
 
     const data = await res.json()
     setResult(data)
     setSubmitting(false)
-  }, [levelId])
+  }, [levelId, quizStartedAt])
 
   // ─── Begin level ─────────────────────────────────────────────────────────
 
@@ -200,6 +210,7 @@ export default function LevelPage() {
     setAnswers({})
     setResult(null)
     setExpandedIds(new Set())
+    setQuizStartedAt(Date.now())
     setScreen('quiz')
   }
 
@@ -245,14 +256,8 @@ export default function LevelPage() {
   if (!level) return null
   if (!accessChecked) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#0D1B2A',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <div style={{ color: 'rgba(245,240,232,0.4)', fontSize: '0.85rem', letterSpacing: '0.08em' }}>
+      <div className="min-h-screen bg-navy flex items-center justify-center">
+        <div className="text-white/40 text-sm tracking-[0.08em] font-mono">
           Verifying access...
         </div>
       </div>
@@ -263,182 +268,94 @@ export default function LevelPage() {
 
   if (screen === 'start') {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#0D1B2A',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem 1.25rem',
-      }}>
-        <div style={{ width: '100%', maxWidth: '560px' }}>
+      <div className="min-h-screen bg-navy flex flex-col items-center justify-center px-5 py-8">
+        <div className="w-full max-w-[560px]">
 
           {/* Back link */}
-          <Link href="/progression" style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            color: 'rgba(245,240,232,0.4)',
-            fontSize: '0.8rem',
-            textDecoration: 'none',
-            marginBottom: '2.5rem',
-            letterSpacing: '0.04em',
-            transition: 'color 0.15s',
-          }}>
+          <Link
+            href="/progression"
+            className="inline-flex items-center gap-[0.35rem] text-white/40 text-[0.8rem] no-underline mb-10 tracking-[0.04em] hover:text-white/70 transition-colors"
+          >
             ← Back to Progression
           </Link>
 
           {/* Level label */}
-          <div style={{
-            fontSize: '0.68rem',
-            letterSpacing: '0.14em',
-            color: '#14BDAC',
-            fontFamily: 'monospace',
-            marginBottom: '0.75rem',
-            textTransform: 'uppercase',
-          }}>
+          <Label color="teal" size="sm" className="mb-3">
             Level {level.id}
-          </div>
+          </Label>
 
           {/* Level name */}
-          <h1 style={{
-            fontFamily: 'Georgia, serif',
-            fontSize: 'clamp(2rem, 6vw, 3rem)',
-            fontWeight: 700,
-            color: '#F5F0E8',
-            margin: '0 0 1rem 0',
-            lineHeight: 1.15,
-          }}>
+          <Heading as="h1" size="3xl" className="text-white mb-4 text-[clamp(2rem,6vw,3rem)]">
             {level.name}
-          </h1>
+          </Heading>
 
           {/* Description */}
-          <p style={{
-            color: 'rgba(245,240,232,0.65)',
-            fontSize: '1rem',
-            lineHeight: 1.65,
-            margin: '0 0 1.5rem 0',
-          }}>
+          <p className="text-white/65 text-base leading-[1.65] mb-6">
             {level.description}
           </p>
 
           {/* Domain tags */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.75rem' }}>
+          <div className="flex flex-wrap gap-2 mb-7">
             {level.domains.map(domain => (
-              <span key={domain} style={{
-                background: 'rgba(20,189,172,0.12)',
-                border: '1px solid rgba(20,189,172,0.3)',
-                borderRadius: '100px',
-                padding: '0.2rem 0.7rem',
-                color: '#14BDAC',
-                fontSize: '0.75rem',
-                letterSpacing: '0.04em',
-              }}>
+              <span
+                key={domain}
+                className="bg-teal/[12%] border border-teal/30 rounded-full px-3 py-[0.2rem] text-teal text-xs tracking-[0.04em]"
+              >
                 {domain}
               </span>
             ))}
           </div>
 
           {/* Meta line */}
-          <div style={{
-            color: 'rgba(245,240,232,0.4)',
-            fontSize: '0.8rem',
-            marginBottom: '1.5rem',
-            letterSpacing: '0.02em',
-          }}>
+          <div className="text-white/40 text-[0.8rem] mb-6 tracking-[0.02em]">
             15 questions · Pass with 80% to unlock the next level
           </div>
 
           {/* Study Guide */}
-          <div style={{
-            border: '1px solid rgba(20,189,172,0.2)',
-            borderRadius: '10px',
-            marginBottom: '1.75rem',
-            overflow: 'hidden',
-          }}>
+          <div className="border border-teal/20 rounded-[10px] mb-7 overflow-hidden">
             <button
               onClick={() => setShowGuide(v => !v)}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.75rem 1rem',
-                background: 'rgba(20,189,172,0.07)',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#14BDAC',
-                fontFamily: 'monospace',
-                fontSize: '0.72rem',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase' as const,
-              }}
+              className="w-full flex items-center justify-between px-4 py-3 bg-teal/[7%] border-none cursor-pointer text-teal font-mono text-[0.72rem] tracking-[0.1em] uppercase"
             >
               <span>Key Concepts — Study Before You Begin</span>
-              <span style={{ fontSize: '0.9rem', transition: 'transform 0.2s', transform: showGuide ? 'rotate(180deg)' : 'none' }}>▾</span>
+              <span
+                className="text-[0.9rem] transition-transform duration-200"
+                style={{ transform: showGuide ? 'rotate(180deg)' : 'none' }}
+              >
+                ▾
+              </span>
             </button>
             {showGuide && (
-              <div style={{ padding: '0.25rem 0 0.5rem' }}>
+              <div className="py-2">
                 {level.studyGuide.keyConcepts.map((concept, i) => (
-                  <div key={i} style={{
-                    padding: '0.75rem 1rem',
-                    borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <div style={{
-                      fontFamily: 'monospace',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      color: '#DAA520',
-                      marginBottom: '0.25rem',
-                    }}>
+                  <div
+                    key={i}
+                    className={`px-4 py-3 ${i === 0 ? '' : 'border-t border-white/[6%]'}`}
+                  >
+                    <div className="font-mono text-[0.78rem] font-bold text-amber mb-1">
                       {concept.term}
                     </div>
-                    <div style={{
-                      fontSize: '0.82rem',
-                      color: 'rgba(245,240,232,0.6)',
-                      lineHeight: 1.55,
-                    }}>
+                    <div className="text-[0.82rem] text-white/60 leading-[1.55]">
                       {concept.definition}
                     </div>
                   </div>
                 ))}
-                <div style={{
-                  margin: '0.5rem 1rem 0.25rem',
-                  padding: '0.65rem 0.85rem',
-                  background: 'rgba(20,189,172,0.06)',
-                  borderLeft: '3px solid #14BDAC',
-                  borderRadius: '0 6px 6px 0',
-                }}>
-                  <div style={{ fontSize: '0.65rem', fontFamily: 'monospace', color: '#14BDAC', letterSpacing: '0.1em', marginBottom: '0.2rem' }}>FOCUS TIP</div>
-                  <div style={{ fontSize: '0.8rem', color: 'rgba(245,240,232,0.55)', lineHeight: 1.55 }}>{level.studyGuide.focusTip}</div>
+                <div className="mx-4 mt-2 mb-1 px-[0.85rem] py-[0.65rem] bg-teal/[6%] border-l-[3px] border-teal rounded-r-md">
+                  <Label color="teal" size="xs" className="mb-[0.2rem]">Focus Tip</Label>
+                  <div className="text-[0.8rem] text-white/55 leading-[1.55]">{level.studyGuide.focusTip}</div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Begin button */}
-          <button
+          <Button
             onClick={beginLevel}
-            style={{
-              width: '100%',
-              padding: '1rem',
-              background: '#14BDAC',
-              color: '#0D1B2A',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '1rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: '0.04em',
-              fontFamily: 'monospace',
-              transition: 'opacity 0.15s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            variant="default"
+            className="w-full py-4 text-base font-bold tracking-[0.04em] font-mono rounded-[10px]"
           >
             Begin Level
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -451,108 +368,43 @@ export default function LevelPage() {
     const progressPct = ((currentIndex) / 15) * 100
 
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#0D1B2A',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+      <div className="min-h-screen bg-navy flex flex-col">
 
         {/* Progress bar */}
-        <div style={{ height: '3px', background: 'rgba(245,240,232,0.08)', flexShrink: 0 }}>
-          <div style={{
-            height: '100%',
-            width: `${progressPct}%`,
-            background: '#14BDAC',
-            transition: 'width 0.25s ease',
-          }} />
-        </div>
+        <Progress
+          value={progressPct}
+          color="teal"
+          className="rounded-none h-[3px] flex-shrink-0"
+        />
 
         {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1rem 1.5rem',
-          borderBottom: '1px solid rgba(245,240,232,0.07)',
-          flexShrink: 0,
-        }}>
-          <div style={{ color: 'rgba(245,240,232,0.45)', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[7%] flex-shrink-0">
+          <div className="text-white/45 text-[0.78rem] font-mono">
             {level.name}
           </div>
-          <div style={{ color: '#14BDAC', fontSize: '0.8rem', fontFamily: 'monospace', fontWeight: 600 }}>
+          <div className="text-teal text-[0.8rem] font-mono font-semibold">
             Question {currentIndex + 1} of 15
           </div>
         </div>
 
         {/* Question area */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem 1.25rem',
-        }}>
-          <div style={{ width: '100%', maxWidth: '640px' }}>
+        <div className="flex-1 flex flex-col items-center justify-center px-5 py-8">
+          <div className="w-full max-w-[640px]">
 
             {/* Question text */}
-            <p style={{
-              color: '#F5F0E8',
-              fontSize: 'clamp(1.05rem, 3vw, 1.3rem)',
-              lineHeight: 1.6,
-              marginBottom: '2rem',
-              fontFamily: 'Georgia, serif',
-            }}>
+            <p className="text-white text-[clamp(1.05rem,3vw,1.3rem)] leading-[1.6] mb-8 font-display">
               {question.question}
             </p>
 
             {/* Option buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="flex flex-col gap-3">
               {question.options.map((option, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleAnswer(idx)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '1rem',
-                    width: '100%',
-                    padding: '1rem 1.25rem',
-                    background: 'rgba(245,240,232,0.04)',
-                    border: '1px solid rgba(245,240,232,0.12)',
-                    borderRadius: '10px',
-                    color: '#F5F0E8',
-                    fontSize: '0.95rem',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    lineHeight: 1.5,
-                    transition: 'background 0.15s, border-color 0.15s',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(20,189,172,0.1)'
-                    e.currentTarget.style.borderColor = 'rgba(20,189,172,0.4)'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(245,240,232,0.04)'
-                    e.currentTarget.style.borderColor = 'rgba(245,240,232,0.12)'
-                  }}
+                  className="flex items-start gap-4 w-full px-5 py-4 bg-white/[4%] border border-white/[12%] rounded-[10px] text-white text-[0.95rem] cursor-pointer text-left leading-[1.5] transition-all hover:bg-teal/10 hover:border-teal/40"
                 >
-                  <span style={{
-                    flexShrink: 0,
-                    width: '1.6rem',
-                    height: '1.6rem',
-                    borderRadius: '50%',
-                    background: 'rgba(20,189,172,0.15)',
-                    color: '#14BDAC',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    fontFamily: 'monospace',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginTop: '0.05rem',
-                  }}>
+                  <span className="flex-shrink-0 w-[1.6rem] h-[1.6rem] rounded-full bg-teal/[15%] text-teal text-xs font-bold font-mono flex items-center justify-center mt-[0.05rem]">
                     {OPTION_LABELS[idx]}
                   </span>
                   <span>{option}</span>
@@ -570,25 +422,9 @@ export default function LevelPage() {
   // Loading state while submitting
   if (submitting) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#0D1B2A',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '1rem',
-      }}>
-        <div style={{
-          width: '2.5rem',
-          height: '2.5rem',
-          border: '2px solid rgba(20,189,172,0.25)',
-          borderTopColor: '#14BDAC',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <div style={{ color: 'rgba(245,240,232,0.5)', fontSize: '0.9rem', fontFamily: 'monospace' }}>
+      <div className="min-h-screen bg-navy flex flex-col items-center justify-center gap-4">
+        <div className="w-10 h-10 border-2 border-teal/25 border-t-teal rounded-full animate-spin" />
+        <div className="text-white/50 text-[0.9rem] font-mono">
           Calculating your score...
         </div>
       </div>
@@ -597,81 +433,35 @@ export default function LevelPage() {
 
   if (!result) return null
 
-  const scoreColor = result.passed ? '#14BDAC' : '#DAA520'
-  const scoreDisplay = `${Math.round(result.score)}%`
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0D1B2A',
-      padding: '2rem 1.25rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-    }}>
-      <div style={{ width: '100%', maxWidth: '640px' }}>
+    <div className="min-h-screen bg-navy px-5 py-8 flex flex-col items-center">
+      <div className="w-full max-w-[640px]">
 
         {/* Score block */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '2rem',
-          padding: '2.5rem 1.5rem',
-          background: 'rgba(245,240,232,0.03)',
-          border: '1px solid rgba(245,240,232,0.08)',
-          borderRadius: '14px',
-        }}>
+        <div className="text-center mb-8 px-6 py-10 bg-white/[3%] border border-white/[8%] rounded-[14px]">
 
           {/* Score number */}
-          <div style={{
-            fontFamily: 'Georgia, serif',
-            fontSize: 'clamp(3rem, 10vw, 5rem)',
-            fontWeight: 700,
-            color: scoreColor,
-            lineHeight: 1,
-            marginBottom: '0.75rem',
-          }}>
-            {scoreDisplay}
-          </div>
+          <Numeric
+            size="5xl"
+            color={result.passed ? 'teal' : 'amber'}
+            className="text-[clamp(3rem,10vw,5rem)] block mb-3"
+          >
+            {Math.round(result.score)}%
+          </Numeric>
 
           {/* Pass / fail badge */}
           {result.passed ? (
-            <span style={{
-              display: 'inline-block',
-              background: 'rgba(34,197,94,0.15)',
-              border: '1px solid rgba(34,197,94,0.4)',
-              borderRadius: '100px',
-              padding: '0.25rem 0.9rem',
-              color: '#4ade80',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              fontFamily: 'monospace',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              marginBottom: '1.25rem',
-            }}>
+            <span className="inline-block bg-green-500/15 border border-green-500/40 rounded-full px-[0.9rem] py-1 text-green-400 text-[0.78rem] font-bold font-mono tracking-[0.08em] uppercase mb-5">
               Level Complete
             </span>
           ) : (
-            <span style={{
-              display: 'inline-block',
-              background: 'rgba(218,165,32,0.12)',
-              border: '1px solid rgba(218,165,32,0.35)',
-              borderRadius: '100px',
-              padding: '0.25rem 0.9rem',
-              color: '#DAA520',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              fontFamily: 'monospace',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              marginBottom: '1.25rem',
-            }}>
+            <span className="inline-block bg-amber/[12%] border border-amber/35 rounded-full px-[0.9rem] py-1 text-amber text-[0.78rem] font-bold font-mono tracking-[0.08em] uppercase mb-5">
               Not quite — 80% required to advance
             </span>
           )}
 
           {/* Correct count */}
-          <div style={{ color: 'rgba(245,240,232,0.45)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+          <div className="text-white/45 text-[0.85rem] font-mono">
             {result.correct} of {result.total} correct
           </div>
         </div>
@@ -679,35 +469,34 @@ export default function LevelPage() {
         {/* PASS extras */}
         {result.passed && (
           <>
+            {/* Study Module card */}
+            <div className="mb-4 px-5 py-4 rounded-[10px] bg-amber/[6%] border border-amber/30">
+              <div className="text-[0.68rem] font-mono tracking-[0.12em] text-amber uppercase mb-2">
+                Study Module Unlocked
+              </div>
+              <p className="text-white/65 text-[0.85rem] leading-[1.55] mb-3">
+                Review the 5 key concepts for Level {level.id} and complete the CEU assessment.
+                Completion is tracked for future credentialing.
+              </p>
+              <Link
+                href={`/progression/${levelId}/study`}
+                className="inline-block bg-amber/[15%] border border-amber/50 text-amber no-underline px-4 py-[0.45rem] rounded-[8px] text-[0.8rem] font-bold font-mono tracking-[0.03em]"
+              >
+                Open Study Module →
+              </Link>
+            </div>
+
             {/* Next level unlocked */}
             {result.nextLevelUnlocked && (
-              <div style={{
-                marginBottom: '1rem',
-                padding: '1rem 1.25rem',
-                borderRadius: '10px',
-                background: 'rgba(20,189,172,0.06)',
-                border: '1px solid rgba(20,189,172,0.0)',
-                animation: 'borderReveal 0.6s ease forwards 0.3s',
-                position: 'relative',
-                overflow: 'hidden',
-              }}>
+              <div className="mb-4 px-5 py-4 rounded-[10px] bg-teal/[6%] border border-teal/45 relative overflow-hidden">
                 <style>{`
                   @keyframes borderReveal {
                     from { border-color: rgba(20,189,172,0.0); }
                     to   { border-color: rgba(20,189,172,0.45); }
                   }
                 `}</style>
-                <div style={{
-                  fontSize: '0.68rem',
-                  letterSpacing: '0.12em',
-                  color: '#14BDAC',
-                  fontFamily: 'monospace',
-                  marginBottom: '0.3rem',
-                  textTransform: 'uppercase',
-                }}>
-                  Unlocked
-                </div>
-                <div style={{ color: '#F5F0E8', fontSize: '0.95rem', fontWeight: 600 }}>
+                <Label color="teal" className="mb-[0.3rem]">Unlocked</Label>
+                <div className="text-white text-[0.95rem] font-semibold">
                   Level {result.nextLevelUnlocked} unlocked!
                 </div>
               </div>
@@ -715,17 +504,9 @@ export default function LevelPage() {
 
             {/* Bonus unlocked */}
             {result.bonusUnlocked.length > 0 && (
-              <div style={{
-                marginBottom: '1rem',
-                padding: '0.85rem 1.25rem',
-                borderRadius: '10px',
-                background: 'rgba(218,165,32,0.08)',
-                border: '1px solid rgba(218,165,32,0.3)',
-              }}>
-                <span style={{ fontSize: '0.68rem', letterSpacing: '0.1em', color: '#DAA520', fontFamily: 'monospace', textTransform: 'uppercase' }}>
-                  Bonus Unlocked:{' '}
-                </span>
-                <span style={{ color: '#F5F0E8', fontSize: '0.9rem' }}>
+              <div className="mb-4 px-5 py-[0.85rem] rounded-[10px] bg-amber/[8%] border border-amber/30">
+                <Label color="amber" as="span">Bonus Unlocked:{' '}</Label>
+                <span className="text-white text-[0.9rem]">
                   {result.bonusUnlocked.join(', ')}
                 </span>
               </div>
@@ -735,44 +516,25 @@ export default function LevelPage() {
 
         {/* Badges earned */}
         {result.badgesEarned?.length > 0 && (
-          <div style={{
-            marginBottom: '1rem',
-            padding: '1rem 1.25rem',
-            borderRadius: '10px',
-            background: 'rgba(20,189,172,0.06)',
-            border: '1px solid rgba(20,189,172,0.3)',
-          }}>
-            <div style={{
-              fontSize: '0.68rem',
-              letterSpacing: '0.12em',
-              color: '#14BDAC',
-              fontFamily: 'monospace',
-              textTransform: 'uppercase',
-              marginBottom: '0.75rem',
-            }}>
+          <div className="mb-4 px-5 py-4 rounded-[10px] bg-teal/[6%] border border-teal/30">
+            <Label color="teal" className="mb-3">
               {result.badgesEarned.length === 1 ? 'Badge Unlocked' : 'Badges Unlocked'}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            </Label>
+            <div className="flex flex-col gap-2">
               {result.badgesEarned.map(id => {
                 const badge = getBadgeById(id)
                 if (!badge) return null
                 return (
-                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: '50%',
-                      background: `${badge.color}20`,
-                      border: `1px solid ${badge.color}60`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.1rem',
-                      flexShrink: 0,
-                    }}>{badge.icon}</span>
+                  <div key={id} className="flex items-center gap-3">
+                    <span
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0"
+                      style={{ background: `${badge.color}20`, border: `1px solid ${badge.color}60` }}
+                    >
+                      {badge.icon}
+                    </span>
                     <div>
-                      <div style={{ color: '#F5F0E8', fontSize: '0.88rem', fontWeight: 600 }}>{badge.name}</div>
-                      <div style={{ color: 'rgba(245,240,232,0.45)', fontSize: '0.75rem' }}>{badge.description}</div>
+                      <div className="text-white text-[0.88rem] font-semibold">{badge.name}</div>
+                      <div className="text-white/45 text-xs">{badge.description}</div>
                     </div>
                   </div>
                 )
@@ -783,38 +545,12 @@ export default function LevelPage() {
 
         {/* XP earned block */}
         {result.xpBreakdown && (
-          <div style={{
-            marginBottom: '1rem',
-            padding: '1rem 1.25rem',
-            borderRadius: '10px',
-            background: 'rgba(218,165,32,0.06)',
-            border: '1px solid rgba(218,165,32,0.25)',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '0.6rem',
-            }}>
-              <div style={{
-                fontSize: '0.68rem',
-                letterSpacing: '0.12em',
-                color: '#DAA520',
-                fontFamily: 'monospace',
-                textTransform: 'uppercase',
-              }}>
-                XP Earned
-              </div>
-              <div style={{
-                fontSize: '1.1rem',
-                fontWeight: 700,
-                color: '#DAA520',
-                fontFamily: 'monospace',
-              }}>
-                +{result.xpBreakdown.total}
-              </div>
+          <div className="mb-4 px-5 py-4 rounded-[10px] bg-amber/[6%] border border-amber/25">
+            <div className="flex items-center justify-between mb-[0.6rem]">
+              <Label color="amber">XP Earned</Label>
+              <Numeric size="lg" color="amber">+{result.xpBreakdown.total}</Numeric>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+            <div className="flex flex-col gap-[0.3rem]">
               {result.xpBreakdown.attempt > 0 && (
                 <XpRow label="Attempted" value={result.xpBreakdown.attempt} />
               )}
@@ -828,18 +564,12 @@ export default function LevelPage() {
                 <XpRow label="Precision bonus (90%+)" value={result.xpBreakdown.precision} />
               )}
             </div>
-            <div style={{
-              marginTop: '0.75rem',
-              paddingTop: '0.6rem',
-              borderTop: '1px solid rgba(218,165,32,0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
-              <span style={{ fontSize: '0.75rem', color: 'rgba(245,240,232,0.4)', fontFamily: 'monospace' }}>
-                Total XP
-              </span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: getXpTier(result.totalXp).color, fontFamily: 'monospace' }}>
+            <div className="mt-3 pt-[0.6rem] border-t border-amber/[15%] flex items-center justify-between">
+              <span className="text-xs text-white/40 font-mono">Total XP</span>
+              <span
+                className="text-[0.85rem] font-bold font-mono"
+                style={{ color: getXpTier(result.totalXp).color }}
+              >
                 {result.totalXp} · {getXpTier(result.totalXp).label}
               </span>
             </div>
@@ -848,87 +578,49 @@ export default function LevelPage() {
 
         {/* FAIL retry button */}
         {!result.passed && (
-          <div style={{ marginBottom: '1rem' }}>
-            <button
+          <div className="mb-4">
+            <Button
               onClick={retryActive ? beginLevel : undefined}
               disabled={!retryActive}
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                background: retryActive ? '#14BDAC' : 'rgba(20,189,172,0.1)',
-                color: retryActive ? '#0D1B2A' : 'rgba(20,189,172,0.4)',
-                border: `1px solid ${retryActive ? '#14BDAC' : 'rgba(20,189,172,0.2)'}`,
-                borderRadius: '10px',
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                cursor: retryActive ? 'pointer' : 'not-allowed',
-                fontFamily: 'monospace',
-                letterSpacing: '0.04em',
-                transition: 'all 0.2s',
-              }}
+              className={`w-full py-[0.85rem] rounded-[10px] text-[0.9rem] font-bold font-mono tracking-[0.04em] ${retryActive ? '' : 'cursor-not-allowed'}`}
+              variant={retryActive ? 'default' : 'outline'}
             >
               {retryActive
                 ? 'Retry Level'
                 : `Retry available in ${retryCountdown}s...`}
-            </button>
+            </Button>
           </div>
         )}
 
         {/* CTA buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '2rem' }}>
-          <Link href="/progression" style={{
-            display: 'block',
-            textAlign: 'center',
-            padding: '0.85rem',
-            background: result.passed ? '#14BDAC' : 'rgba(245,240,232,0.05)',
-            color: result.passed ? '#0D1B2A' : 'rgba(245,240,232,0.6)',
-            border: result.passed ? 'none' : '1px solid rgba(245,240,232,0.12)',
-            borderRadius: '10px',
-            fontSize: '0.9rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            fontFamily: 'monospace',
-            letterSpacing: '0.04em',
-          }}>
-            Return to Dashboard
-          </Link>
+        <div className="flex flex-col gap-[0.6rem] mb-8">
+          <Button
+            asChild
+            variant={result.passed ? 'default' : 'ghost'}
+            className="w-full py-[0.85rem] rounded-[10px] text-[0.9rem] font-bold font-mono tracking-[0.04em]"
+          >
+            <Link href="/progression">Return to Dashboard</Link>
+          </Button>
 
           {result.passed && (
-            <button
+            <Button
               onClick={retake}
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                background: 'transparent',
-                color: 'rgba(245,240,232,0.45)',
-                border: '1px solid rgba(245,240,232,0.1)',
-                borderRadius: '10px',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontFamily: 'monospace',
-                letterSpacing: '0.04em',
-              }}
+              variant="ghost"
+              className="w-full py-[0.85rem] rounded-[10px] text-[0.85rem] font-mono tracking-[0.04em] text-white/45 border border-white/10"
             >
               Retake this level
-            </button>
+            </Button>
           )}
         </div>
 
         {/* ─── Remediation section (fail only) ─── */}
         {!result.passed && result.incorrectItems.length > 0 && (
           <div>
-            <div style={{
-              fontSize: '0.68rem',
-              letterSpacing: '0.12em',
-              color: 'rgba(245,240,232,0.35)',
-              fontFamily: 'monospace',
-              textTransform: 'uppercase',
-              marginBottom: '1rem',
-            }}>
+            <Label color="muted" className="mb-4">
               Review wrong answers ({result.incorrectItems.length})
-            </div>
+            </Label>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="flex flex-col gap-3">
               {result.incorrectItems.map((item) => {
                 const isExpanded = expandedIds.has(item.questionId)
                 // Look up options from local QUESTIONS (safe: server sends IDs)
@@ -939,96 +631,41 @@ export default function LevelPage() {
                 return (
                   <div
                     key={item.questionId}
-                    style={{
-                      background: 'rgba(245,240,232,0.03)',
-                      border: '1px solid rgba(245,240,232,0.08)',
-                      borderRadius: '10px',
-                      overflow: 'hidden',
-                    }}
+                    className="bg-white/[3%] border border-white/[8%] rounded-[10px] overflow-hidden"
                   >
                     {/* Question + domain tag */}
-                    <div style={{ padding: '1rem 1.25rem 0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                        <p style={{
-                          color: '#F5F0E8',
-                          fontSize: '0.9rem',
-                          lineHeight: 1.55,
-                          margin: 0,
-                          flex: 1,
-                        }}>
+                    <div className="px-5 pt-4 pb-3">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <p className="text-white text-[0.9rem] leading-[1.55] m-0 flex-1">
                           {item.questionText}
                         </p>
-                        <span style={{
-                          flexShrink: 0,
-                          background: 'rgba(20,189,172,0.1)',
-                          border: '1px solid rgba(20,189,172,0.2)',
-                          borderRadius: '100px',
-                          padding: '0.15rem 0.6rem',
-                          color: '#14BDAC',
-                          fontSize: '0.68rem',
-                          letterSpacing: '0.04em',
-                          whiteSpace: 'nowrap',
-                        }}>
+                        <span className="flex-shrink-0 bg-teal/10 border border-teal/20 rounded-full px-[0.6rem] py-[0.15rem] text-teal text-[0.68rem] tracking-[0.04em] whitespace-nowrap">
                           {item.domain}
                         </span>
                       </div>
 
                       {/* Your answer */}
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.5rem',
-                        marginBottom: '0.4rem',
-                        fontSize: '0.82rem',
-                      }}>
-                        <span style={{ color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace', flexShrink: 0 }}>
-                          Your answer:
-                        </span>
-                        <span style={{ color: '#f87171' }}>{selectedLabel}</span>
+                      <div className="flex items-start gap-2 mb-[0.4rem] text-[0.82rem]">
+                        <span className="text-white/35 font-mono flex-shrink-0">Your answer:</span>
+                        <span className="text-red-400">{selectedLabel}</span>
                       </div>
 
                       {/* Correct answer */}
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.5rem',
-                        fontSize: '0.82rem',
-                      }}>
-                        <span style={{ color: 'rgba(245,240,232,0.35)', fontFamily: 'monospace', flexShrink: 0 }}>
-                          Correct answer:
-                        </span>
-                        <span style={{ color: '#4ade80' }}>{correctLabel}</span>
+                      <div className="flex items-start gap-2 text-[0.82rem]">
+                        <span className="text-white/35 font-mono flex-shrink-0">Correct answer:</span>
+                        <span className="text-green-400">{correctLabel}</span>
                       </div>
                     </div>
 
                     {/* Accordion toggle */}
                     <button
                       onClick={() => toggleExpanded(item.questionId)}
-                      style={{
-                        width: '100%',
-                        padding: '0.6rem 1.25rem',
-                        background: 'rgba(245,240,232,0.03)',
-                        border: 'none',
-                        borderTop: '1px solid rgba(245,240,232,0.07)',
-                        color: 'rgba(245,240,232,0.45)',
-                        fontSize: '0.78rem',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        fontFamily: 'monospace',
-                        letterSpacing: '0.04em',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                        transition: 'color 0.15s',
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#14BDAC')}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,240,232,0.45)')}
+                      className="w-full px-5 py-[0.6rem] bg-white/[3%] border-none border-t border-white/[7%] text-white/45 text-[0.78rem] cursor-pointer text-left font-mono tracking-[0.04em] flex items-center gap-[0.4rem] hover:text-teal transition-colors"
                     >
-                      <span style={{
-                        display: 'inline-block',
-                        transition: 'transform 0.2s',
-                        transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                      }}>
+                      <span
+                        className="inline-block transition-transform duration-200"
+                        style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                      >
                         ›
                       </span>
                       Why?
@@ -1036,14 +673,7 @@ export default function LevelPage() {
 
                     {/* Explanation */}
                     {isExpanded && (
-                      <div style={{
-                        padding: '0.85rem 1.25rem',
-                        borderTop: '1px solid rgba(245,240,232,0.07)',
-                        color: 'rgba(245,240,232,0.7)',
-                        fontSize: '0.85rem',
-                        lineHeight: 1.65,
-                        background: 'rgba(20,189,172,0.04)',
-                      }}>
+                      <div className="px-5 py-[0.85rem] border-t border-white/[7%] text-white/70 text-[0.85rem] leading-[1.65] bg-teal/[4%]">
                         {item.explanation}
                       </div>
                     )}
@@ -1055,7 +685,7 @@ export default function LevelPage() {
         )}
 
         {/* Bottom spacer */}
-        <div style={{ height: '3rem' }} />
+        <div className="h-12" />
       </div>
     </div>
   )

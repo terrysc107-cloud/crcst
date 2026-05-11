@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Check, Crown, Sparkles, Clock } from 'lucide-react'
+import { Check, Crown, Sparkles, Clock, Tag } from 'lucide-react'
 
 const PLANS = [
   {
@@ -68,6 +68,10 @@ export default function PricingPage() {
   const [tierExpiry, setTierExpiry] = useState<string | null>(null)
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [codeInput, setCodeInput] = useState('')
+  const [codeLoading, setCodeLoading] = useState(false)
+  const [codeError, setCodeError] = useState('')
+  const [codeSuccess, setCodeSuccess] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -133,6 +137,50 @@ export default function PricingPage() {
       setError(err.message || 'Failed to start checkout')
     } finally {
       setLoading(null)
+    }
+  }
+
+  const handleRedeemCode = async () => {
+    if (!codeInput.trim()) return
+    try {
+      setCodeLoading(true)
+      setCodeError('')
+      setCodeSuccess('')
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        window.location.href = '/crcst'
+        return
+      }
+
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) {
+        setCodeError('Authentication failed. Please try again.')
+        return
+      }
+
+      const res = await fetch('/api/payment/redeem-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ code: codeInput.trim() }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setCodeError(data.error || 'Failed to redeem code')
+        return
+      }
+
+      const tierLabel = data.tier === 'triple_crown' ? 'Triple Crown' : 'Pro'
+      setCodeSuccess(`Code applied! You now have ${tierLabel} access for ${data.durationDays} days.`)
+      setCodeInput('')
+      setCurrentPlan(data.tier)
+      setTierExpiry(data.expiresAt)
+    } catch {
+      setCodeError('Something went wrong. Please try again.')
+    } finally {
+      setCodeLoading(false)
     }
   }
 
@@ -276,6 +324,43 @@ export default function PricingPage() {
             </div>
           )
         })}
+      </div>
+
+      {/* Wholesale / Access Code */}
+      <div className="max-w-md mx-auto px-6 pb-10">
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Tag className="w-4 h-4 text-primary" />
+            <h2 className="font-semibold text-sm">Have an access code?</h2>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">
+            Provided by your employer or training program.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={codeInput}
+              onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === 'Enter' && handleRedeemCode()}
+              placeholder="Enter code"
+              disabled={codeLoading}
+              className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 uppercase placeholder-normal"
+            />
+            <button
+              onClick={handleRedeemCode}
+              disabled={codeLoading || !codeInput.trim()}
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {codeLoading ? '...' : 'Apply'}
+            </button>
+          </div>
+          {codeError && (
+            <p className="mt-2 text-xs text-destructive">{codeError}</p>
+          )}
+          {codeSuccess && (
+            <p className="mt-2 text-xs text-emerald-500">{codeSuccess}</p>
+          )}
+        </div>
       </div>
 
       {/* Already have CRCST section */}

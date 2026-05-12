@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
-export default function RedeemPage() {
+function RedeemForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [code, setCode] = useState('')
@@ -238,5 +238,13 @@ export default function RedeemPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
+  )
+}
+
+export default function RedeemPage() {
+  return (
+    <Suspense>
+      <RedeemForm />
+    </Suspense>
   )
 }

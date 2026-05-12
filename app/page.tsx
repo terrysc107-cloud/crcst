@@ -588,18 +588,18 @@ export default function LandingPage() {
       {/* ── ATS CALLOUT ──────────────────────────────────────────────────────── */}
       <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">Professional Training &amp; Certification Courses</p>
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
           <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4 font-display">
-            Looking for live instruction or a structured course?
+            Do you need professional study assistance?
           </h2>
           <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
-            Aseptic Technical Solutions delivers a proven sterile processing certification training program for individuals and organizations alike. Choose from in-person classes, live virtual sessions, or self-study formats — designed for everyone from first-time students to experienced techs re-entering the field. Whether you are preparing on your own, enrolling your department, or building a school curriculum from scratch, their expert instructors meet you where you are.
+            Aseptic Technical Solutions offers a proven certification training program with flexible options built for every learner — in-person classes, live virtual sessions, and self-study formats. Whether you are preparing solo or building a high-performing SPD team, our expert instructors are ready to help you get certified and stay compliant.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <a href="https://aseptictechnicalsolutions.com"
               className="inline-flex items-center px-6 py-3 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
               style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
-              Explore Courses at Aseptic Technical Solutions
+              Explore Training Programs at Aseptic Technical Solutions
             </a>
             <a href="mailto:terry@scottadvisory.net"
               className="inline-flex items-center px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal transition-all">

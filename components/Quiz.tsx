@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Question } from '@/lib/questions'
 import { supabase } from '@/lib/supabase'
 
@@ -32,15 +32,17 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [pauseSaved, setPauseSaved] = useState(false)
   const [rateLimitReached, setRateLimitReached] = useState(false)
   const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null)
+  const [answerFeedback, setAnswerFeedback] = useState<'correct' | 'wrong' | null>(null)
+  const incrementInFlight = useRef(false)
 
   const q = quizData.questions[current]
   const progress = ((current + 1) / quizData.questions.length) * 100
   const hasAnswered = answers[current] !== null
   const isCorrect = hasAnswered && answers[current] === q.correct_answer
 
-  // Timer for timed exam modes
+  // Timer for timed exam modes — only depends on mode, not timeLeft (avoids restart on every tick)
   useEffect(() => {
-    if ((mode !== 'quiz' && mode !== 'test') || timeLeft <= 0) return
+    if (mode !== 'quiz' && mode !== 'test') return
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -54,7 +56,46 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [mode, timeLeft])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode])
+
+  // Shared usage increment — called once per question regardless of mode
+  const incrementUsage = async () => {
+    if (!user?.id || incrementInFlight.current) return
+    incrementInFlight.current = true
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      const res = await fetch('/api/usage/increment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ field: 'questions_attempted' }),
+      })
+      const data = await res.json()
+      if (res.status === 429 || data.error === 'limit_reached') {
+        if (!data.unlimited) {
+          setRateLimitReached(true)
+          setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+        }
+      } else if (data.used !== undefined && !data.unlimited) {
+        setUsageInfo({
+          used: data.used,
+          limit: data.limit || 20,
+          remaining: data.remaining || 0,
+        })
+        if (data.remaining !== null && data.remaining <= 0) {
+          setRateLimitReached(true)
+        }
+      }
+    } catch (err) {
+      console.error('[Quiz] Failed to increment usage:', err)
+    } finally {
+      incrementInFlight.current = false
+    }
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -126,17 +167,18 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
 
   const selectAnswer = async (idx: number) => {
     if (rateLimitReached) return
-    // In practice/homework mode, lock once explanation is showing
     if ((mode === 'practice' || mode === 'homework') && showExplanation) return
-    // In timed/custom mode, allow changing answers freely but only track first answer
     const isFirstAnswer = !hasAnswered
 
     const newAnswers = [...answers]
     newAnswers[current] = idx
     setAnswers(newAnswers)
 
-    // Only track attempt and increment usage on the first answer for this question
+    // Show micro-feedback animation on first answer
     if (isFirstAnswer) {
+      setAnswerFeedback(idx === q.correct_answer ? 'correct' : 'wrong')
+      setTimeout(() => setAnswerFeedback(null), 600)
+
       supabase.from('question_attempts').insert({
         user_id: user?.id ?? null,
         question_id: q.id,
@@ -145,40 +187,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         selected_answer: String.fromCharCode(65 + idx).toLowerCase(),
       }).then(() => {})
 
-      if (user?.id) {
-        try {
-          const session = await supabase.auth.getSession()
-          const token = session.data.session?.access_token
-          const res = await fetch('/api/usage/increment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ field: 'questions_attempted' }),
-          })
-
-          const data = await res.json()
-
-          if (res.status === 429 || data.error === 'limit_reached') {
-            if (!data.unlimited) {
-              setRateLimitReached(true)
-              setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
-            }
-          } else if (data.used !== undefined && !data.unlimited) {
-            setUsageInfo({
-              used: data.used,
-              limit: data.limit || 20,
-              remaining: data.remaining || 0,
-            })
-            if (data.remaining !== null && data.remaining <= 0) {
-              setRateLimitReached(true)
-            }
-          }
-        } catch (err) {
-          console.error('[v0] Failed to increment usage:', err)
-        }
-      }
+      await incrementUsage()
     }
   }
 
@@ -337,44 +346,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                 onClick={async () => {
                   if (rateLimitReached) return
                   const newAnswers = [...answers]
-                  newAnswers[current] = -1 // Mark as "didn't know"
+                  newAnswers[current] = -1
                   setAnswers(newAnswers)
-                  
-                  // Increment usage count for flashcard (counts toward hourly limit)
-                  if (user?.id) {
-                    try {
-                      const session = await supabase.auth.getSession()
-                      const token = session.data.session?.access_token
-                      const res = await fetch('/api/usage/increment', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                        },
-                        body: JSON.stringify({ field: 'questions_attempted' }),
-                      })
-                      
-                      const data = await res.json()
-                      if (res.status === 429 || data.error === 'limit_reached') {
-                        setRateLimitReached(true)
-                        setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
-                      } else if (data.used !== undefined) {
-                        setUsageInfo({ 
-                          used: data.used, 
-                          limit: data.limit || 20, 
-                          remaining: data.remaining || 0 
-                        })
-                        if (data.remaining !== null && data.remaining <= 0) {
-                          setRateLimitReached(true)
-                        }
-                      }
-                    } catch (err) {
-                      console.error('[v0] Failed to increment flashcard usage:', err)
-                    }
-                  }
+                  await incrementUsage()
                 }}
                 disabled={rateLimitReached}
-                className="flex-1 px-4 py-3 bg-wrong-bg border-2 border-wrong text-wrong rounded-lg font-mono text-sm hover:bg-wrong/20 transition disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-wrong-bg border-2 border-wrong text-wrong rounded-lg font-mono text-sm hover:bg-wrong/20 transition disabled:opacity-50 active:scale-95"
               >
                 ✗ Didn't Know
               </button>
@@ -382,44 +359,12 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
                 onClick={async () => {
                   if (rateLimitReached) return
                   const newAnswers = [...answers]
-                  newAnswers[current] = q.correct_answer // Mark as "knew it"
+                  newAnswers[current] = q.correct_answer
                   setAnswers(newAnswers)
-                  
-                  // Increment usage count for flashcard (counts toward hourly limit)
-                  if (user?.id) {
-                    try {
-                      const session = await supabase.auth.getSession()
-                      const token = session.data.session?.access_token
-                      const res = await fetch('/api/usage/increment', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                        },
-                        body: JSON.stringify({ field: 'questions_attempted' }),
-                      })
-                      
-                      const data = await res.json()
-                      if (res.status === 429 || data.error === 'limit_reached') {
-                        setRateLimitReached(true)
-                        setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
-                      } else if (data.used !== undefined) {
-                        setUsageInfo({ 
-                          used: data.used, 
-                          limit: data.limit || 20, 
-                          remaining: data.remaining || 0 
-                        })
-                        if (data.remaining !== null && data.remaining <= 0) {
-                          setRateLimitReached(true)
-                        }
-                      }
-                    } catch (err) {
-                      console.error('[v0] Failed to increment flashcard usage:', err)
-                    }
-                  }
+                  await incrementUsage()
                 }}
                 disabled={rateLimitReached}
-                className="flex-1 px-4 py-3 bg-correct-bg border-2 border-correct text-correct rounded-lg font-mono text-sm hover:bg-correct/20 transition disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-correct-bg border-2 border-correct text-correct rounded-lg font-mono text-sm hover:bg-correct/20 transition disabled:opacity-50 active:scale-95"
               >
                 ✓ Knew It
               </button>
@@ -512,6 +457,30 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         </div>
       )}
 
+      {/* Low-usage warning for free tier */}
+      {usageInfo && !rateLimitReached && usageInfo.remaining <= 5 && usageInfo.remaining > 0 && (
+        <div className={`mx-6 mt-3 px-4 py-2.5 rounded-lg flex items-center justify-between gap-3 fadeUp ${
+          usageInfo.remaining <= 2
+            ? 'bg-wrong-bg border border-wrong/40'
+            : 'bg-amber/10 border border-amber/40'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className="text-base">⚡</span>
+            <span className={`font-mono text-xs font-semibold ${
+              usageInfo.remaining <= 2 ? 'text-wrong' : 'text-amber'
+            }`}>
+              {usageInfo.remaining} free question{usageInfo.remaining !== 1 ? 's' : ''} left this hour
+            </span>
+          </div>
+          <a
+            href="/pricing"
+            className="shrink-0 px-3 py-1 bg-teal text-white rounded-md font-mono text-xs hover:bg-teal-2 transition"
+          >
+            Go Unlimited
+          </a>
+        </div>
+      )}
+
       {/* Question */}
       <div className="px-6 py-8">
         <div className="text-xs text-teal tracking-widest mb-2">
@@ -525,21 +494,27 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
         <div className="space-y-3 mb-8">
           {q.options.map((opt, idx) => {
             let optionClass =
-              'w-full text-left px-4 py-3 rounded-lg border-2 transition font-mono text-sm'
+              'w-full text-left px-4 py-3 rounded-lg border-2 transition-all font-mono text-sm active:scale-[0.98]'
 
-            if ((mode === 'practice' || mode === 'homework') && showExplanation) {
+            const isSelected = answers[current] === idx
+            const practiceReveal = (mode === 'practice' || mode === 'homework') && showExplanation
+
+            if (practiceReveal) {
               if (idx === q.correct_answer) {
                 optionClass += ' border-correct bg-correct-bg text-correct'
-              } else if (idx === answers[current] && idx !== q.correct_answer) {
-                optionClass += ' border-wrong bg-wrong-bg text-wrong'
+                if (isSelected) optionClass += ' correct-pop'
+              } else if (isSelected && idx !== q.correct_answer) {
+                optionClass += ' border-wrong bg-wrong-bg text-wrong shake'
               } else {
                 optionClass += ' border-cream-2 text-text-3'
               }
             } else {
-              if (answers[current] === idx) {
+              if (isSelected) {
                 optionClass += ' border-teal bg-teal/10 text-navy'
+                if (answerFeedback === 'correct') optionClass += ' correct-pop'
+                if (answerFeedback === 'wrong') optionClass += ' shake'
               } else {
-                optionClass += ' border-cream-2 hover:border-teal text-text'
+                optionClass += ' border-cream-2 hover:border-teal hover:shadow-sm text-text'
               }
             }
 
@@ -547,7 +522,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
               <button
                 key={idx}
                 onClick={() => selectAnswer(idx)}
-                disabled={(mode === 'practice' || mode === 'homework') && showExplanation}
+                disabled={practiceReveal}
                 className={optionClass}
               >
                 <span className="inline-block w-6 h-6 rounded-full bg-cream-2 text-center text-xs leading-6 mr-3">

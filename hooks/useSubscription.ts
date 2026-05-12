@@ -16,6 +16,7 @@ interface SubscriptionState {
     aiChatsLimit: number | null
   } | null
   loading: boolean
+  error: boolean
   isPaid: boolean
   canAccessUnlimited: boolean
   canAccessCHL: boolean
@@ -30,6 +31,7 @@ const DEFAULT_STATE: SubscriptionState = {
   tierExpiresAt: null,
   usage: null,
   loading: true,
+  error: false,
   isPaid: false,
   canAccessUnlimited: false,
   canAccessCHL: false,
@@ -51,7 +53,7 @@ export function useSubscription(): SubscriptionState & { refresh: () => void } {
       })
 
       if (!res.ok) {
-        setState((s) => ({ ...s, loading: false }))
+        setState((s) => ({ ...s, loading: false, error: true }))
         return
       }
 
@@ -67,6 +69,7 @@ export function useSubscription(): SubscriptionState & { refresh: () => void } {
         tierExpiresAt: data.currentPeriodEnd,
         usage,
         loading: false,
+        error: false,
         isPaid,
         canAccessUnlimited: isPaid,
         canAccessCHL: isTripleCrown,
@@ -79,7 +82,7 @@ export function useSubscription(): SubscriptionState & { refresh: () => void } {
           : Math.max(0, (usage?.aiChatsLimit ?? 5) - (usage?.aiChatsToday ?? 0)),
       })
     } catch {
-      setState((s) => ({ ...s, loading: false }))
+      setState((s) => ({ ...s, loading: false, error: true }))
     }
   }, [])
 

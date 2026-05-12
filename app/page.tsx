@@ -416,44 +416,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── RESUME SERVICE ───────────────────────────────────────────────────── */}
-      <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <p className="font-mono text-teal text-[0.7rem] tracking-[0.12em] mb-3 uppercase">Career Services</p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black leading-snug mb-5 font-display">
-              Your certification opens doors.<br />
-              <span className="text-teal">A qualified resume gets you through them.</span>
-            </h2>
-            <p className="text-white/60 leading-relaxed mb-8 text-[0.95rem]">
-              Certification is just the beginning. Stand out to hiring managers and pass ATS filters with a professionally written resume tailored for healthcare and SPD roles.
-            </p>
-            <a href="https://www.myqualifiedresume.com/" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-white font-bold text-[0.95rem] hover:opacity-90 transition-opacity"
-              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
-              Explore Resume Services →
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            {[
-              { stat: "87%", label: "Interview Rate", desc: "Clients who land interviews after using our service" },
-              { stat: "48h", label: "Delivery Time", desc: "Expert-written and human-reviewed, fast" },
-              { stat: "$29", label: "Starting Price", desc: "Affordable packages from Starter to Premium" },
-            ].map(({ stat, label, desc }) => (
-              <div key={label}
-                className="flex items-start gap-5 bg-white/[0.04] border border-teal/20 rounded-2xl px-5 py-4">
-                <div className="font-serif text-3xl font-black text-teal leading-none flex-shrink-0">{stat}</div>
-                <div>
-                  <div className="font-semibold text-sm mb-0.5 text-white">{label}</div>
-                  <div className="text-xs text-white/50 leading-snug">{desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── PRICING ──────────────────────────────────────────────────────────── */}
       <section id="pricing" className="py-24 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-14">
@@ -524,6 +486,29 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── ATS CALLOUT ──────────────────────────────────────────────────────── */}
+      <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
+          <h2 className="font-display text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4">
+            Do you need professional study assistance?
+          </h2>
+          <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
+            Aseptic Technical Solutions offers a proven certification training program with flexible options built for every learner — in-person classes, live virtual sessions, and self-study formats. Whether you are preparing solo or building a high-performing SPD team, our expert instructors are ready to help you get certified and stay compliant.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a href="https://aseptictechnicalsolutions.com"
+              className="inline-flex items-center px-6 py-3 rounded-xl text-white font-semibold bg-gradient-to-br from-teal to-teal-2 hover:opacity-90 transition-opacity">
+              Explore Training Programs at Aseptic Technical Solutions
+            </a>
+            <a href="mailto:terry@scottadvisory.net"
+              className="inline-flex items-center px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal transition-all">
+              Contact Us Directly
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── INSTITUTIONS ─────────────────────────────────────────────────────── */}
       <section className="py-24 px-4 bg-white/[0.02] border-t border-white/5">
         <div className="max-w-6xl mx-auto">
@@ -580,30 +565,6 @@ export default function LandingPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               Contact terry@scottadvisory.net
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ── ATS CALLOUT ──────────────────────────────────────────────────────── */}
-      <section className="py-20 px-4 bg-teal/[0.06] border-t border-teal/15 border-b border-teal/15">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-4 uppercase">For Facilities &amp; Departments</p>
-          <h2 className="text-[clamp(1.6rem,3.5vw,2.4rem)] font-black mb-4 font-display">
-            Do you need professional study assistance?
-          </h2>
-          <p className="text-white/55 text-base leading-relaxed mb-8 font-light">
-            Aseptic Technical Solutions offers a proven certification training program with flexible options built for every learner — in-person classes, live virtual sessions, and self-study formats. Whether you are preparing solo or building a high-performing SPD team, our expert instructors are ready to help you get certified and stay compliant.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <a href="https://aseptictechnicalsolutions.com"
-              className="inline-flex items-center px-6 py-3 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
-              style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
-              Explore Training Programs at Aseptic Technical Solutions
-            </a>
-            <a href="mailto:terry@scottadvisory.net"
-              className="inline-flex items-center px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal transition-all">
-              Contact Us Directly
             </a>
           </div>
         </div>

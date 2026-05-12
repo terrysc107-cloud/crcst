@@ -8,10 +8,21 @@ export default function CodeEntryWidget() {
   const [code, setCode] = useState("");
 
   const formatInput = (raw: string): string => {
-    const flat = raw.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 12);
-    const parts: string[] = [];
-    for (let i = 0; i < flat.length; i += 4) parts.push(flat.slice(i, i + 4));
-    return parts.join("-");
+    // Uppercase and remove anything that's not alphanumeric or dash
+    const clean = raw.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+
+    // If the user is typing a wholesale code (already has dashes mid-string
+    // that don't fit the XXXX-XXXX-XXXX pattern), preserve as-is up to 24 chars
+    const strippedFlat = clean.replace(/-/g, "");
+    if (strippedFlat.length <= 12 && !/-(?:TC|PRO)-/i.test(clean)) {
+      // Auto-format as XXXX-XXXX-XXXX access code
+      const flat = strippedFlat.slice(0, 12);
+      const parts: string[] = [];
+      for (let i = 0; i < flat.length; i += 4) parts.push(flat.slice(i, i + 4));
+      return parts.join("-");
+    }
+    // Wholesale code — preserve dashes, cap at 24 chars
+    return clean.slice(0, 24);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,12 +31,10 @@ export default function CodeEntryWidget() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const flat = code.replace(/[^a-zA-Z0-9]/g, "");
-    // Persist code so auth flow can pick it up after sign-in/sign-up
-    if (flat.length > 0) {
-      sessionStorage.setItem("pending_redeem_code", flat);
-    }
-    router.push(flat.length === 12 ? `/redeem?code=${flat}` : "/redeem");
+    const trimmed = code.trim();
+    if (trimmed.length < 6) return;
+    sessionStorage.setItem("pending_redeem_code", trimmed);
+    router.push(`/redeem?code=${encodeURIComponent(trimmed)}`);
   };
 
   return (
@@ -42,7 +51,8 @@ export default function CodeEntryWidget() {
       />
       <button
         type="submit"
-        className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal/20 border border-teal/40 text-teal text-sm font-semibold hover:bg-teal/30 hover:border-teal/60 transition-all whitespace-nowrap"
+        disabled={code.trim().length < 6}
+        className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal/20 border border-teal/40 text-teal text-sm font-semibold hover:bg-teal/30 hover:border-teal/60 transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Activate →
       </button>

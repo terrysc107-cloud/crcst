@@ -23,20 +23,30 @@ async function fetchStats() {
   }
 }
 
+// Revalidate every 5 minutes so Supabase isn't hit on every page load
+export const revalidate = 300;
+
 export default async function StatsBar() {
   const { questionsAnswered, badgesClaimed } = await fetchStats();
 
+  const formatCount = (n: number) => {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M+`;
+    if (n >= 10_000) return `${Math.floor(n / 1000)}K+`;
+    if (n > 0) return n.toLocaleString();
+    return null;
+  };
+
   const stats = [
     {
-      value: questionsAnswered > 0 ? questionsAnswered.toLocaleString() : "787+",
-      label: "Questions Answered",
+      value: formatCount(questionsAnswered) ?? "787+",
+      label: "Practice Questions Attempted",
     },
-    { value: "4", label: "Certifications Covered" },
+    { value: "3", label: "Certification Exams Covered" },
     {
-      value: badgesClaimed > 0 ? badgesClaimed.toLocaleString() : "100+",
-      label: "Badges Claimed",
+      value: formatCount(badgesClaimed) ?? "100+",
+      label: "Students Who Passed",
     },
-    { value: "24", label: "CRCST Content Domains" },
+    { value: "24", label: "CRCST Exam Domains Covered" },
   ];
 
   return (

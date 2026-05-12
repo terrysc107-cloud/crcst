@@ -116,18 +116,18 @@ function RedeemForm() {
         {status === 'success' ? (
           <div style={{ textAlign: 'center' }}>
             <div style={{
-              width: 64, height: 64, borderRadius: '50%',
+              width: 72, height: 72, borderRadius: '50%',
               background: 'rgba(20,189,172,0.15)',
               border: '2px solid #14BDAC',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 1.25rem', fontSize: '1.75rem',
-            }}>✓</div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#14BDAC', marginBottom: '0.5rem' }}>
-              Access activated.
+              margin: '0 auto 1.25rem', fontSize: '2rem',
+            }} className="check-bounce">✓</div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#14BDAC', marginBottom: '0.5rem' }} className="fadeUp">
+              Access activated!
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
-              {tier === 'triple_crown' ? 'Triple Crown' : 'Pro'} access is now unlocked on your account.
-              Redirecting to dashboard…
+            <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }} className="fadeUp">
+              {tier === 'triple_crown' ? 'Triple Crown' : 'Pro'} access is now active.
+              Taking you to your dashboard…
             </p>
           </div>
         ) : (
@@ -184,7 +184,7 @@ function RedeemForm() {
                   marginBottom: '1rem',
                   lineHeight: 1.5,
                 }}>
-                  You'll need to <Link href="/dashboard" style={{ color: '#14BDAC', textDecoration: 'underline' }}>sign in</Link> before redeeming.
+                  You'll need to <Link href="/crcst" style={{ color: '#14BDAC', textDecoration: 'underline' }}>sign in</Link> before redeeming.
                 </div>
               )}
 
@@ -241,9 +241,29 @@ function RedeemForm() {
   )
 }
 
+function RedeemFallback() {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: '#021B3A',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        border: '3px solid rgba(20,189,172,0.3)',
+        borderTopColor: '#14BDAC',
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
+
 export default function RedeemPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<RedeemFallback />}>
       <RedeemForm />
     </Suspense>
   )

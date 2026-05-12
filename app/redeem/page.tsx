@@ -22,10 +22,8 @@ function RedeemForm() {
     })
     const prefill = searchParams.get('code')
     if (prefill) {
-      const flat = prefill.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 12)
-      const parts: string[] = []
-      for (let i = 0; i < flat.length; i += 4) parts.push(flat.slice(i, i + 4))
-      setCode(parts.join('-'))
+      // Decode and uppercase — preserve dashes for wholesale codes
+      setCode(decodeURIComponent(prefill).toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 24))
     }
   }, [searchParams])
 
@@ -36,10 +34,16 @@ function RedeemForm() {
   }, [status, router])
 
   const formatInput = (raw: string): string => {
-    const flat = raw.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 12)
-    const parts: string[] = []
-    for (let i = 0; i < flat.length; i += 4) parts.push(flat.slice(i, i + 4))
-    return parts.join('-')
+    const clean = raw.toUpperCase().replace(/[^A-Z0-9-]/g, '')
+    const strippedFlat = clean.replace(/-/g, '')
+    // Auto-format as XXXX-XXXX-XXXX if it looks like an access code
+    if (strippedFlat.length <= 12 && !/-(?:TC|PRO)-/i.test(clean)) {
+      const flat = strippedFlat.slice(0, 12)
+      const parts: string[] = []
+      for (let i = 0; i < flat.length; i += 4) parts.push(flat.slice(i, i + 4))
+      return parts.join('-')
+    }
+    return clean.slice(0, 24)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,10 +58,10 @@ function RedeemForm() {
     e.preventDefault()
     if (status === 'loading') return
 
-    const flat = code.replace(/[^a-zA-Z0-9]/g, '')
-    if (flat.length !== 12) {
+    const trimmed = code.trim()
+    if (trimmed.replace(/[^A-Z0-9]/gi, '').length < 6) {
       setStatus('error')
-      setError("Codes are 12 characters. Please double-check what you entered.")
+      setError("That doesn't look like a valid code. Please double-check what you received.")
       return
     }
 
@@ -78,7 +82,7 @@ function RedeemForm() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ code: flat }),
+        body: JSON.stringify({ code: trimmed }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -190,7 +194,7 @@ function RedeemForm() {
 
               <button
                 type="submit"
-                disabled={status === 'loading' || code.replace(/-/g, '').length !== 12}
+                disabled={status === 'loading' || code.replace(/[^A-Z0-9]/gi, '').length < 6}
                 style={{
                   width: '100%',
                   padding: '0.95rem 1rem',

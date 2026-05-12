@@ -179,17 +179,17 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <p className="font-mono text-white/35 text-xs mt-5 tracking-wider">
-            Free tier includes 20 questions/hour · No credit card required
-          </p>
-
-          {/* Access code entry */}
-          <div className="mt-10 pt-8 border-t border-white/8">
-            <p className="font-mono text-white/40 text-[0.72rem] tracking-widest uppercase mb-3">
+          {/* Access code entry — moved above free-tier note */}
+          <div className="mt-7 pt-6 border-t border-white/8">
+            <p className="font-mono text-white/40 text-[0.7rem] tracking-widest uppercase mb-3">
               Have an access code from your instructor or program?
             </p>
             <CodeEntryWidget />
           </div>
+
+          <p className="font-mono text-white/30 text-xs mt-5 tracking-wider">
+            Free tier includes 20 questions/hour · No credit card required
+          </p>
         </div>
       </section>
 

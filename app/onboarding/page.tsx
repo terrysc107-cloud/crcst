@@ -263,6 +263,12 @@ export default function OnboardingPage() {
     // Always mark complete locally
     localStorage.setItem(`onboarding_complete_${userId}`, 'true')
     setSaving(false)
+    const pendingCode = sessionStorage.getItem('pending_redeem_code')
+    if (pendingCode) {
+      sessionStorage.removeItem('pending_redeem_code')
+      router.push(`/redeem?code=${pendingCode}`)
+      return
+    }
     router.push('/dashboard')
   }
 
@@ -270,6 +276,12 @@ export default function OnboardingPage() {
   function handleSkip() {
     if (userId) {
       localStorage.setItem(`onboarding_complete_${userId}`, 'true')
+    }
+    const pendingCode = sessionStorage.getItem('pending_redeem_code')
+    if (pendingCode) {
+      sessionStorage.removeItem('pending_redeem_code')
+      router.push(`/redeem?code=${pendingCode}`)
+      return
     }
     router.push('/dashboard')
   }

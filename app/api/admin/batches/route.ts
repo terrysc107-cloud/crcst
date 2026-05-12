@@ -70,29 +70,40 @@ export async function POST(request: NextRequest) {
   const user = await assertAdmin(request)
   if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
-  const { org_name, org_slug, tier, quantity, price_per_seat, duration_days = 90, notes } =
-    await request.json()
+  const {
+    org_name, org_slug, tier, quantity, price_per_seat,
+    duration_days = 90, notes, channel = "wholesale", rep_name,
+  } = await request.json()
 
-  if (!org_name || !org_slug || !tier || !quantity || !price_per_seat) {
+  if (!org_name || !org_slug || !tier || !quantity) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
   if (!["pro", "triple_crown"].includes(tier)) {
     return NextResponse.json({ error: "Invalid tier" }, { status: 400 })
   }
-  if (quantity < 10) {
-    return NextResponse.json({ error: "Minimum 10 seats" }, { status: 400 })
+  if (!["wholesale", "distributor", "giveaway"].includes(channel)) {
+    return NextResponse.json({ error: "Invalid channel" }, { status: 400 })
+  }
+  if (quantity < 1) {
+    return NextResponse.json({ error: "Quantity must be at least 1" }, { status: 400 })
   }
 
   const slug = org_slug.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8)
   const expiresAt = new Date()
-  expiresAt.setDate(expiresAt.getDate() + duration_days)
+  expiresAt.setDate(expiresAt.getDate() + Number(duration_days))
 
   const admin = adminClient()
 
   // Create batch
   const { data: batch, error: batchErr } = await admin
     .from("wholesale_batches")
-    .insert({ org_name, org_slug: slug, tier, quantity, price_per_seat, duration_days, expires_at: expiresAt.toISOString(), notes })
+    .insert({
+      org_name, org_slug: slug, tier, quantity,
+      price_per_seat: channel === "giveaway" ? 0 : price_per_seat,
+      duration_days: Number(duration_days),
+      expires_at: expiresAt.toISOString(),
+      notes, channel, rep_name: rep_name || null,
+    })
     .select()
     .single()
 

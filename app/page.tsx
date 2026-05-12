@@ -64,7 +64,7 @@ const FEATURES: { Icon: LucideIcon; title: string; desc: string }[] = [
   { Icon: Zap, title: "Custom Quiz Mode", desc: "Filter by domain, difficulty, or chapter. Build targeted practice sessions around your specific gaps." },
   { Icon: Flame, title: "Streak Tracking", desc: "Daily study streaks keep you accountable. Build momentum in the weeks before your exam." },
   { Icon: ClipboardList, title: "Exam Readiness Score", desc: "A live score that updates as you practice. Know whether you're ready before you sit down at the testing center." },
-  { Icon: Medal, title: "Certification Badges", desc: "When you pass, claim your digital badge. Share on LinkedIn and start your next certification journey." },
+  { Icon: Medal, title: "Certification Badges", desc: "When you pass your exam, earn a digital badge to share on LinkedIn and show your credentials off." },
   { Icon: LockOpen, title: "Progression Mode", desc: "Five sequential levels, XP rewards, and locked doors. Earn your way through the full CRCST domain — knowledge is earned, not accessed. Pro & Triple Crown." },
 ];
 
@@ -359,9 +359,9 @@ export default function LandingPage() {
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────────── */}
       <section className="py-24 px-4 max-w-4xl mx-auto">
         <div className="text-center mb-14">
-          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">The Process</p>
+          <p className="font-mono text-teal text-[0.72rem] tracking-[0.12em] mb-3 uppercase">How It Works</p>
           <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black font-display">
-            From signup to certified<br />
+            Go from studying to exam-ready<br />
             <span className="text-teal">in four steps.</span>
           </h2>
         </div>
@@ -369,9 +369,9 @@ export default function LandingPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { step: "01", title: "Create your account", desc: "Free sign up. Tell us which cert you're targeting and your exam date." },
-            { step: "02", title: "Practice by domain", desc: "Work through each chapter. Weak spots are flagged so you know where to focus." },
+            { step: "02", title: "Practice by domain", desc: "Work through each chapter. Weak spots are flagged so you know exactly where to focus." },
             { step: "03", title: "Ask the AI anything", desc: "Stuck on a concept? The AI Study Chat explains it in plain language, instantly." },
-            { step: "04", title: "Pass and claim your badge", desc: "Download your digital badge and start the next cert." },
+            { step: "04", title: "Walk in confident", desc: "You put in the reps. Now sit for your HSPA or CBSPD exam knowing you're ready." },
           ].map((s, i) => (
             <div key={i} className="text-center px-2 py-6">
               <div className="w-14 h-14 rounded-full border-2 border-teal/40 flex items-center justify-center mx-auto mb-5 font-mono text-teal font-semibold">

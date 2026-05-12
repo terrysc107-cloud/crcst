@@ -81,6 +81,8 @@ const config: Config = {
         sans: ['DM Sans', 'sans-serif'],
         serif: ['Libre Baskerville', 'Georgia', 'serif'],
         mono: ['DM Mono', 'monospace'],
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Playfair Display', 'Georgia', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

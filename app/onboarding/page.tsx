@@ -108,15 +108,9 @@ function StepDots({ current, total }: { current: number; total: number }) {
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className="h-2 rounded-full transition-all duration-300"
-          style={{
-            width: i === current ? 28 : 8,
-            background: i === current
-              ? '#14BDAC'
-              : i < current
-                ? 'rgba(20,189,172,0.4)'
-                : 'rgba(255,255,255,0.15)',
-          }}
+          className={`h-2 rounded-full transition-all duration-300 ${
+            i === current ? 'w-7 bg-teal' : i < current ? 'w-2 bg-teal/40' : 'w-2 bg-white/15'
+          }`}
         />
       ))}
     </div>
@@ -422,11 +416,9 @@ export default function OnboardingPage() {
                   <button
                     key={opt.id}
                     onClick={() => setData((d) => ({ ...d, experienceLevel: opt.id }))}
-                    className="text-left rounded-[14px] px-5 py-4 cursor-pointer flex items-center gap-4 w-full font-mono transition-all duration-200"
-                    style={{
-                      background: selected ? 'rgba(20,189,172,0.12)' : 'rgba(255,255,255,0.04)',
-                      border: `2px solid ${selected ? '#14BDAC' : 'rgba(255,255,255,0.1)'}`,
-                    }}
+                    className={`text-left rounded-[14px] px-5 py-4 cursor-pointer flex items-center gap-4 w-full font-mono transition-all duration-200 border-2 ${
+                      selected ? 'bg-teal/[12%] border-teal' : 'bg-white/[4%] border-white/10'
+                    }`}
                   >
                     <span className="text-[1.75rem] flex-shrink-0">{opt.icon}</span>
                     <div className="flex-1">
@@ -470,11 +462,8 @@ export default function OnboardingPage() {
                 value={data.examDate}
                 onChange={(e) => setData((d) => ({ ...d, examDate: e.target.value }))}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-white/[6%] border border-white/[15%] rounded-[10px] px-4 py-3 text-[0.95rem] font-mono outline-none box-border"
-                style={{
-                  color: data.examDate ? '#fff' : 'rgba(255,255,255,0.3)',
-                  colorScheme: 'dark',
-                }}
+                className={`w-full bg-white/[6%] border border-white/[15%] rounded-[10px] px-4 py-3 text-[0.95rem] font-mono outline-none box-border ${data.examDate ? 'text-white' : 'text-white/30'}`}
+                style={{ colorScheme: 'dark' }}
               />
               {data.examDate && (
                 <div className="mt-2 text-[0.8rem] text-teal">
@@ -493,16 +482,11 @@ export default function OnboardingPage() {
                   <button
                     key={day}
                     onClick={() => setData((d) => ({ ...d, studyDaysPerWeek: day }))}
-                    className="flex-1 rounded-[10px] font-mono text-[0.9rem] cursor-pointer transition-all duration-150 py-2"
-                    style={{
-                      aspectRatio: '1',
-                      background: data.studyDaysPerWeek === day
-                        ? 'rgba(20,189,172,0.2)'
-                        : 'rgba(255,255,255,0.04)',
-                      border: `2px solid ${data.studyDaysPerWeek === day ? '#14BDAC' : 'rgba(255,255,255,0.1)'}`,
-                      color: data.studyDaysPerWeek === day ? '#14BDAC' : 'rgba(255,255,255,0.5)',
-                      fontWeight: data.studyDaysPerWeek === day ? 700 : 400,
-                    }}
+                    className={`flex-1 aspect-square rounded-[10px] font-mono text-[0.9rem] cursor-pointer transition-all duration-150 py-2 border-2 ${
+                      data.studyDaysPerWeek === day
+                        ? 'bg-teal/20 border-teal text-teal font-bold'
+                        : 'bg-white/[4%] border-white/10 text-white/50 font-normal'
+                    }`}
                   >
                     {day}
                   </button>

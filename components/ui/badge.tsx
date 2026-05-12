@@ -17,6 +17,18 @@ const badgeVariants = cva(
           'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        teal:
+          'border-teal/40 bg-teal/10 text-teal font-mono tracking-wide',
+        amber:
+          'border-amber/40 bg-amber/10 text-amber font-mono tracking-wide',
+        pro:
+          'border-teal/50 bg-teal/15 text-teal font-mono tracking-wider uppercase text-[0.65rem]',
+        'triple-crown':
+          'border-amber/50 bg-amber/15 text-amber font-mono tracking-wider uppercase text-[0.65rem]',
+        free:
+          'border-white/15 bg-white/8 text-white/50 font-mono tracking-wider uppercase text-[0.65rem]',
+        locked:
+          'border-navy-3/30 bg-navy-3/10 text-navy-3 font-mono tracking-wide',
       },
     },
     defaultVariants: {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 const PRICING = {
@@ -118,7 +119,11 @@ export default function WholesaleAdmin() {
     <div className="min-h-screen bg-gray-950 text-white">
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-lg">Wholesale Admin</h1>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Link href="/admin" className="text-gray-400 hover:text-white text-sm transition-colors">Admin</Link>
+            <span className="text-gray-600">/</span>
+            <span className="text-sm font-semibold">Wholesale</span>
+          </div>
           <p className="text-xs text-gray-400">Access code batches</p>
         </div>
         <button

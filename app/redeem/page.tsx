@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
-export default function RedeemPage() {
+function RedeemForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [code, setCode] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +20,14 @@ export default function RedeemPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSignedIn(!!session)
     })
-  }, [])
+    const prefill = searchParams.get('code')
+    if (prefill) {
+      const flat = prefill.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 12)
+      const parts: string[] = []
+      for (let i = 0; i < flat.length; i += 4) parts.push(flat.slice(i, i + 4))
+      setCode(parts.join('-'))
+    }
+  }, [searchParams])
 
   useEffect(() => {
     if (status !== 'success') return
@@ -230,5 +238,13 @@ export default function RedeemPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
+  )
+}
+
+export default function RedeemPage() {
+  return (
+    <Suspense>
+      <RedeemForm />
+    </Suspense>
   )
 }

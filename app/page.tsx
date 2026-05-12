@@ -2,6 +2,7 @@ import Link from "next/link";
 import NavBar from "@/components/landing/NavBar";
 import FaqAccordion from "@/components/landing/FaqAccordion";
 import StatsBar from "@/components/landing/StatsBar";
+import CodeEntryWidget from "@/components/landing/CodeEntryWidget";
 import type { Metadata } from "next";
 import {
   Settings, Award, Microscope,
@@ -169,15 +170,26 @@ export default function LandingPage() {
               style={{ background: "linear-gradient(135deg, var(--teal), var(--teal-2))" }}>
               Start Studying Free
             </Link>
-            <a href="#features"
-              className="inline-flex items-center px-7 py-4 rounded-xl text-[1.05rem] font-medium border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal hover:bg-teal/5 transition-all">
-              See How It Works
-            </a>
+            <Link href="/crcst"
+              className="inline-flex items-center gap-2 px-7 py-4 rounded-xl text-[1.05rem] font-medium border border-white/20 bg-white/5 text-white/80 hover:border-teal/50 hover:text-teal hover:bg-teal/5 transition-all">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Sign In
+            </Link>
           </div>
 
           <p className="font-mono text-white/35 text-xs mt-5 tracking-wider">
             Free tier includes 20 questions/hour · No credit card required
           </p>
+
+          {/* Access code entry */}
+          <div className="mt-10 pt-8 border-t border-white/8">
+            <p className="font-mono text-white/40 text-[0.72rem] tracking-widest uppercase mb-3">
+              Have an access code from your instructor or program?
+            </p>
+            <CodeEntryWidget />
+          </div>
         </div>
       </section>
 
@@ -516,13 +528,13 @@ export default function LandingPage() {
       <section className="py-24 px-4 bg-white/[0.02] border-t border-white/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="font-mono text-amber text-[0.72rem] tracking-[0.12em] mb-3 uppercase">For Programs &amp; Institutions</p>
+            <p className="font-mono text-amber text-[0.72rem] tracking-[0.12em] mb-3 uppercase">For Programs, Schools &amp; Institutions</p>
             <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight font-display">
-              Get your entire staff certified.<br />
-              <span className="text-teal">We&apos;ll build the app around you.</span>
+              Built for the people who<br />
+              <span className="text-teal">train the next generation.</span>
             </h2>
             <p className="text-white/55 text-base leading-relaxed mt-4 max-w-2xl mx-auto font-light">
-              Hospitals, SPD departments, vocational programs, and training centers can get a personalized version of this platform — branded for your organization, tailored to your curriculum, and deployed for your whole team.
+              Whether you run a hospital SPD department, a vocational school, a community college sterile processing program, or a private training center — we can deploy a version of this platform built around your curriculum, your students, and your certification goals.
             </p>
           </div>
 
@@ -531,17 +543,17 @@ export default function LandingPage() {
               {
                 Icon: Building2,
                 title: "Hospital & Department Access",
-                desc: "Give every member of your SPD team access to structured exam prep with progress tracking across your department. Know who is ready and who needs more time before they sit for certification.",
+                desc: "Give every technician on your SPD team access to structured exam prep with department-wide progress tracking. Know who is ready and who needs more support — before they sit for certification.",
               },
               {
                 Icon: GraduationCap,
-                title: "Training Program Integration",
-                desc: "Running an SPD certification program? Embed our question bank and AI study tools directly into your curriculum. Custom domains, your branding, and content aligned to your schedule.",
+                title: "Schools & Training Programs",
+                desc: "Running a sterile processing certificate program at a vocational school, community college, or private training center? Integrate our question bank and AI study tools directly into your coursework. Custom branding, your domain, content paced to your syllabus.",
               },
               {
                 Icon: TrendingUp,
-                title: "Team Dashboards & Reporting",
-                desc: "Managers and instructors get a live view of team progress by domain, difficulty, and readiness score — so you can intervene early and hit your certification targets.",
+                title: "Instructor Dashboards & Reporting",
+                desc: "Program directors and instructors get a real-time view of every student's progress by domain, difficulty, and readiness score — so you can step in early and get your cohort across the finish line together.",
               },
             ] as { Icon: LucideIcon; title: string; desc: string }[]).map((item, i) => (
               <div key={i}

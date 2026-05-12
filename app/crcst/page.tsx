@@ -94,6 +94,13 @@ export default function Home() {
           window.location.href = '/onboarding'
           return
         }
+        // If user arrived via a code entry widget, send them straight to redeem
+        const pendingCode = sessionStorage.getItem('pending_redeem_code')
+        if (pendingCode) {
+          sessionStorage.removeItem('pending_redeem_code')
+          window.location.href = '/redeem?code=' + pendingCode
+          return
+        }
         setUser(session.user)
         setScreen('home')
         loadStats(session.user.id)

@@ -21,11 +21,11 @@ export default function CodeEntryWidget() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const flat = code.replace(/[^a-zA-Z0-9]/g, "");
-    if (flat.length === 12) {
-      router.push(`/redeem?code=${flat}`);
-    } else {
-      router.push("/redeem");
+    // Persist code so auth flow can pick it up after sign-in/sign-up
+    if (flat.length > 0) {
+      sessionStorage.setItem("pending_redeem_code", flat);
     }
+    router.push(flat.length === 12 ? `/redeem?code=${flat}` : "/redeem");
   };
 
   return (

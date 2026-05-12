@@ -4,36 +4,15 @@ Record consciously deferred work, tradeoffs, and cleanup items here.
 
 ---
 
-## Study Module UI — not built yet
-
-**What:** The unlockable card that appears after passing each progression level. Shows 5 key concepts + a 15-question domain quiz. This is the CEU module placeholder container.
-
-**Why deferred:** Context window cleared after DB migration. Next session starts here.
-
-**Shape:**
-- Unlocks after level N is passed (writes to `bonus_unlocks` or new `ceu_modules` + `user_ceu_completions`)
-- Shows: chapter title, 5 key concept definitions, domain quiz (15 questions from level's domains)
-- Completion writes to `user_ceu_completions` with `ceu_earned = 0` until partner confirmed
-- Footer: "This module will count toward your CEU record when certified providers are available"
-- Same container, different `content_source` when partner arrives
+## Study Module UI — ✅ built (`app/progression/[levelId]/study/page.tsx`)
 
 ---
 
-## XP widget not visible to users yet
-
-**What:** Users earn XP but there's no updated display for non-progression users (free tier, CHL/CER users). Need XP total + tier label + progress bar on dashboard and/or cert home screens.
-
-**Where to add:**
-- `app/dashboard/page.tsx` — add XP widget alongside existing progression widget
-- `app/crcst/page.tsx` — small XP chip in header or results screen
+## XP widget — ✅ live on dashboard and crcst/page.tsx
 
 ---
 
-## Session time display on profile — not built yet
-
-**What:** Total verified study hours from `user_sessions` shown on profile page as "X hrs Y min of verified study time." This is the proof-of-work number for future CEU provider conversations.
-
-**Where:** `app/account/page.tsx` — add a "Study Time" stat card
+## Session time + XP stats on account page — ✅ built (Study Stats card in `app/account/page.tsx`)
 
 ---
 

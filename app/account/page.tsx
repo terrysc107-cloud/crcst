@@ -6,6 +6,15 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Label, Heading, Numeric } from '@/components/ui/typography'
+import { getXpTier } from '@/lib/progression-config'
+
+function fmtStudyTime(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const hrs = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  if (hrs === 0) return `${mins} min`
+  return `${hrs} hr${hrs !== 1 ? 's' : ''} ${mins > 0 ? `${mins} min` : ''}`
+}
 
 interface StatusData {
   plan: 'free' | 'pro' | 'triple_crown'
@@ -50,6 +59,10 @@ export default function AccountPage() {
   const [quizResults, setQuizResults] = useState<QuizResult[]>([])
   const [cancelling, setCancelling] = useState(false)
   const [cancelDone, setCancelDone] = useState(false)
+  const [studySeconds, setStudySeconds] = useState(0)
+  const [xp, setXp] = useState(0)
+  const [levelsCompleted, setLevelsCompleted] = useState(0)
+  const [badgeCount, setBadgeCount] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -70,6 +83,18 @@ export default function AccountPage() {
         .eq('user_id', u.id)
         .order('claimed_at', { ascending: false })
       if (badges) setEarnedBadges(badges)
+
+      // Fetch study stats
+      const [profileRes, xpRes, levelsRes, badgesRes] = await Promise.all([
+        supabase.from('profiles').select('total_study_seconds').eq('id', u.id).single(),
+        supabase.from('user_xp').select('total_xp').eq('user_id', u.id).maybeSingle(),
+        supabase.from('user_levels').select('status').eq('user_id', u.id),
+        supabase.from('progression_badges').select('badge_id').eq('user_id', u.id),
+      ])
+      setStudySeconds(profileRes.data?.total_study_seconds ?? 0)
+      setXp(xpRes.data?.total_xp ?? 0)
+      setLevelsCompleted(levelsRes.data?.filter((l: any) => l.status === 'completed').length ?? 0)
+      setBadgeCount(badgesRes.data?.length ?? 0)
 
       // Fetch quiz results from all cert types
       const results: QuizResult[] = []
@@ -234,6 +259,39 @@ export default function AccountPage() {
         <div className="bg-white/[4%] border border-white/10 rounded-2xl p-7 mb-6">
           <Label color="muted" className="mb-4">Account</Label>
           <div className="text-[0.9rem] text-white/70">{user.email}</div>
+        </div>
+
+        {/* Study Stats */}
+        <div className="bg-white/[4%] border border-white/10 rounded-2xl p-7 mb-6">
+          <Label color="muted" className="mb-4">Study Stats</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-[0.78rem] text-white/40 uppercase tracking-wider mb-1">Verified Study Time</div>
+              <div className="text-xl font-bold text-white">
+                {studySeconds > 0 ? fmtStudyTime(studySeconds) : '—'}
+              </div>
+              <div className="text-[0.72rem] text-white/30 mt-0.5">across all sessions</div>
+            </div>
+            <div>
+              <div className="text-[0.78rem] text-white/40 uppercase tracking-wider mb-1">XP Earned</div>
+              <div className="text-xl font-bold" style={{ color: getXpTier(xp).color }}>
+                {xp.toLocaleString()} XP
+              </div>
+              <div className="text-[0.72rem] mt-0.5" style={{ color: getXpTier(xp).color }}>
+                {getXpTier(xp).label}
+              </div>
+            </div>
+            <div>
+              <div className="text-[0.78rem] text-white/40 uppercase tracking-wider mb-1">Levels Completed</div>
+              <div className="text-xl font-bold text-white">{levelsCompleted} <span className="text-white/30 text-sm font-normal">/ 24</span></div>
+              <div className="text-[0.72rem] text-white/30 mt-0.5">progression mode</div>
+            </div>
+            <div>
+              <div className="text-[0.78rem] text-white/40 uppercase tracking-wider mb-1">Badges Earned</div>
+              <div className="text-xl font-bold text-white">{badgeCount}</div>
+              <div className="text-[0.72rem] text-white/30 mt-0.5">progression badges</div>
+            </div>
+          </div>
         </div>
 
         {/* Earned Badges Section */}

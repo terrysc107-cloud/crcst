@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Question } from '@/lib/questions'
 import { supabase } from '@/lib/supabase'
+import { SmartUpsellModal } from '@/components/SmartUpsellModal'
+import { FREE_LIMITS } from '@/lib/subscription'
 
 interface QuizData {
   questions: Question[]
@@ -33,6 +35,8 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
   const [rateLimitReached, setRateLimitReached] = useState(false)
   const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null)
   const [answerFeedback, setAnswerFeedback] = useState<'correct' | 'wrong' | null>(null)
+  const [showUpsellModal, setShowUpsellModal] = useState(false)
+  const [upsellDismissed, setUpsellDismissed] = useState(false)
   const incrementInFlight = useRef(false)
 
   const q = quizData.questions[current]
@@ -78,16 +82,20 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       if (res.status === 429 || data.error === 'limit_reached') {
         if (!data.unlimited) {
           setRateLimitReached(true)
-          setUsageInfo({ used: data.used || 20, limit: data.limit || 20, remaining: 0 })
+          setUsageInfo({ used: data.used || FREE_LIMITS.questionsPerDay, limit: data.limit || FREE_LIMITS.questionsPerDay, remaining: 0 })
         }
       } else if (data.used !== undefined && !data.unlimited) {
         setUsageInfo({
           used: data.used,
-          limit: data.limit || 20,
+          limit: data.limit || FREE_LIMITS.questionsPerDay,
           remaining: data.remaining || 0,
         })
         if (data.remaining !== null && data.remaining <= 0) {
           setRateLimitReached(true)
+        }
+        // Show smart upsell modal at threshold — once per session
+        if (!upsellDismissed && data.used >= FREE_LIMITS.upsellWallAt && !data.unlimited) {
+          setShowUpsellModal(true)
         }
       }
     } catch (err) {
@@ -191,28 +199,73 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
     }
   }
 
-  // Rate limit reached screen
+  // Compute session stats for upsell modal
+  const sessionAnswered = answers.filter((a) => a !== null).length
+  const sessionCorrect  = answers.filter((a, i) => a !== null && a === quizData.questions[i]?.correct_answer).length
+  const weakDomains = Array.from(
+    new Set(
+      answers
+        .map((a, i) => (a !== null && a !== quizData.questions[i]?.correct_answer ? quizData.questions[i]?.domain : null))
+        .filter(Boolean) as string[]
+    )
+  )
+
+  // Smart upsell modal — fires mid-session at question 10
+  if (showUpsellModal && !rateLimitReached) {
+    return (
+      <SmartUpsellModal
+        isOpen
+        onContinueFree={() => {
+          setShowUpsellModal(false)
+          setUpsellDismissed(true)
+        }}
+        sessionStats={{
+          questionsAnswered: sessionAnswered,
+          correctCount: sessionCorrect,
+          weakDomains,
+        }}
+        dailyLimit={FREE_LIMITS.questionsPerDay}
+        upsellAt={FREE_LIMITS.upsellWallAt}
+      />
+    )
+  }
+
+  // Hard rate limit screen — daily cap exhausted
   if (rateLimitReached) {
     return (
       <div className="max-w-md mx-auto text-center py-12 px-6">
-        <div className="text-6xl mb-6">&#9203;</div>
+        <div className="text-6xl mb-6">&#128683;</div>
         <h2 className="font-serif text-2xl text-navy mb-4">
-          Hourly Limit Reached
+          Daily Limit Reached
         </h2>
         <p className="text-text-3 mb-6">
-          You&apos;ve used all {usageInfo?.limit || 20} free questions this hour. 
-          Your limit will reset in about an hour, or upgrade to Pro for unlimited access.
+          You&apos;ve used all {usageInfo?.limit || FREE_LIMITS.questionsPerDay} free questions for today.
+          Your limit resets at midnight, or upgrade to Pro for unlimited access.
         </p>
-        
+
         {usageInfo && (
           <div className="bg-cream rounded-lg p-4 mb-6">
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-text-3">Questions used</span>
+              <span className="text-text-3">Questions used today</span>
               <span className="text-navy font-mono">{usageInfo.used}/{usageInfo.limit}</span>
             </div>
             <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
               <div className="h-full bg-wrong" style={{ width: '100%' }} />
             </div>
+          </div>
+        )}
+
+        {weakDomains.length > 0 && (
+          <div className="bg-cream rounded-lg p-4 mb-6 text-left">
+            <p className="text-xs text-text-3 font-mono uppercase tracking-wider mb-2">Weak spots this session</p>
+            <div className="flex flex-wrap gap-2">
+              {weakDomains.slice(0, 4).map((d) => (
+                <span key={d} className="text-xs bg-wrong-bg border border-wrong/20 text-wrong rounded-full px-2.5 py-1">
+                  {d}
+                </span>
+              ))}
+            </div>
+            <p className="text-xs text-text-3 mt-2">Pro tracks these across all your sessions and shows you exactly what to review.</p>
           </div>
         )}
 
@@ -458,7 +511,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
       )}
 
       {/* Low-usage warning for free tier */}
-      {usageInfo && !rateLimitReached && usageInfo.remaining <= 5 && usageInfo.remaining > 0 && (
+      {usageInfo && !rateLimitReached && !showUpsellModal && usageInfo.remaining <= 5 && usageInfo.remaining > 0 && (
         <div className={`mx-6 mt-3 px-4 py-2.5 rounded-lg flex items-center justify-between gap-3 fadeUp ${
           usageInfo.remaining <= 2
             ? 'bg-wrong-bg border border-wrong/40'
@@ -469,7 +522,7 @@ export default function Quiz({ quizData, mode, onComplete, onExit, onPause, user
             <span className={`font-mono text-xs font-semibold ${
               usageInfo.remaining <= 2 ? 'text-wrong' : 'text-amber'
             }`}>
-              {usageInfo.remaining} free question{usageInfo.remaining !== 1 ? 's' : ''} left this hour
+              {usageInfo.remaining} free question{usageInfo.remaining !== 1 ? 's' : ''} left today
             </span>
           </div>
           <a

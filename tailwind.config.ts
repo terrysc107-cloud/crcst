@@ -25,6 +25,17 @@ const config: Config = {
           DEFAULT: '#daa520',
           2: '#f4a261',
         },
+        rose: {
+          DEFAULT: '#E02B4B',
+          2: '#f06074',
+          3: '#fbbbc4',
+          dark: '#b01535',
+        },
+        sky: {
+          DEFAULT: '#3B82F6',
+          2: '#60a5fa',
+          3: '#bfdbfe',
+        },
         cream: {
           DEFAULT: '#f8f4ee',
           2: '#ede8e0',

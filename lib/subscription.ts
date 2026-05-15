@@ -17,7 +17,8 @@ export interface DailyUsage {
 }
 
 export const FREE_LIMITS = {
-  questionsPerHour: 20, // Includes both quiz questions and flashcards
+  questionsPerDay: 15,  // Hard daily cap (was 20/hour)
+  upsellWallAt: 10,     // Show smart upsell modal at this threshold mid-session
   aiChatsPerDay: 5,
 }
 
@@ -85,10 +86,32 @@ export async function canAccessCert(userId: string, cert: 'crcst' | 'chl' | 'cer
   return TIER_CERTS[plan].includes(cert)
 }
 
+export async function getDailyQuestionsUsage(userId: string): Promise<number> {
+  const supabase = getServiceSupabase()
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+
+  const { data, error } = await supabase
+    .from('daily_usage')
+    .select('questions_attempted')
+    .eq('user_id', userId)
+    .gte('created_at', todayStart.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[subscription] getDailyQuestionsUsage error:', error.message)
+    return 0
+  }
+
+  return Number(data?.questions_attempted) || 0
+}
+
+// Kept for backwards compatibility — not used for free-tier limits anymore
 export async function getHourlyUsage(userId: string): Promise<DailyUsage> {
   const supabase = getServiceSupabase()
 
-  // Use RPC to bypass schema cache issues
   const { data, error } = await supabase.rpc('get_hourly_usage', {
     p_user_id: userId,
   })
@@ -97,14 +120,12 @@ export async function getHourlyUsage(userId: string): Promise<DailyUsage> {
     return { user_id: userId, created_at: new Date().toISOString(), questions_attempted: 0, ai_chats_used: 0 }
   }
 
-  // RPC returns { questions_count, chats_count }
   const row = data[0] || { questions_count: 0, chats_count: 0 }
-
-  return { 
-    user_id: userId, 
-    created_at: new Date().toISOString(), 
-    questions_attempted: Number(row.questions_count) || 0, 
-    ai_chats_used: Number(row.chats_count) || 0 
+  return {
+    user_id: userId,
+    created_at: new Date().toISOString(),
+    questions_attempted: Number(row.questions_count) || 0,
+    ai_chats_used: Number(row.chats_count) || 0
   }
 }
 
@@ -129,15 +150,14 @@ export async function incrementDailyUsage(
   field: 'questions_attempted' | 'ai_chats_used'
 ): Promise<{ success: boolean; newCount: number }> {
   const supabase = getServiceSupabase()
-  
+
   const questionsVal = field === 'questions_attempted' ? 1 : 0
-  const chatsVal = field === 'ai_chats_used' ? 1 : 0
-  
-  // Use the new insert_daily_usage RPC function (bypasses schema cache)
+  const chatsVal     = field === 'ai_chats_used' ? 1 : 0
+
   const { error } = await supabase.rpc('insert_daily_usage', {
-    p_user_id: userId,
+    p_user_id:  userId,
     p_questions: questionsVal,
-    p_chats: chatsVal,
+    p_chats:    chatsVal,
   })
 
   if (error) {
@@ -145,10 +165,11 @@ export async function incrementDailyUsage(
     return { success: false, newCount: 0 }
   }
 
-  // Get updated hourly count
-  const usage = await getHourlyUsage(userId)
-  const newCount = field === 'questions_attempted' ? usage.questions_attempted : usage.ai_chats_used
-  
+  // Return updated daily count
+  const newCount = field === 'questions_attempted'
+    ? await getDailyQuestionsUsage(userId)
+    : await getDailyAiChatUsage(userId)
+
   return { success: true, newCount }
 }
 
@@ -163,15 +184,14 @@ export async function canUserAccessPaidFeature(
     return { allowed: true, used: 0, limit: -1 }
   }
 
-  // Free tier — check hourly limits for questions, daily for AI chat
+  // Free tier — daily limit for questions, daily for AI chat
   if (feature === 'questions') {
-    const usage = await getHourlyUsage(userId)
-    const used = usage.questions_attempted
-    const limit = FREE_LIMITS.questionsPerHour
+    const used  = await getDailyQuestionsUsage(userId)
+    const limit = FREE_LIMITS.questionsPerDay
     if (used >= limit) {
       return {
         allowed: false,
-        reason: `You've used all ${limit} free questions this hour. Upgrade to Pro for unlimited access.`,
+        reason: `You've used all ${limit} free questions for today. Upgrade to Pro for unlimited access, or come back tomorrow.`,
         used,
         limit,
       }

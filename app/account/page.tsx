@@ -238,9 +238,9 @@ export default function AccountPage() {
             <Label color="muted" className="mb-4">Current Usage</Label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-[0.85rem] text-white/60 mb-[0.3rem]">Questions (per hour)</div>
+                <div className="text-[0.85rem] text-white/60 mb-[0.3rem]">Questions (per day)</div>
                 <div className="text-xl font-semibold">
-                  {statusData.usage.questionsThisHour}{' '}
+                  {statusData.usage.questionsToday}{' '}
                   <span className="text-white/40 text-[0.9rem]">/ {statusData.usage.questionsLimit}</span>
                 </div>
               </div>

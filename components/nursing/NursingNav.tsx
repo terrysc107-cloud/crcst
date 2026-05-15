@@ -16,14 +16,14 @@ export default function NursingNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      const s = window.scrollY > 40;
+      setScrolled(s);
+      if (s) setMobileOpen(false);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    if (scrolled && mobileOpen) setMobileOpen(false);
-  }, [scrolled, mobileOpen]);
 
   return (
     <>
@@ -77,7 +77,7 @@ export default function NursingNav() {
         {/* Desktop CTAs */}
         <div className="hidden sm:flex items-center gap-3">
           <Link
-            href="/nursing/cases"
+            href="/account"
             className="inline-flex items-center px-4 py-2 rounded-lg border border-white/20 bg-white/5 text-white/80 text-sm font-medium transition-all hover:bg-white/10 hover:text-white"
           >
             Sign In
@@ -136,7 +136,7 @@ export default function NursingNav() {
           ))}
           <div className="pt-3 flex flex-col gap-2">
             <Link
-              href="/nursing/cases"
+              href="/account"
               onClick={() => setMobileOpen(false)}
               className="w-full text-center py-3 rounded-lg border border-white/20 text-white/80 text-sm font-medium"
             >

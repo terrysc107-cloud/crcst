@@ -11,6 +11,7 @@ import { getXpTier } from '@/lib/progression-config'
 import { awardQuizXp } from '@/lib/award-xp'
 import { useSubscription } from '@/hooks/useSubscription'
 import { Badge } from '@/components/ui/badge'
+import { FREE_LIMITS } from '@/lib/subscription'
 
 type Screen = 'home' | 'quiz' | 'results' | 'auth' | 'custom' | 'homework'
 type QuizMode = 'practice' | 'flashcards' | 'custom' | 'quiz' | 'test' | 'homework'
@@ -228,12 +229,14 @@ export default function Home() {
 
       if (res.ok) {
         const data = await res.json()
-        setRateLimitInfo({
-          allowed: data.allowed,
-          used: data.used ?? 0,
-          limit: data.limit ?? 20,
-          remaining: data.remaining ?? 20,
-        })
+        if (!data.unlimited) {
+          setRateLimitInfo({
+            allowed: data.allowed,
+            used: data.used ?? 0,
+            limit: data.limit ?? FREE_LIMITS.questionsPerDay,
+            remaining: data.remaining ?? FREE_LIMITS.questionsPerDay,
+          })
+        }
       }
     } catch (error) {
       console.error('Error loading rate limit info:', error)
@@ -375,11 +378,11 @@ export default function Home() {
         })
         if (res.ok) {
           const data = await res.json()
-          if (!data.allowed) {
+          if (!data.allowed && !data.unlimited) {
             setRateLimitInfo({
               allowed: false,
               used: data.used ?? 0,
-              limit: data.limit ?? 20,
+              limit: data.limit ?? FREE_LIMITS.questionsPerDay,
               remaining: 0,
             })
             setShowUpgradeModal(true)
@@ -622,15 +625,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hourly Usage Indicator for Free Users Only */}
+        {/* Daily Usage Indicator for Free Users Only */}
         {rateLimitInfo && rateLimitInfo.limit && rateLimitInfo.limit > 0 && (
           <div className="mx-6 mt-6 p-4 bg-white border border-cream-2 rounded-lg">
             <div className="flex justify-between items-center mb-2">
               <div className="text-xs tracking-widest text-text-3">
-                HOURLY QUESTIONS
+                DAILY QUESTIONS
               </div>
               <div className="text-xs text-text-3">
-                {rateLimitInfo.used}/{rateLimitInfo.limit} used this hour
+                {rateLimitInfo.used}/{rateLimitInfo.limit} used today
               </div>
             </div>
             <div className="w-full h-2 bg-cream-2 rounded-full overflow-hidden">
@@ -643,11 +646,11 @@ export default function Home() {
             </div>
             {rateLimitInfo.remaining === 0 ? (
               <div className="mt-2 text-xs text-wrong">
-                Hourly limit reached. <button onClick={() => setShowUpgradeModal(true)} className="text-teal underline">Upgrade to Pro</button> for unlimited questions.
+                Daily limit reached. <button onClick={() => setShowUpgradeModal(true)} className="text-teal underline">Upgrade to Pro</button> for unlimited questions.
               </div>
             ) : rateLimitInfo.remaining <= 5 ? (
               <div className="mt-2 text-xs text-amber">
-                {rateLimitInfo.remaining} questions remaining this hour
+                {rateLimitInfo.remaining} questions remaining today
               </div>
             ) : null}
           </div>
@@ -850,10 +853,10 @@ export default function Home() {
             <div className="text-center mb-6">
               <div className="text-4xl mb-3">⏰</div>
               <h2 className="font-serif text-2xl text-navy mb-2">
-                Hourly Limit Reached
+                Daily Limit Reached
               </h2>
               <p className="text-sm text-text-3">
-                You&apos;ve used all {rateLimitInfo?.limit || 20} free questions this hour. Upgrade to Pro for unlimited access!
+                You&apos;ve used all {rateLimitInfo?.limit || FREE_LIMITS.questionsPerDay} free questions today. Upgrade to Pro for unlimited access, or come back tomorrow.
               </p>
             </div>
 

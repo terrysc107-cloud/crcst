@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getUserSubscription, getHourlyUsage, getDailyAiChatUsage, FREE_LIMITS } from '@/lib/subscription'
+import { getUserSubscription, getDailyQuestionsUsage, getDailyAiChatUsage, FREE_LIMITS } from '@/lib/subscription'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ plan: 'free', usage: null }, { status: 200 })
     }
 
-    const [sub, hourlyUsage, dailyAiChats] = await Promise.all([
+    const [sub, questionsToday, dailyAiChats] = await Promise.all([
       getUserSubscription(user.id),
-      getHourlyUsage(user.id),
+      getDailyQuestionsUsage(user.id),
       getDailyAiChatUsage(user.id),
     ])
 
@@ -32,9 +32,9 @@ export async function GET(request: NextRequest) {
       status: sub?.status || 'none',
       currentPeriodEnd: sub?.current_period_end || null,
       usage: {
-        questionsThisHour: hourlyUsage.questions_attempted,
+        questionsToday,
         aiChatsToday: dailyAiChats,
-        questionsLimit: plan === 'free' ? FREE_LIMITS.questionsPerHour : null,
+        questionsLimit: plan === 'free' ? FREE_LIMITS.questionsPerDay : null,
         aiChatsLimit: plan === 'free' ? FREE_LIMITS.aiChatsPerDay : null,
       },
     })

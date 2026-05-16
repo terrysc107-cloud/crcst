@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { TrendingUp, Zap, Brain, BarChart2, Lock } from 'lucide-react'
+import { TrendingUp, Zap, BarChart2, Lock } from 'lucide-react'
 
 interface SessionStats {
   questionsAnswered: number
@@ -108,7 +108,6 @@ export function SmartUpsellModal({
             {[
               { Icon: Zap,      text: 'Unlimited questions — finish every quiz, every session' },
               { Icon: BarChart2, text: 'Domain mastery tracking — see exactly where you\'re weak' },
-              { Icon: Brain,    text: 'Unlimited AI Study Chat — ask anything, get answers instantly' },
             ].map(({ Icon, text }, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm text-white/65">
                 <Icon className="w-4 h-4 text-teal flex-shrink-0 mt-0.5" />

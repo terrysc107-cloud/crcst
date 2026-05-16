@@ -51,8 +51,8 @@ const PLANS = [
     period: '',
     description: 'Get started with CRCST prep',
     features: [
-      { text: '20 practice questions per hour', included: true },
-      { text: '5 AI chat messages per day', included: true },
+      { text: '15 practice questions per day', included: true },
+      { text: 'AI study chat', included: true },
       { text: 'Basic progress tracking', included: true },
       { text: 'CRCST certification only', included: true },
       { text: 'CHL certification', included: false },

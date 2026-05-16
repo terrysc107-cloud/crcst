@@ -2,7 +2,7 @@ import { generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { canUserAccessPaidFeature, incrementDailyUsage } from '@/lib/subscription'
+import { incrementDailyUsage } from '@/lib/subscription'
 
 export const maxDuration = 30
 
@@ -25,15 +25,6 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check rate limit before calling AI
-    const access = await canUserAccessPaidFeature(user.id, 'ai_chat')
-    if (!access.allowed) {
-      return NextResponse.json(
-        { error: access.reason, used: access.used, limit: access.limit },
-        { status: 429 }
-      )
     }
 
     const { message } = await request.json()

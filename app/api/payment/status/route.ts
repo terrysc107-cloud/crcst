@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         questionsToday,
         aiChatsToday: dailyAiChats,
         questionsLimit: plan === 'free' ? FREE_LIMITS.questionsPerDay : null,
-        aiChatsLimit: plan === 'free' ? FREE_LIMITS.aiChatsPerDay : null,
+        aiChatsLimit: null,
       },
     })
   } catch (error) {

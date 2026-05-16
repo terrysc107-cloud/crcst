@@ -17,9 +17,8 @@ export interface DailyUsage {
 }
 
 export const FREE_LIMITS = {
-  questionsPerDay: 15,  // Hard daily cap (was 20/hour)
+  questionsPerDay: 15,  // Hard daily cap
   upsellWallAt: 10,     // Show smart upsell modal at this threshold mid-session
-  aiChatsPerDay: 5,
 }
 
 // Available certifications by tier
@@ -96,16 +95,13 @@ export async function getDailyQuestionsUsage(userId: string): Promise<number> {
     .select('questions_attempted')
     .eq('user_id', userId)
     .gte('created_at', todayStart.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
 
   if (error) {
     console.error('[subscription] getDailyQuestionsUsage error:', error.message)
     return 0
   }
 
-  return Number(data?.questions_attempted) || 0
+  return (data || []).reduce((sum, row) => sum + (Number(row.questions_attempted) || 0), 0)
 }
 
 // Kept for backwards compatibility — not used for free-tier limits anymore
@@ -200,18 +196,7 @@ export async function canUserAccessPaidFeature(
   }
 
   if (feature === 'ai_chat') {
-    // Use RPC to bypass schema cache issues
-    const used = await getDailyAiChatUsage(userId)
-    const limit = FREE_LIMITS.aiChatsPerDay
-    if (used >= limit) {
-      return {
-        allowed: false,
-        reason: `You've used all ${limit} free AI chats for today. Upgrade to Pro for unlimited access.`,
-        used,
-        limit,
-      }
-    }
-    return { allowed: true, used, limit }
+    return { allowed: true }
   }
 
   return { allowed: true }

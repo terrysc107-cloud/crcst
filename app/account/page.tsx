@@ -21,7 +21,7 @@ interface StatusData {
   status: string
   currentPeriodEnd: string | null
   usage: {
-    questionsThisHour: number
+    questionsToday: number
     aiChatsToday: number
     questionsLimit: number | null
     aiChatsLimit: number | null
@@ -236,20 +236,11 @@ export default function AccountPage() {
         {statusData.plan === 'free' && (
           <div className="bg-white/[4%] border border-white/10 rounded-2xl p-7 mb-6">
             <Label color="muted" className="mb-4">Current Usage</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-[0.85rem] text-white/60 mb-[0.3rem]">Questions (per day)</div>
-                <div className="text-xl font-semibold">
-                  {statusData.usage.questionsToday}{' '}
-                  <span className="text-white/40 text-[0.9rem]">/ {statusData.usage.questionsLimit}</span>
-                </div>
-              </div>
-              <div>
-                <div className="text-[0.85rem] text-white/60 mb-[0.3rem]">AI Chat (per day)</div>
-                <div className="text-xl font-semibold">
-                  {statusData.usage.aiChatsToday}{' '}
-                  <span className="text-white/40 text-[0.9rem]">/ {statusData.usage.aiChatsLimit}</span>
-                </div>
+            <div>
+              <div className="text-[0.85rem] text-white/60 mb-[0.3rem]">Questions today</div>
+              <div className="text-xl font-semibold">
+                {statusData.usage.questionsToday}{' '}
+                <span className="text-white/40 text-[0.9rem]">/ {statusData.usage.questionsLimit}</span>
               </div>
             </div>
           </div>

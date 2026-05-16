@@ -10,7 +10,7 @@ interface SubscriptionState {
   status: string
   tierExpiresAt: string | null
   usage: {
-    questionsThisHour: number
+    questionsToday: number
     aiChatsToday: number
     questionsLimit: number | null
     aiChatsLimit: number | null
@@ -36,8 +36,8 @@ const DEFAULT_STATE: SubscriptionState = {
   canAccessUnlimited: false,
   canAccessCHL: false,
   canAccessCER: false,
-  questionsRemaining: 20,
-  aiChatsRemaining: 5,
+  questionsRemaining: 15,
+  aiChatsRemaining: null,
 }
 
 export function useSubscription(): SubscriptionState & { refresh: () => void } {
@@ -76,10 +76,8 @@ export function useSubscription(): SubscriptionState & { refresh: () => void } {
         canAccessCER: isTripleCrown,
         questionsRemaining: isPaid
           ? null
-          : Math.max(0, (usage?.questionsLimit ?? 20) - (usage?.questionsThisHour ?? 0)),
-        aiChatsRemaining: isPaid
-          ? null
-          : Math.max(0, (usage?.aiChatsLimit ?? 5) - (usage?.aiChatsToday ?? 0)),
+          : Math.max(0, (usage?.questionsLimit ?? 15) - (usage?.questionsToday ?? 0)),
+        aiChatsRemaining: null,
       })
     } catch {
       setState((s) => ({ ...s, loading: false, error: true }))

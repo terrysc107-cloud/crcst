@@ -191,11 +191,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between flex-wrap gap-3 bg-teal/4 border border-teal/20 rounded-xl px-5 py-4 mb-5">
             <div>
               <p className="font-mono text-teal text-[0.72rem] tracking-[0.1em] uppercase mb-1">
-                Free Tier — Hourly Usage
+                Free Tier — Daily Usage
               </p>
               <p className="text-sm text-text-2 flex gap-5 flex-wrap">
-                <span>Questions: <strong>{sub.usage?.questionsThisHour ?? 0} / {sub.usage?.questionsLimit ?? 20}</strong></span>
-                <span>AI Chat: <strong>{sub.usage?.aiChatsToday ?? 0} / {sub.usage?.aiChatsLimit ?? 5}</strong></span>
+                <span>Questions: <strong>{sub.usage?.questionsToday ?? 0} / {sub.usage?.questionsLimit ?? 15}</strong></span>
               </p>
             </div>
             <Link

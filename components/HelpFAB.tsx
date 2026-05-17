@@ -34,12 +34,24 @@ export default function HelpFAB() {
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [isPaid, setIsPaid] = useState<boolean | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         setUserId(user.id)
         setFeedbackEmail(user.email || '')
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('tier, tier_expires_at')
+          .eq('id', user.id)
+          .single()
+        const tier = profile?.tier as string | undefined
+        const expires = profile?.tier_expires_at as string | null | undefined
+        const expired = expires ? new Date(expires) < new Date() : false
+        setIsPaid((tier === 'pro' || tier === 'triple_crown') && !expired)
+      } else {
+        setIsPaid(false)
       }
     })
   }, [])
@@ -141,11 +153,11 @@ export default function HelpFAB() {
     <>
       {/* ── Chat Window ── */}
       {chatOpen && (
-        <div className="fixed bottom-6 right-6 w-80 sm:w-96 h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 slide-up border border-cream-2">
+        <div className="fixed bottom-6 right-6 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 slide-up border border-cream-2" style={{ height: isPaid === false ? 'auto' : '450px' }}>
           <div className="bg-navy text-white px-4 py-3 flex justify-between items-center">
             <div>
               <div className="font-mono text-sm font-medium">SPD Study Assistant</div>
-              <div className="text-xs text-teal-3">Ask me anything!</div>
+              {isPaid && <div className="text-xs text-teal-3">Ask me anything!</div>}
             </div>
             <button onClick={() => setChatOpen(false)} className="text-navy-3 hover:text-white transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,62 +166,100 @@ export default function HelpFAB() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-cream">
-            {messages.length === 0 && (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-3">🎓</div>
-                <p className="text-sm text-text-3 mb-4">Hi! I&apos;m your SPD certification study assistant.</p>
-                <div className="space-y-2">
-                  {['What are the sterilization methods?', 'Explain the decontamination process', 'What is a biological indicator?'].map((s) => (
-                    <button key={s} onClick={() => setChatInput(s)} className="block w-full text-left text-xs bg-white text-teal px-3 py-2 rounded-lg hover:bg-teal hover:text-white transition border border-cream-2">
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] text-sm px-4 py-2 rounded-2xl ${msg.role === 'user' ? 'bg-teal text-white rounded-br-sm' : 'bg-white text-text border border-cream-2 rounded-bl-sm'}`}>
-                  {msg.content}
-                </div>
-              </div>
-            ))}
-            {chatLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white text-text border border-cream-2 px-4 py-2 rounded-2xl rounded-bl-sm">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-teal rounded-full animate-bounce" />
-                    <span className="w-2 h-2 bg-teal rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                    <span className="w-2 h-2 bg-teal rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="border-t border-cream-2 p-3 bg-white">
-            <div className="flex gap-2">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={handleChatKey}
-                placeholder="Ask a question..."
-                className="flex-1 px-4 py-2 text-sm border border-cream-2 rounded-full focus:outline-none focus:border-teal font-mono"
-                disabled={chatLoading}
-              />
-              <button
-                onClick={sendChat}
-                disabled={chatLoading || !chatInput.trim()}
-                className="w-10 h-10 bg-teal text-white rounded-full flex items-center justify-center hover:bg-teal-2 disabled:opacity-50 transition"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          {/* Free-user locked state */}
+          {isPaid === false && (
+            <div className="p-6 text-center">
+              <div className="w-14 h-14 rounded-full bg-cream-2 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-7 h-7 text-text-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-              </button>
+              </div>
+              <p className="font-serif text-lg text-navy mb-1">Pro Feature</p>
+              <p className="text-sm text-text-3 mb-5">
+                AI Study Chat is available for Pro and Triple Crown members. Ask unlimited questions, get instant answers.
+              </p>
+              <a
+                href="/pricing"
+                className="block w-full py-3 px-6 rounded-lg bg-teal text-white font-mono text-sm text-center hover:bg-teal-2 transition"
+              >
+                Upgrade to Pro — $19
+              </a>
+              <p className="text-xs text-text-3 mt-3">90 days · No subscription · One-time payment</p>
             </div>
-          </div>
+          )}
+
+          {/* Loading state */}
+          {isPaid === null && (
+            <div className="flex-1 flex items-center justify-center bg-cream">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-teal rounded-full animate-bounce" />
+                <span className="w-2 h-2 bg-teal rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                <span className="w-2 h-2 bg-teal rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Full chat (paid users) */}
+          {isPaid === true && (
+            <>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-cream">
+                {messages.length === 0 && (
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-3">🎓</div>
+                    <p className="text-sm text-text-3 mb-4">Hi! I&apos;m your SPD certification study assistant.</p>
+                    <div className="space-y-2">
+                      {['What are the sterilization methods?', 'Explain the decontamination process', 'What is a biological indicator?'].map((s) => (
+                        <button key={s} onClick={() => setChatInput(s)} className="block w-full text-left text-xs bg-white text-teal px-3 py-2 rounded-lg hover:bg-teal hover:text-white transition border border-cream-2">
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {messages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] text-sm px-4 py-2 rounded-2xl ${msg.role === 'user' ? 'bg-teal text-white rounded-br-sm' : 'bg-white text-text border border-cream-2 rounded-bl-sm'}`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white text-text border border-cream-2 px-4 py-2 rounded-2xl rounded-bl-sm">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-teal rounded-full animate-bounce" />
+                        <span className="w-2 h-2 bg-teal rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <span className="w-2 h-2 bg-teal rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="border-t border-cream-2 p-3 bg-white">
+                <div className="flex gap-2">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={handleChatKey}
+                    placeholder="Ask a question..."
+                    className="flex-1 px-4 py-2 text-sm border border-cream-2 rounded-full focus:outline-none focus:border-teal font-mono"
+                    disabled={chatLoading}
+                  />
+                  <button
+                    onClick={sendChat}
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="w-10 h-10 bg-teal text-white rounded-full flex items-center justify-center hover:bg-teal-2 disabled:opacity-50 transition"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

@@ -52,9 +52,9 @@ const PLANS = [
     description: 'Get started with CRCST prep',
     features: [
       { text: '15 practice questions per day', included: true },
-      { text: 'AI study chat', included: true },
       { text: 'Basic progress tracking', included: true },
       { text: 'CRCST certification only', included: true },
+      { text: 'AI study chat', included: false },
       { text: 'CHL certification', included: false },
       { text: 'CER certification', included: false },
     ],

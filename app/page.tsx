@@ -79,7 +79,7 @@ const PLANS = [
     name: "Free",
     price: "$0",
     period: "",
-    features: ["15 practice questions/day", "AI study chat", "Basic progress tracking", "CRCST certification only"],
+    features: ["15 practice questions/day", "Basic progress tracking", "CRCST certification only"],
     cta: "Start Free",
     note: "No credit card required",
     href: "/crcst",

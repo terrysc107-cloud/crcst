@@ -2,7 +2,7 @@ import { generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { incrementDailyUsage } from '@/lib/subscription'
+import { incrementDailyUsage, getPlan } from '@/lib/subscription'
 
 export const maxDuration = 30
 
@@ -25,6 +25,14 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const plan = await getPlan(user.id)
+    if (plan === 'free') {
+      return NextResponse.json(
+        { error: 'AI Study Chat is available for Pro and Triple Crown members only. Upgrade to unlock.' },
+        { status: 403 }
+      )
     }
 
     const { message } = await request.json()
